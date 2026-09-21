@@ -75,6 +75,10 @@
                        required>
             </div>
 
+            <a href="{{ route('recuperar.solicitar.form') }}" class="block text-center text-sm text-teal-600 hover:underline mt-3">
+                ¿Olvidaste tu contraseña?
+            </a>
+
             <button type="submit"
                     class="w-full bg-green-600 text-white font-semibold py-2 rounded-md hover:bg-green-700 transition">
                 Iniciar sesión

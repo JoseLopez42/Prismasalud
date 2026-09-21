@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RecuperarPasswordController;
 
 Route::get('/', function () {
     return view('index');
@@ -21,3 +22,10 @@ Route::middleware('esadministrador')->group(function () {
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
 Route::post('/login', [LoginController::class, 'iniciarSesion'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
+
+// Rutas de recuperación de contraseña (públicas)
+Route::get('/recuperar', [RecuperarPasswordController::class, 'mostrarFormularioSolicitud'])->name('recuperar.solicitar.form');
+Route::post('/recuperar', [RecuperarPasswordController::class, 'enviarCodigo'])->name('recuperar.solicitar');
+
+Route::get('/restablecer', [RecuperarPasswordController::class, 'mostrarFormularioRestablecer'])->name('recuperar.restablecer.form');
+Route::post('/restablecer', [RecuperarPasswordController::class, 'restablecer'])->name('recuperar.restablecer');
