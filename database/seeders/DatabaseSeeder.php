@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TipoUsuarioSeeder::class,
             AdminPruebaSeeder::class,
+            DepartamentoSeeder::class,
         ]);
     }
 }

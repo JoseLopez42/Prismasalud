@@ -5,17 +5,77 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecuperarPasswordController;
+use App\Http\Controllers\Admin\DepartamentoController;
+use App\Http\Controllers\Admin\CiudadController;
+use App\Http\Controllers\Admin\SedeController;
+use App\Http\Controllers\Admin\TipoDocumentoController;
+use App\Http\Controllers\Admin\TipoUsuarioController;
 
 Route::get('/', function () {
     return view('index');
 });
 
-// Rutas de gestión de usuarios (protegidas: solo Administrador)
-Route::middleware('esadministrador')->group(function () {
+// Pagina institucional "Nosotros" (publica)
+Route::view('/nosotros', 'nosotros')->name('nosotros');
+
+// Todo lo que hace el Administrador va bajo /admin/...
+Route::prefix('admin')->middleware('esadministrador')->group(function () {
+
+    // Dashboard: http://127.0.0.1:8000/admin
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Usuarios: http://127.0.0.1:8000/admin/usuarios
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::get('/usuarios/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
-    Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/usuarios/{cedula}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+    Route::put('/usuarios/{cedula}', [UsuarioController::class, 'update'])->name('usuarios.update');
+    Route::delete('/usuarios/{cedula}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+
+    // Roles (tipos de usuario): /admin/usuarios/roles
+    Route::get('/usuarios/roles', [TipoUsuarioController::class, 'index'])->name('roles.index');
+    Route::get('/usuarios/roles/crear', [TipoUsuarioController::class, 'create'])->name('roles.create');
+    Route::post('/usuarios/roles', [TipoUsuarioController::class, 'store'])->name('roles.store');
+    Route::get('/usuarios/roles/{id}/editar', [TipoUsuarioController::class, 'edit'])->name('roles.edit');
+    Route::put('/usuarios/roles/{id}', [TipoUsuarioController::class, 'update'])->name('roles.update');
+    Route::delete('/usuarios/roles/{id}', [TipoUsuarioController::class, 'destroy'])->name('roles.destroy');
+
+    // Tipos de documento: /admin/usuarios/tipos-documento
+    Route::get('/usuarios/tipos-documento', [TipoDocumentoController::class, 'index'])->name('tipos_documento.index');
+    Route::get('/usuarios/tipos-documento/crear', [TipoDocumentoController::class, 'create'])->name('tipos_documento.create');
+    Route::post('/usuarios/tipos-documento', [TipoDocumentoController::class, 'store'])->name('tipos_documento.store');
+    Route::get('/usuarios/tipos-documento/{id}/editar', [TipoDocumentoController::class, 'edit'])->name('tipos_documento.edit');
+    Route::put('/usuarios/tipos-documento/{id}', [TipoDocumentoController::class, 'update'])->name('tipos_documento.update');
+    Route::delete('/usuarios/tipos-documento/{id}', [TipoDocumentoController::class, 'destroy'])->name('tipos_documento.destroy');
+
+    // Ubicaciones: http://127.0.0.1:8000/admin/ubicaciones/...
+    // (refleja la carpeta de vistas admin/ubicaciones/...)
+    Route::prefix('ubicaciones')->group(function () {
+
+        // Departamentos: /admin/ubicaciones/departamentos
+        Route::get('/departamentos', [DepartamentoController::class, 'index'])->name('departamentos.index');
+        Route::get('/departamentos/crear', [DepartamentoController::class, 'create'])->name('departamentos.create');
+        Route::post('/departamentos', [DepartamentoController::class, 'store'])->name('departamentos.store');
+        Route::get('/departamentos/{id}/editar', [DepartamentoController::class, 'edit'])->name('departamentos.edit');
+        Route::put('/departamentos/{id}', [DepartamentoController::class, 'update'])->name('departamentos.update');
+        Route::delete('/departamentos/{id}', [DepartamentoController::class, 'destroy'])->name('departamentos.destroy');
+
+        // Ciudades: /admin/ubicaciones/ciudades
+        Route::get('/ciudades', [CiudadController::class, 'index'])->name('ciudades.index');
+        Route::get('/ciudades/crear', [CiudadController::class, 'create'])->name('ciudades.create');
+        Route::post('/ciudades', [CiudadController::class, 'store'])->name('ciudades.store');
+        Route::get('/ciudades/{id}/editar', [CiudadController::class, 'edit'])->name('ciudades.edit');
+        Route::put('/ciudades/{id}', [CiudadController::class, 'update'])->name('ciudades.update');
+        Route::delete('/ciudades/{id}', [CiudadController::class, 'destroy'])->name('ciudades.destroy');
+
+        // Sedes: /admin/ubicaciones/sedes
+        Route::get('/sedes', [SedeController::class, 'index'])->name('sedes.index');
+        Route::get('/sedes/crear', [SedeController::class, 'create'])->name('sedes.create');
+        Route::post('/sedes', [SedeController::class, 'store'])->name('sedes.store');
+        Route::get('/sedes/{id}/editar', [SedeController::class, 'edit'])->name('sedes.edit');
+        Route::put('/sedes/{id}', [SedeController::class, 'update'])->name('sedes.update');
+        Route::delete('/sedes/{id}', [SedeController::class, 'destroy'])->name('sedes.destroy');
+    });
 });
 
 // Rutas de login (públicas, cualquiera puede acceder al formulario)
