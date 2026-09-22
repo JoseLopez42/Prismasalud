@@ -13,13 +13,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --azul: #1B4D6B;
+            --azul-claro: #2E86AB;
+            --naranja: #0C7B93;
+            --teal: #12A594;
+            --teal-claro: #4ADE80;
+        }
+
         body { font-family: 'Inter', sans-serif; }
-        /* Degradado institucional verde de PrismaSalud */
+        /* Degradado institucional PrismaSalud (azul -> teal -> naranja) */
         .gradiente-salud {
-            background: linear-gradient(135deg, #14532d 0%, #0f766e 55%, #0d9488 100%);
+            background: linear-gradient(135deg, var(--azul) 0%, var(--teal) 55%, var(--naranja) 100%);
         }
         .panel-marca {
-            background: linear-gradient(160deg, #14532d 0%, #0d7a5f 70%, #0f766e 100%);
+            background: linear-gradient(160deg, var(--azul) 0%, var(--naranja) 70%, var(--teal) 100%);
         }
         input[type="checkbox"]:focus {
             outline: none;
