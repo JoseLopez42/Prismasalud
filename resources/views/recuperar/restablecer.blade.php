@@ -1,107 +1,111 @@
-{{--
-    =====================================================================
-    VISTA: recuperar/restablecer.blade.php
-    Segundo paso de la recuperación: el usuario escribe su correo,
-    el código de 6 dígitos que le llegó, y su nueva contraseña
-    (dos veces, para confirmarla).
-    =====================================================================
---}}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restablecer contraseña - PrismaSalud IPS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .gradiente-salud {
-            background: linear-gradient(120deg, #14532d 0%, #0f766e 60%, #0d9488 100%);
-        }
-    </style>
-</head>
-<body class="gradiente-salud min-h-screen flex items-center justify-center px-4">
+{{-- Segundo paso de la recuperación: correo, código de 6 dígitos y
+     nueva contraseña (dos veces, para confirmarla). --}}
+@extends('partials.auth')
 
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-8">
+@section('titulo', 'Restablecer contraseña - PrismaSalud IPS')
+@section('card_titulo', 'Restablecer contraseña')
+@section('card_descripcion', 'Escribe el código que te llegó por correo y tu nueva contraseña.')
 
-        <div class="flex items-center gap-2 justify-center mb-6">
-            <img src="{{ asset('img/logo.png') }}" alt="Logo PrismaSalud IPS" class="w-9 h-9 object-contain">
-            <p class="font-bold text-gray-900">
-                Prisma<span class="text-teal-600">Salud</span> IPS
-            </p>
+@push('estilos')
+<style>
+    input[type="password"].tracking-widest, input.codigo {
+        letter-spacing: .6em;
+    }
+</style>
+@endpush
+
+@section('formulario')
+
+    @if (session('exito'))
+        <div class="flex items-start gap-2 bg-green-50 text-green-700 text-sm rounded-lg px-4 py-3 mb-5">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ session('exito') }}</span>
         </div>
+    @endif
 
-        <h1 class="text-xl font-bold text-gray-900 text-center mb-1">Restablecer contraseña</h1>
-        <p class="text-sm text-gray-500 text-center mb-6">
-            Escribe el código que te llegó por correo y tu nueva contraseña.
-        </p>
+    @if ($errors->has('codigo'))
+        <div class="flex items-start gap-2 bg-red-50 text-red-600 text-sm rounded-lg px-4 py-3 mb-5">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ $errors->first('codigo') }}</span>
+        </div>
+    @endif
 
-        {{-- Mensajes de éxito (ej: al llegar desde "solicitar código") --}}
-        @if (session('exito'))
-            <div class="bg-green-50 text-green-700 text-sm rounded-md px-4 py-2 mb-4">
-                {{ session('exito') }}
-            </div>
-        @endif
+    @if ($errors->any() && !$errors->has('codigo'))
+        <div class="flex items-start gap-2 bg-red-50 text-red-600 text-sm rounded-lg px-4 py-3 mb-5">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ $errors->first() }}</span>
+        </div>
+    @endif
 
-        {{-- Error específico del código (inválido o expirado) --}}
-        @if ($errors->has('codigo'))
-            <div class="bg-red-50 text-red-600 text-sm rounded-md px-4 py-2 mb-4">
-                {{ $errors->first('codigo') }}
-            </div>
-        @endif
+    <form method="POST" action="{{ route('recuperar.restablecer') }}" class="space-y-5">
+        @csrf
 
-        {{-- Otros errores de validación (ej: contraseñas no coinciden) --}}
-        @if ($errors->any() && !$errors->has('codigo'))
-            <div class="bg-red-50 text-red-600 text-sm rounded-md px-4 py-2 mb-4">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('recuperar.restablecer') }}" class="space-y-4">
-            @csrf
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Correo</label>
-                <input type="email" name="correo" value="{{ old('correo') }}"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+        <div>
+            <label for="correo" class="block text-sm font-medium text-gray-700 mb-1.5">Correo electrónico</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    @include('admin.partials.icono', ['icono' => 'correo', 'clase' => 'w-5 h-5'])
+                </div>
+                <input type="email" name="correo" id="correo" value="{{ old('correo') }}" autocomplete="email"
+                       placeholder="tucorreo@ejemplo.com"
+                       class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition"
                        required autofocus>
             </div>
+        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Código de 6 dígitos</label>
-                <input type="text" name="codigo" maxlength="6" value="{{ old('codigo') }}"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-teal-500"
+        <div>
+            <label for="codigo" class="block text-sm font-medium text-gray-700 mb-1.5">Código de 6 dígitos</label>
+            <input type="text" name="codigo" id="codigo" maxlength="6" value="{{ old('codigo') }}" inputmode="numeric"
+                   placeholder="••••••"
+                   class="codigo w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-center font-semibold bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition"
+                   required>
+        </div>
+
+        <div>
+            <label for="contrasena" class="block text-sm font-medium text-gray-700 mb-1.5">Nueva contraseña</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    @include('admin.partials.icono', ['icono' => 'candado', 'clase' => 'w-5 h-5'])
+                </div>
+                <input type="password" name="contrasena" id="contrasena" autocomplete="new-password"
+                       placeholder="Mínimo 6 caracteres"
+                       class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition"
                        required>
             </div>
+        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
-                <input type="password" name="contrasena"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+        <div>
+            <label for="contrasena_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">Confirmar nueva contraseña</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    @include('admin.partials.icono', ['icono' => 'candado', 'clase' => 'w-5 h-5'])
+                </div>
+                <input type="password" name="contrasena_confirmation" id="contrasena_confirmation" autocomplete="new-password"
+                       placeholder="Repite tu nueva contraseña"
+                       class="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition"
                        required>
             </div>
+        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
-                {{-- El nombre debe terminar en "_confirmation" para que
-                     la regla "confirmed" del controlador la reconozca. --}}
-                <input type="password" name="contrasena_confirmation"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                       required>
-            </div>
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold py-2.5 rounded-lg hover:from-green-700 hover:to-teal-700 hover:shadow-lg transition active:scale-[.99]">
+            Cambiar contraseña
+        </button>
+    </form>
 
-            <button type="submit"
-                    class="w-full bg-green-600 text-white font-semibold py-2 rounded-md hover:bg-green-700 transition">
-                Cambiar contraseña
-            </button>
-        </form>
-
-        <a href="{{ route('login') }}" class="block text-center text-sm text-teal-600 hover:underline mt-6">
-            ← Volver a iniciar sesión
+    <div class="mt-6 pt-5 border-t border-gray-100 text-center">
+        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-teal-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver a iniciar sesión
         </a>
     </div>
 
-</body>
-</html>
+@endsection

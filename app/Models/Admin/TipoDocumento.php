@@ -10,5 +10,5 @@ class TipoDocumento extends Model
     protected $primaryKey = 'id_tipo_documento';
     public $timestamps = false; // esta tabla no tiene created_at/updated_at
 
-    protected $fillable = ['tipo_documento'];
+    protected $fillable = ['tipo_documento', 'activo'];
 }

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PanelUsuarioController;
 use App\Http\Controllers\RecuperarPasswordController;
 use App\Http\Controllers\Admin\DepartamentoController;
 use App\Http\Controllers\Admin\CiudadController;
@@ -18,6 +19,10 @@ Route::get('/', function () {
 // Pagina institucional "Nosotros" (publica)
 Route::view('/nosotros', 'nosotros')->name('nosotros');
 
+// Marco legal (publico)
+Route::view('/terminos-y-condiciones', 'terminos_condiciones')->name('terminos.index');
+Route::view('/politica-de-privacidad', 'politica_privacidad')->name('privacidad.index');
+
 // Todo lo que hace el Administrador va bajo /admin/...
 Route::prefix('admin')->middleware('esadministrador')->group(function () {
 
@@ -30,7 +35,7 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
     Route::get('/usuarios/{cedula}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
     Route::put('/usuarios/{cedula}', [UsuarioController::class, 'update'])->name('usuarios.update');
-    Route::delete('/usuarios/{cedula}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+    Route::patch('/usuarios/{cedula}/estado', [UsuarioController::class, 'cambiarEstado'])->name('usuarios.estado');
 
     // Roles (tipos de usuario): /admin/usuarios/roles
     Route::get('/usuarios/roles', [TipoUsuarioController::class, 'index'])->name('roles.index');
@@ -38,7 +43,7 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
     Route::post('/usuarios/roles', [TipoUsuarioController::class, 'store'])->name('roles.store');
     Route::get('/usuarios/roles/{id}/editar', [TipoUsuarioController::class, 'edit'])->name('roles.edit');
     Route::put('/usuarios/roles/{id}', [TipoUsuarioController::class, 'update'])->name('roles.update');
-    Route::delete('/usuarios/roles/{id}', [TipoUsuarioController::class, 'destroy'])->name('roles.destroy');
+    Route::patch('/usuarios/roles/{id}/estado', [TipoUsuarioController::class, 'cambiarEstado'])->name('roles.estado');
 
     // Tipos de documento: /admin/usuarios/tipos-documento
     Route::get('/usuarios/tipos-documento', [TipoDocumentoController::class, 'index'])->name('tipos_documento.index');
@@ -46,7 +51,7 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
     Route::post('/usuarios/tipos-documento', [TipoDocumentoController::class, 'store'])->name('tipos_documento.store');
     Route::get('/usuarios/tipos-documento/{id}/editar', [TipoDocumentoController::class, 'edit'])->name('tipos_documento.edit');
     Route::put('/usuarios/tipos-documento/{id}', [TipoDocumentoController::class, 'update'])->name('tipos_documento.update');
-    Route::delete('/usuarios/tipos-documento/{id}', [TipoDocumentoController::class, 'destroy'])->name('tipos_documento.destroy');
+    Route::patch('/usuarios/tipos-documento/{id}/estado', [TipoDocumentoController::class, 'cambiarEstado'])->name('tipos_documento.estado');
 
     // Ubicaciones: http://127.0.0.1:8000/admin/ubicaciones/...
     // (refleja la carpeta de vistas admin/ubicaciones/...)
@@ -66,7 +71,7 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
         Route::post('/ciudades', [CiudadController::class, 'store'])->name('ciudades.store');
         Route::get('/ciudades/{id}/editar', [CiudadController::class, 'edit'])->name('ciudades.edit');
         Route::put('/ciudades/{id}', [CiudadController::class, 'update'])->name('ciudades.update');
-        Route::delete('/ciudades/{id}', [CiudadController::class, 'destroy'])->name('ciudades.destroy');
+        Route::patch('/ciudades/{id}/estado', [CiudadController::class, 'cambiarEstado'])->name('ciudades.estado');
 
         // Sedes: /admin/ubicaciones/sedes
         Route::get('/sedes', [SedeController::class, 'index'])->name('sedes.index');
@@ -74,7 +79,7 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
         Route::post('/sedes', [SedeController::class, 'store'])->name('sedes.store');
         Route::get('/sedes/{id}/editar', [SedeController::class, 'edit'])->name('sedes.edit');
         Route::put('/sedes/{id}', [SedeController::class, 'update'])->name('sedes.update');
-        Route::delete('/sedes/{id}', [SedeController::class, 'destroy'])->name('sedes.destroy');
+        Route::patch('/sedes/{id}/estado', [SedeController::class, 'cambiarEstado'])->name('sedes.estado');
     });
 });
 
@@ -82,6 +87,11 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
 Route::post('/login', [LoginController::class, 'iniciarSesion'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
+
+// Panel del Usuario (roles distintos a Administrador)
+Route::prefix('usuario')->middleware('esusuario')->group(function () {
+    Route::get('/', [PanelUsuarioController::class, 'index'])->name('usuario.inicio');
+});
 
 // Rutas de recuperación de contraseña (públicas)
 Route::get('/recuperar', [RecuperarPasswordController::class, 'mostrarFormularioSolicitud'])->name('recuperar.solicitar.form');

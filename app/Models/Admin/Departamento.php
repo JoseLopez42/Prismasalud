@@ -9,7 +9,7 @@ class Departamento extends Model
     protected $table = 'departamentos';
     protected $primaryKey = 'id_departamento';
 
-    protected $fillable = ['nombre_departamento'];
+    protected $fillable = ['nombre_departamento', 'activo'];
 
     // Un departamento tiene muchas ciudades
     public function ciudades()

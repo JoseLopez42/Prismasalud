@@ -86,18 +86,18 @@
                  (flyout con hover en escritorio, acordeón con toque en móvil) --}}
             @php
                 $menu = [
-                    ['icono' => '🏠', 'texto' => 'Dashboard',              'ruta' => route('admin.dashboard'),     'clave' => 'dashboard',    'tablas' => null],
-                    ['icono' => '👥', 'texto' => 'Usuarios y Roles',        'ruta' => route('usuarios.index'),      'clave' => 'usuarios',     'tablas' => ['usuarios', 'roles', 'tipos de documento']],
-                    ['icono' => '📍', 'texto' => 'Ubicaciones',             'ruta' => route('departamentos.index'), 'clave' => 'ubicaciones',  'tablas' => ['departamentos', 'ciudades', 'sedes']],
-                    ['icono' => '🗂️', 'texto' => 'EPS',                    'ruta' => '#', 'clave' => 'eps',            'tablas' => ['eps', 'regimen']],
-                    ['icono' => '🗂️', 'texto' => 'Afiliaciones',           'ruta' => '#', 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
-                    ['icono' => '🩺', 'texto' => 'Médicos y Consultorios',  'ruta' => '#', 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
-                    ['icono' => '🗓️', 'texto' => 'Citas Médicas',          'ruta' => '#', 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
-                    ['icono' => '📄', 'texto' => 'Historia Clínica',        'ruta' => '#', 'clave' => 'historia',       'tablas' => ['historia_clinica', 'diagnostico', 'enfermedad']],
-                    ['icono' => '⚙️', 'texto' => 'Procedimientos',         'ruta' => '#', 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
-                    ['icono' => '💊', 'texto' => 'Farmacia y Medicamentos', 'ruta' => '#', 'clave' => 'farmacia',       'tablas' => ['medicamentos', 'entrega_medicamento', 'estado_entrega', 'farmacia']],
-                    ['icono' => '📊', 'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
-                    ['icono' => '🔧', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
+                    ['icono' => 'dashboard',     'texto' => 'Dashboard',              'ruta' => route('admin.dashboard'),     'clave' => 'dashboard',    'tablas' => null],
+                    ['icono' => 'usuarios',      'texto' => 'Usuarios y Roles',        'ruta' => route('usuarios.index'),      'clave' => 'usuarios',     'tablas' => ['usuarios', 'roles', 'tipos de documento']],
+                    ['icono' => 'ubicaciones',   'texto' => 'Ubicaciones',             'ruta' => route('departamentos.index'), 'clave' => 'ubicaciones',  'tablas' => ['departamentos', 'ciudades', 'sedes']],
+                    ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => '#', 'clave' => 'eps',            'tablas' => ['eps', 'regimen']],
+                    ['icono' => 'afiliaciones',  'texto' => 'Afiliaciones',           'ruta' => '#', 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
+                    ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => '#', 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
+                    ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => '#', 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
+                    ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => '#', 'clave' => 'historia',       'tablas' => ['historia_clinica', 'diagnostico', 'enfermedad']],
+                    ['icono' => 'procedimientos','texto' => 'Procedimientos',         'ruta' => '#', 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
+                    ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => '#', 'clave' => 'farmacia',       'tablas' => ['medicamentos', 'entrega_medicamento', 'estado_entrega', 'farmacia']],
+                    ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
+                    ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
                 ];
             @endphp
 
@@ -106,7 +106,7 @@
                     @if (is_null($item['tablas']))
                         <a href="{{ $item['ruta'] }}"
                            class="nav-item flex items-center gap-3 px-5 py-2.5 text-sm font-medium {{ ($seccionActiva ?? '') === $item['clave'] ? 'activo' : '' }}">
-                            <span>{{ $item['icono'] }}</span>
+                            @include('admin.partials.icono', ['icono' => $item['icono']])
                             <span>{{ $item['texto'] }}</span>
                         </a>
                     @else
@@ -117,7 +117,7 @@
                             <div class="flex items-center item-con-submenu {{ ($seccionActiva ?? '') === $item['clave'] ? 'activo' : '' }}">
                                 <a href="{{ $item['ruta'] }}"
                                    class="nav-item flex-1 flex items-center gap-3 px-5 py-2.5 text-sm font-medium">
-                                    <span>{{ $item['icono'] }}</span>
+                                    @include('admin.partials.icono', ['icono' => $item['icono']])
                                     <span>{{ $item['texto'] }}</span>
                                 </a>
                                 <button type="button"

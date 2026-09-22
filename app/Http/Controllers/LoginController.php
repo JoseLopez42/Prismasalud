@@ -27,10 +27,14 @@ class LoginController extends Controller
             session_start();
         }
 
-        // Validamos que llegaron los campos del formulario.
+        // Validamos que llegaron los campos del formulario y que se
+        // aceptaron los términos y condiciones antes de iniciar sesión.
         $credenciales = $request->validate([
             'cedula'     => 'required|integer',
             'contrasena' => 'required|string',
+            'terminos'   => 'accepted',
+        ], [
+            'terminos.accepted' => 'Debes aceptar los términos y condiciones para iniciar sesión.',
         ]);
 
         // Buscamos el usuario por cédula (la PK de la tabla).
@@ -49,14 +53,13 @@ class LoginController extends Controller
         $_SESSION['usuario_nombres']  = $usuario->nombres;
         $_SESSION['tipo_usuario_id']  = $usuario->tipo_usuario_id;
 
-        // Redirigimos según el tipo de usuario. Por ahora solo
-        // tenemos el panel de Administrador (tipo_usuario_id = 1);
-        // los demás roles se agregan cuando construyamos sus vistas.
+        // Redirigimos según el tipo de usuario: el Administrador va a
+        // su panel (/admin) y los demás roles al panel del Usuario.
         if ($usuario->tipo_usuario_id == 1) {
             return redirect()->route('admin.dashboard');
         }
 
-        return redirect('/')->withErrors(['login' => 'Tu rol todavía no tiene un panel asignado.']);
+        return redirect()->route('usuario.inicio');
     }
 
     /**

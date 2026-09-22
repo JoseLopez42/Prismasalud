@@ -28,6 +28,7 @@ class Usuario extends Model
         'id_ciudad',
         'id_tipo_documento',
         'nit_eps',
+        'activo',
     ];
 
     protected $hidden = [

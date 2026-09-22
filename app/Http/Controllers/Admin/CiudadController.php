@@ -63,9 +63,15 @@ class CiudadController extends Controller
     }
 
     // Elimina la ciudad
-    public function destroy($id)
+    // Activa o desactiva la ciudad (en vez de eliminarla)
+    public function cambiarEstado($id)
     {
-        Ciudad::findOrFail($id)->delete();
-        return redirect()->route('ciudades.index')->with('exito', 'Ciudad eliminada correctamente.');
+        $ciudad = Ciudad::findOrFail($id);
+        $ciudad->activo = !$ciudad->activo; // invierte el valor actual
+        $ciudad->save();
+
+        $mensaje = $ciudad->activo ? 'Ciudad activada correctamente.' : 'Ciudad desactivada correctamente.';
+
+        return redirect()->route('ciudades.index')->with('exito', $mensaje);
     }
 }

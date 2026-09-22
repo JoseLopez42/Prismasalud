@@ -27,12 +27,12 @@ class DashboardController extends Controller
         // (citas, afiliados, médicos, farmacia), estos valores se
         // reemplazan por consultas reales a la base de datos.
         $estadisticas = [
-            ['icono' => '📅', 'numero' => '128',   'texto' => 'Citas de hoy'],
-            ['icono' => '👥', 'numero' => '3,542', 'texto' => 'Afiliados activos'],
-            ['icono' => '⚕️', 'numero' => '35',    'texto' => 'Médicos activos'],
-            ['icono' => '💊', 'numero' => '212',   'texto' => 'Entregas de medicamentos'],
+            ['icono' => 'citas',       'numero' => '128',   'texto' => 'Citas de hoy'],
+            ['icono' => 'afiliados',   'numero' => '3,542', 'texto' => 'Afiliados activos'],
+            ['icono' => 'user-circle', 'numero' => '35',    'texto' => 'Médicos activos'],
+            ['icono' => 'medicamentos','numero' => '212',   'texto' => 'Entregas de medicamentos'],
         ];
 
-        return view('admin.dashboard', compact('usuarioActual', 'estadisticas'));
+        return view('admin.dashboard', compact('usuarioActual', 'estadisticas'))->with('seccionActiva', 'dashboard');
     }
 }

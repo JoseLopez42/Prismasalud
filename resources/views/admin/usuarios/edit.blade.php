@@ -26,17 +26,6 @@
         animation: girar .6s linear infinite;
     }
     @keyframes girar { to { transform: rotate(360deg); } }
-
-    #bloque-eps {
-        overflow: hidden;
-        max-height: 0;
-        opacity: 0;
-        transition: max-height .25s ease, opacity .25s ease;
-    }
-    #bloque-eps.visible {
-        max-height: 200px;
-        opacity: 1;
-    }
 </style>
 @endpush
 
@@ -130,18 +119,6 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-
-                    <div id="bloque-eps">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">NIT de la EPS</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-teal-50 flex items-center justify-center text-sm">🗂️</span>
-                            <input type="text" name="nit_eps" id="campo-nit-eps"
-                                   value="{{ old('nit_eps', $usuario->nit_eps) }}"
-                                   class="campo-form w-full border border-gray-300 rounded-lg pl-11 pr-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                                   placeholder="Ej: 900123456">
-                        </div>
-                        <p class="text-xs text-gray-400 mt-1">Obligatorio para pacientes.</p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -242,29 +219,11 @@
     </div>
 
     <script>
-        const ID_PACIENTE = '2';
-
         ['campo-edad', 'campo-telefono'].forEach(function (idCampo) {
             document.getElementById(idCampo).addEventListener('input', function () {
                 this.value = this.value.replace(/\D/g, '');
             });
         });
-
-        const campoRol = document.getElementById('campo-rol');
-        const bloqueEps = document.getElementById('bloque-eps');
-        const campoNitEps = document.getElementById('campo-nit-eps');
-
-        function actualizarBloqueEps() {
-            const esPaciente = campoRol.value === ID_PACIENTE;
-            bloqueEps.classList.toggle('visible', esPaciente);
-            campoNitEps.required = esPaciente;
-            if (!esPaciente) {
-                campoNitEps.value = '';
-            }
-        }
-
-        campoRol.addEventListener('change', actualizarBloqueEps);
-        actualizarBloqueEps(); // se ejecuta ya al cargar, según el rol actual del usuario
 
         const formUsuario = document.getElementById('form-usuario');
         const botonGuardarUsuario = document.getElementById('boton-guardar-usuario');

@@ -8,7 +8,7 @@ class TipoUsuario extends Model
 {
     protected $table = 'tipos_usuario';
 
-    protected $fillable = ['nombre'];
+    protected $fillable = ['nombre', 'activo'];
 
     /**
      * Relación: un tipo de usuario puede tener muchos usuarios.

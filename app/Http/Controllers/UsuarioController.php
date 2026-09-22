@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 class UsuarioController extends Controller
 {
     const TIPO_ADMINISTRADOR = 1;
-    const TIPO_PACIENTE = 2; // según el orden del seeder: 2 = Paciente
 
     // Lista todos los usuarios
     public function index()
@@ -45,8 +44,6 @@ class UsuarioController extends Controller
             'tipo_usuario_id'   => 'required|exists:tipos_usuario,id',
             'id_ciudad'         => 'nullable|exists:ciudades,id_ciudad',
             'id_tipo_documento' => 'nullable|exists:tipo_documento,id_tipo_documento',
-            // El NIT de la EPS solo es obligatorio si el rol elegido es Paciente
-            'nit_eps'           => 'required_if:tipo_usuario_id,' . self::TIPO_PACIENTE . '|nullable|string|max:20',
             'foto'              => 'nullable|image|max:2048', // máx 2MB
         ]);
 
@@ -90,7 +87,6 @@ class UsuarioController extends Controller
             'tipo_usuario_id'   => 'required|exists:tipos_usuario,id',
             'id_ciudad'         => 'nullable|exists:ciudades,id_ciudad',
             'id_tipo_documento' => 'nullable|exists:tipo_documento,id_tipo_documento',
-            'nit_eps'           => 'required_if:tipo_usuario_id,' . self::TIPO_PACIENTE . '|nullable|string|max:20',
             'foto'              => 'nullable|image|max:2048',
         ]);
 
@@ -109,10 +105,15 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')->with('exito', 'Usuario actualizado correctamente.');
     }
 
-    // Elimina el usuario
-    public function destroy($cedula)
+    // Activa o desactiva el usuario (en vez de eliminarlo)
+    public function cambiarEstado($cedula)
     {
-        Usuario::findOrFail($cedula)->delete();
-        return redirect()->route('usuarios.index')->with('exito', 'Usuario eliminado correctamente.');
+        $usuario = Usuario::findOrFail($cedula);
+        $usuario->activo = !$usuario->activo;
+        $usuario->save();
+
+        $mensaje = $usuario->activo ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
+
+        return redirect()->route('usuarios.index')->with('exito', $mensaje);
     }
 }

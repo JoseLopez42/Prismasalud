@@ -1,4 +1,4 @@
-<!-- index.blade.php - Home publica -->
+<!-- index.blade.php - Home publica (rediseño multicolor) -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -21,13 +21,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --azul: #1B4D6B;
+            --azul-claro: #2E86AB;
+            --naranja: #0C7B93;
+            --teal: #12A594;
+            --teal-claro: #4ADE80;
+        }
+
         body { font-family: 'Inter', sans-serif; }
 
-        /* Degradado verde/teal usado en hero y banner CTA, con movimiento sutil */
+        /* Degradado multicolor (azul -> teal -> naranja), tal como el logo */
         .gradiente-salud {
-            background: linear-gradient(120deg, #1A5C3A 0%, #0f766e 50%, #0d9488 100%);
-            background-size: 200% 200%;
-            animation: moverGradiente 7s ease infinite;
+            background: linear-gradient(120deg, var(--azul) 0%, var(--teal) 55%, var(--naranja) 100%);
+            background-size: 220% 220%;
+            animation: moverGradiente 8s ease infinite;
         }
         @keyframes moverGradiente {
             0%   { background-position: 0% 50%; }
@@ -35,30 +43,42 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Formas decorativas flotantes de fondo (solo dentro del hero) */
+        /* Formas decorativas flotantes, ahora con los 3 colores */
         .hero-decoraciones {
             position: absolute;
             inset: 0;
             overflow: hidden;
             pointer-events: none;
-            z-index: -1;
+            z-index: 0;
         }
         .blob {
             position: absolute;
             border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.08);
-            filter: blur(2px);
-            animation: flotar 10s ease-in-out infinite;
+            filter: blur(6px);
+            animation: flotar 11s ease-in-out infinite;
+            opacity: 0.35;
         }
-        .blob-1 { width: 220px; height: 220px; top: -60px; right: 8%; animation-delay: 0s; }
-        .blob-2 { width: 140px; height: 140px; bottom: 10%; left: 4%; animation-delay: 2.5s; }
-        .blob-3 { width: 90px; height: 90px; top: 30%; right: 30%; animation-delay: 5s; }
+        .blob-1 { width: 260px; height: 260px; top: -70px; right: 6%; background: var(--naranja); animation-delay: 0s; }
+        .blob-2 { width: 160px; height: 160px; bottom: 8%; left: 3%; background: var(--teal-claro); animation-delay: 2.5s; }
+        .blob-3 { width: 110px; height: 110px; top: 32%; right: 28%; background: var(--azul-claro); animation-delay: 5s; }
         @keyframes flotar {
             0%, 100% { transform: translateY(0) translateX(0); }
-            50% { transform: translateY(-18px) translateX(10px); }
+            50% { transform: translateY(-22px) translateX(14px); }
         }
 
-        /* Header fijo, se vuelve semi-transparente al hacer scroll */
+        /* Glow que sigue el cursor dentro del hero */
+        #glow-cursor {
+            position: absolute;
+            width: 420px; height: 420px;
+            border-radius: 9999px;
+            background: radial-gradient(circle, rgba(18,165,148,0.20) 0%, rgba(18,165,148,0) 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: left .12s linear, top .12s linear;
+            z-index: 0;
+        }
+
+        /* Header fijo */
         .site-header {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -73,116 +93,85 @@
             -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
         }
-
         .site-header .logo-text { color: #111827; }
         .site-header .logo-sub { color: #9ca3af; }
-        .site-header .brand-accent { color: #0d9488; }
-        .site-header .nav-link { color: #4b5563; }
-        .site-header .nav-link:hover { color: #0d9488; }
-
-        /* Subrayado animado al pasar el mouse por el menu */
-        .nav-link {
-            position: relative;
+        .site-header .brand-accent {
+            background: linear-gradient(90deg, var(--azul-claro), var(--teal));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
+        .site-header .nav-link { color: #4b5563; position: relative; }
+        .site-header .nav-link:hover { color: var(--teal); }
         .nav-link::after {
             content: '';
             position: absolute;
             left: 0; bottom: -4px;
-            width: 0;
-            height: 2px;
-            background-color: #0d9488;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--azul-claro), var(--naranja));
             transition: width .25s ease;
         }
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .site-header .btn-login {
-            color: #0d9488;
-            border-color: #0d9488;
-        }
-        .site-header .btn-login:hover { background-color: #f0fdfa; }
-
-        /* Espacio reservado porque el header es fixed */
+        .nav-link:hover::after { width: 100%; }
         .header-spacer { height: 80px; }
 
-        /* Menu hamburguesa - drawer deslizante */
+        /* Menu hamburguesa - drawer */
         .overlay-movil {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            visibility: hidden;
+            opacity: 0; visibility: hidden;
             transition: opacity .25s ease, visibility .25s ease;
             z-index: 60;
         }
-        .overlay-movil.abierto {
-            opacity: 1;
-            visibility: visible;
-        }
-
+        .overlay-movil.abierto { opacity: 1; visibility: visible; }
         .drawer-movil {
-            position: fixed;
-            top: 0; right: 0;
-            height: 100%;
-            width: 78%;
-            max-width: 320px;
+            position: fixed; top: 0; right: 0; height: 100%;
+            width: 78%; max-width: 320px;
             background: #ffffff;
             box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
             transform: translateX(100%);
             transition: transform .3s ease;
             z-index: 70;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
-        .drawer-movil.abierto {
-            transform: translateX(0);
-        }
-
+        .drawer-movil.abierto { transform: translateX(0); }
         .drawer-movil .drawer-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.9rem 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #f3f4f6;
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.9rem 1.5rem; font-size: 0.95rem; font-weight: 600;
+            color: #374151; border-bottom: 1px solid #f3f4f6;
         }
-        .drawer-movil .drawer-link:active,
-        .drawer-movil .drawer-link:hover {
-            background-color: #f0fdfa;
-            color: #0f766e;
+        .drawer-movil .drawer-link:active, .drawer-movil .drawer-link:hover {
+            background-color: #f0fdfa; color: var(--teal);
         }
         .drawer-movil .drawer-icono {
-            width: 34px;
-            height: 34px;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            flex-shrink: 0;
+            width: 34px; height: 34px; border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
-        /* Boton CTA unico (mismo estilo en hero y banner) */
+        /* Boton CTA principal: gradiente naranja->teal, se ve mas "vivo" */
         .btn-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
+            display: inline-flex; align-items: center; gap: 0.4rem;
             padding: 0.85rem 1.6rem;
-            background: #ffffff;
-            color: #0f766e;
+            background: linear-gradient(120deg, var(--naranja), var(--teal));
+            background-size: 180% 180%;
+            color: #ffffff;
             font-weight: 600;
             border-radius: 0.5rem;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-            transition: transform .2s ease, box-shadow .2s ease;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+            transition: transform .2s ease, box-shadow .2s ease, background-position .4s ease;
             white-space: nowrap;
         }
         .btn-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.24);
+            background-position: 100% 50%;
         }
+
+        /* Boton secundario (outline) */
+        .btn-outline {
+            border: 1.5px solid rgba(255,255,255,0.7);
+            transition: transform .2s ease, background-color .2s ease;
+        }
+        .btn-outline:hover { transform: translateY(-2px); }
 
         /* Animacion de aparicion al hacer scroll */
         .reveal {
@@ -190,32 +179,70 @@
             transform: translateY(24px);
             transition: opacity .6s ease, transform .6s ease;
         }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
 
-        /* Mapa: proporcion 16:9 sin librerias */
+        /* Mapa */
         .mapa-wrap {
-            position: relative;
-            padding-bottom: 40%;
-            height: 0;
-            overflow: hidden;
-            border-radius: 0.75rem;
+            position: relative; padding-bottom: 40%; height: 0;
+            overflow: hidden; border-radius: 0.75rem;
         }
         .mapa-wrap iframe {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            border: 0;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
         }
-        /* Tarjetas del hero: leve resalte al pasar el mouse */
+
+        /* Tarjetas del hero: efecto 3D al pasar el mouse (tilt) */
         .tarjeta-hero {
-            transition: background-color .2s ease, transform .2s ease;
+            transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
         }
         .tarjeta-hero:hover {
             background-color: rgba(255, 255, 255, 0.16);
-            transform: translateX(4px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+        }
+
+        /* Tarjetas de especialidades: barra de color superior que aparece al hover */
+        .tarjeta-especialidad {
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .tarjeta-especialidad::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--azul-claro), var(--teal), var(--naranja));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .3s ease;
+        }
+        .tarjeta-especialidad:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.1);
+        }
+        .tarjeta-especialidad:hover::before { transform: scaleX(1); }
+
+        /* Icono de cada especialidad: colores rotativos (azul/teal/naranja) */
+        .icono-c1 { background: #e6f3fa; color: var(--azul-claro); }
+        .icono-c2 { background: #e6f9f6; color: var(--teal); }
+        .icono-c3 { background: #e0f7f4; color: var(--naranja); }
+
+        /* Avatares de testimonios con colores rotativos */
+        .avatar-c1 { background: var(--azul-claro); }
+        .avatar-c2 { background: var(--teal); }
+        .avatar-c3 { background: var(--naranja); }
+
+        /* Insignia con degradado sutil */
+        .badge-multicolor {
+            background: linear-gradient(90deg, rgba(46,134,171,0.12), rgba(18,165,148,0.12), rgba(12,123,147,0.12));
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        /* Contador con numero en degradado */
+        .stat-gradiente {
+            background: linear-gradient(90deg, #ffffff, var(--teal-claro));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
     </style>
 </head>
@@ -245,11 +272,10 @@
                 <a href="#contacto" class="nav-link">Contacto</a>
             </nav>
 
-            <!-- Solo boton de sesion, empujado a la derecha -->
             <div class="hidden md:flex items-center gap-3 ml-auto">
                 <a href="{{ url('/login') }}"
                    class="px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
-                   style="background: linear-gradient(120deg, #0f766e, #0d9488);">
+                   style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                     Inicio sesión
                 </a>
             </div>
@@ -263,14 +289,12 @@
 
         <div id="overlay-movil" class="overlay-movil md:hidden"></div>
 
-        <!-- Drawer movil -->
         <div id="drawer-movil" class="drawer-movil md:hidden">
-
             <div class="gradiente-salud flex items-center justify-between px-5 py-5">
                 <div class="flex items-center gap-2">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo PrismaSalud IPS" class="w-9 h-9 object-contain">
                     <p class="font-bold text-white text-sm">
-                        Prisma<span class="text-teal-300">Salud</span> IPS
+                        Prisma<span style="color:#e0f7f4;">Salud</span> IPS
                     </p>
                 </div>
                 <button id="boton-cerrar-drawer" aria-label="Cerrar menú" class="text-white/80 hover:text-white">
@@ -279,39 +303,37 @@
                     </svg>
                 </button>
             </div>
-
             <nav class="flex-1 overflow-y-auto py-2">
                 <a href="{{ url('/') }}" class="drawer-link">
-                    <span class="drawer-icono bg-teal-50 text-teal-600">
+                    <span class="drawer-icono icono-c1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
                     </span> Inicio
                 </a>
                 <a href="{{ route('nosotros') }}" class="drawer-link">
-                    <span class="drawer-icono bg-blue-50 text-blue-600">
+                    <span class="drawer-icono icono-c2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
                     </span> Nosotros
                 </a>
                 <a href="#servicios" class="drawer-link">
-                    <span class="drawer-icono bg-green-50 text-green-600">
+                    <span class="drawer-icono icono-c3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-4.35-9.3-8.4C.8 9.4 1.9 5.6 5.3 4.6c2-.6 4 .1 5.2 1.7l1.5 2 1.5-2c1.2-1.6 3.2-2.3 5.2-1.7 3.4 1 4.5 4.8 2.6 8-2.8 4.05-9.3 8.4-9.3 8.4z"/></svg>
                     </span> Servicios
                 </a>
                 <a href="#blog" class="drawer-link">
-                    <span class="drawer-icono bg-purple-50 text-purple-600">
+                    <span class="drawer-icono icono-c1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/></svg>
                     </span> Blog
                 </a>
                 <a href="#contacto" class="drawer-link">
-                    <span class="drawer-icono bg-amber-50 text-amber-600">
+                    <span class="drawer-icono icono-c3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                     </span> Contacto
                 </a>
             </nav>
-
-            <!-- Solo boton de sesion -->
             <div class="p-5 border-t border-gray-100 bg-gray-50 flex flex-col gap-3">
                 <a href="{{ url('/login') }}"
-                   class="btn-login px-4 py-2.5 text-sm font-semibold border rounded-md text-center bg-white">
+                   class="px-4 py-2.5 text-sm font-semibold border rounded-md text-center bg-white"
+                   style="color: var(--teal); border-color: var(--teal);">
                     Inicio sesión
                 </a>
             </div>
@@ -321,22 +343,24 @@
     <div class="header-spacer"></div>
 
     <!-- Hero -->
-    <section id="contenido-principal" class="gradiente-salud text-white relative">
+    <section id="contenido-principal" class="gradiente-salud text-white relative overflow-hidden">
         <div class="hero-decoraciones">
             <span class="blob blob-1"></span>
             <span class="blob blob-2"></span>
             <span class="blob blob-3"></span>
         </div>
-        <div class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center">
+        <div id="glow-cursor"></div>
+
+        <div class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center relative" style="z-index: 1;">
 
             <div>
-                <span class="inline-block bg-white/10 text-white text-xs px-3 py-1 rounded-full mb-4">
+                <span class="badge-multicolor inline-block text-white text-xs px-3 py-1 rounded-full mb-4">
                     IPS Certificada en Ibagué · Tolima
                 </span>
 
                 <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
                     Tu Salud es nuestra <br>
-                    <span class="text-teal-300">razón de ser</span>
+                    <span style="background: linear-gradient(90deg, #e0f7f4, #b6f5e8); -webkit-background-clip: text; background-clip: text; color: transparent;">razón de ser</span>
                 </h1>
 
                 <p class="text-white/80 mb-8 max-w-md">
@@ -346,7 +370,7 @@
 
                 <div class="flex flex-wrap gap-4">
                     <a href="#servicios"
-                       class="px-5 py-3 border border-white rounded-md font-semibold hover:bg-white hover:text-teal-700 transition">
+                       class="btn-outline px-5 py-3 rounded-md font-semibold hover:bg-white hover:text-[var(--azul)] transition">
                         Ver nuestros servicios
                     </a>
                     <a href="{{ url('/login') }}" class="btn-cta">
@@ -380,9 +404,8 @@
         </div>
 
         <!-- Estadisticas -->
-        <div class="border-t border-white/10" style="background-color: rgba(26, 92, 58, 0.4);">
+        <div class="border-t border-white/10 relative" style="background-color: rgba(0,0,0,0.15); z-index: 1;">
             @php
-                // 'target' = numero puro para animar, 'sufijo' = lo que se agrega despues (K, +, %)
                 $estadisticas = [
                     ['target' => 18, 'sufijo' => 'K+', 'texto' => 'Pacientes atendidos'],
                     ['target' => 35, 'sufijo' => '+',  'texto' => 'Profesionales de salud'],
@@ -394,7 +417,7 @@
             <div id="stats-bar" class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-6 text-center">
                 @foreach ($estadisticas as $stat)
                     <div class="reveal {{ $loop->last ? 'col-span-2 md:col-span-1' : '' }}">
-                        <p class="text-3xl font-extrabold">
+                        <p class="text-3xl font-extrabold stat-gradiente">
                             <span class="stat-numero" data-target="{{ $stat['target'] }}">0</span>{{ $stat['sufijo'] }}
                         </p>
                         <p class="text-sm text-white/70">{{ $stat['texto'] }}</p>
@@ -404,13 +427,33 @@
         </div>
     </section>
 
+    <!-- EPS afiliadas -->
+    <section class="bg-white py-14 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-400 text-sm font-semibold uppercase tracking-wide mb-8">
+                Trabajamos con tu EPS
+            </p>
+            @php
+                $eps = ['Sura', 'Nueva EPS', 'Sanitas', 'Compensar', 'Famisanar', 'Salud Total'];
+            @endphp
+            <div class="flex flex-wrap justify-center gap-x-10 gap-y-4">
+                @foreach ($eps as $nombreEps)
+                    <span class="text-gray-400 hover:text-[var(--teal)] font-bold text-lg transition">
+                        {{ $nombreEps }}
+                    </span>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     <!-- Servicios -->
     <section id="servicios" class="max-w-7xl mx-auto px-6 py-20">
-        <span class="inline-block border border-teal-500 text-teal-600 text-xs px-3 py-1 rounded-full mb-4">
+        <span class="inline-block border text-xs px-3 py-1 rounded-full mb-4" style="border-color: var(--teal); color: var(--teal);">
             Nuestros servicios
         </span>
         <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
-            Atención integral <span class="text-teal-500">en un solo lugar</span>
+            Atención integral
+            <span style="background: linear-gradient(90deg, var(--azul-claro), var(--teal), var(--naranja)); -webkit-background-clip: text; background-clip: text; color: transparent;">en un solo lugar</span>
         </h2>
         <p class="text-gray-500 mb-10 max-w-xl">
             Contamos con un equipo médico completo para cuidar tu salud y la de
@@ -419,33 +462,74 @@
 
         @php
             $especialidades = [
-                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg>', 'titulo' => 'Medicina General', 'texto' => 'Consulta preventiva, diagnóstico y tratamiento de enfermedades comunes para pacientes de todas las edades.'],
-                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-4.35-9.3-8.4C.8 9.4 1.9 5.6 5.3 4.6c2-.6 4 .1 5.2 1.7l1.5 2 1.5-2c1.2-1.6 3.2-2.3 5.2-1.7 3.4 1 4.5 4.8 2.6 8-2.8 4.05-9.3 8.4-9.3 8.4z"/></svg>', 'titulo' => 'Cardiología',      'texto' => 'Evaluación cardiovascular con equipos de última generación. Electrocardiogramas, ecocardiogramas y más.'],
-                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>', 'titulo' => 'Pediatría',        'texto' => 'Cuidado especializado para niños desde el nacimiento hasta la adolescencia. Controles de crecimiento y vacunación.'],
-                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 2v6L4 18a2 2 0 002 3h12a2 2 0 002-3L15 8V2M9 2h6M8 15h8"/></svg>', 'titulo' => 'Laboratorio Clínico', 'texto' => 'Análisis de sangre, orina, cultivos y más. Resultados rápidos y entrega digital desde nuestra plataforma.'],
-                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>', 'titulo' => 'Odontología',      'texto' => 'Salud oral completa: limpieza, ortodoncia, endodoncia y cirugía oral en un ambiente cómodo y moderno.'],
-                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 3a3.5 3.5 0 00-3.5 3.5c0 .35.04.7.13 1.02A3.5 3.5 0 003 11a3.5 3.5 0 002.13 3.22A3.5 3.5 0 009.5 19a3.5 3.5 0 003.5-3.5V6.5A3.5 3.5 0 009.5 3zM14.5 3a3.5 3.5 0 013.5 3.5c0 .35-.04.7-.13 1.02A3.5 3.5 0 0121 11a3.5 3.5 0 01-2.13 3.22A3.5 3.5 0 0114.5 19a3.5 3.5 0 01-3.5-3.5V6.5A3.5 3.5 0 0114.5 3z"/></svg>', 'titulo' => 'Psicología',       'texto' => 'Acompañamiento psicológico para el manejo del estrés, ansiedad, depresión y bienestar emocional.'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg>', 'titulo' => 'Medicina General', 'texto' => 'Consulta preventiva, diagnóstico y tratamiento de enfermedades comunes para pacientes de todas las edades.', 'color' => 'icono-c1'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-4.35-9.3-8.4C.8 9.4 1.9 5.6 5.3 4.6c2-.6 4 .1 5.2 1.7l1.5 2 1.5-2c1.2-1.6 3.2-2.3 5.2-1.7 3.4 1 4.5 4.8 2.6 8-2.8 4.05-9.3 8.4-9.3 8.4z"/></svg>', 'titulo' => 'Cardiología',      'texto' => 'Evaluación cardiovascular con equipos de última generación. Electrocardiogramas, ecocardiogramas y más.', 'color' => 'icono-c3'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>', 'titulo' => 'Pediatría',        'texto' => 'Cuidado especializado para niños desde el nacimiento hasta la adolescencia. Controles de crecimiento y vacunación.', 'color' => 'icono-c2'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 2v6L4 18a2 2 0 002 3h12a2 2 0 002-3L15 8V2M9 2h6M8 15h8"/></svg>', 'titulo' => 'Laboratorio Clínico', 'texto' => 'Análisis de sangre, orina, cultivos y más. Resultados rápidos y entrega digital desde nuestra plataforma.', 'color' => 'icono-c1'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>', 'titulo' => 'Odontología',      'texto' => 'Salud oral completa: limpieza, ortodoncia, endodoncia y cirugía oral en un ambiente cómodo y moderno.', 'color' => 'icono-c3'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 3a3.5 3.5 0 00-3.5 3.5c0 .35.04.7.13 1.02A3.5 3.5 0 003 11a3.5 3.5 0 002.13 3.22A3.5 3.5 0 009.5 19a3.5 3.5 0 003.5-3.5V6.5A3.5 3.5 0 009.5 3zM14.5 3a3.5 3.5 0 013.5 3.5c0 .35-.04.7-.13 1.02A3.5 3.5 0 0121 11a3.5 3.5 0 01-2.13 3.22A3.5 3.5 0 0114.5 19a3.5 3.5 0 01-3.5-3.5V6.5A3.5 3.5 0 0114.5 3z"/></svg>', 'titulo' => 'Psicología',       'texto' => 'Acompañamiento psicológico para el manejo del estrés, ansiedad, depresión y bienestar emocional.', 'color' => 'icono-c2'],
             ];
         @endphp
 
         <div class="grid md:grid-cols-3 gap-6">
             @foreach ($especialidades as $esp)
-                <div class="reveal border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-                    <div class="w-11 h-11 flex items-center justify-center bg-teal-50 text-teal-600 rounded-lg mb-3">
+                <div class="reveal tarjeta-especialidad border border-gray-200 rounded-xl p-6">
+                    <div class="w-11 h-11 flex items-center justify-center {{ $esp['color'] }} rounded-lg mb-3">
                         {!! $esp['icono'] !!}
                     </div>
                     <h3 class="font-semibold text-gray-900 mb-2">{{ $esp['titulo'] }}</h3>
                     <p class="text-sm text-gray-500 mb-4">{{ $esp['texto'] }}</p>
-                    <a href="#" class="text-teal-600 text-sm font-semibold hover:underline">Conocer más →</a>
+                    <a href="#" class="text-sm font-semibold hover:underline" style="color: var(--teal);">Conocer más →</a>
                 </div>
             @endforeach
+        </div>
+    </section>
+
+    <!-- Como agendar tu cita -->
+    <section class="bg-gray-50 py-20">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-14">
+                <span class="inline-block border text-xs px-3 py-1 rounded-full mb-4" style="border-color: var(--azul-claro); color: var(--azul-claro);">
+                    Es muy fácil
+                </span>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-900">
+                    Agenda tu cita en 3 pasos
+                </h2>
+            </div>
+
+            @php
+                $pasos = [
+                    ['numero' => '1', 'titulo' => 'Elige tu especialidad', 'texto' => 'Selecciona el servicio médico que necesitas de nuestro catálogo.', 'color' => 'icono-c1'],
+                    ['numero' => '2', 'titulo' => 'Elige fecha y horario', 'texto' => 'Escoge el día y la hora que mejor se acomode a tu agenda.', 'color' => 'icono-c2'],
+                    ['numero' => '3', 'titulo' => 'Confirma tu cita', 'texto' => 'Recibe la confirmación al instante y listo, te esperamos.', 'color' => 'icono-c3'],
+                ];
+            @endphp
+
+            <div class="grid md:grid-cols-3 gap-8">
+                @foreach ($pasos as $paso)
+                    <div class="reveal text-center">
+                        <div class="w-14 h-14 mx-auto flex items-center justify-center {{ $paso['color'] }} rounded-full text-xl font-extrabold mb-4">
+                            {{ $paso['numero'] }}
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">{{ $paso['titulo'] }}</h3>
+                        <p class="text-sm text-gray-500">{{ $paso['texto'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="{{ url('/login') }}" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-md hover:opacity-90 transition" style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
+                    Agendar ahora
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 12h15"/></svg>
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- Testimonios -->
     <section class="bg-gray-50 py-20">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <span class="inline-block border border-teal-500 text-teal-600 text-xs px-3 py-1 rounded-full mb-4">
+            <span class="inline-block border text-xs px-3 py-1 rounded-full mb-4" style="border-color: var(--naranja); color: var(--naranja);">
                 Testimonios
             </span>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-10">
@@ -454,15 +538,15 @@
 
             @php
                 $testimonios = [
-                    ['estrellas' => 5, 'texto' => 'Excelente atención desde la recepción hasta el médico. El proceso de agendar cita fue muy sencillo y rápido. Totalmente recomendado.', 'iniciales' => 'MP', 'nombre' => 'María Pérez', 'desde' => 'Paciente desde 2021'],
-                    ['estrellas' => 5, 'texto' => 'Los médicos son muy humanos y profesionales. Me siento en buenas manos cada vez que vengo. Las instalaciones son limpias y modernas.', 'iniciales' => 'JR', 'nombre' => 'Jose Rodríguez', 'desde' => 'Paciente desde 2019'],
-                    ['estrellas' => 4, 'texto' => 'El servicio de pediatría es excepcional. Mi hijo siempre sale tranquilo después de sus controles. Los tiempos de espera son muy cortos.', 'iniciales' => 'CG', 'nombre' => 'Carolina Gómez', 'desde' => 'Paciente desde 2022'],
+                    ['estrellas' => 5, 'texto' => 'Excelente atención desde la recepción hasta el médico. El proceso de agendar cita fue muy sencillo y rápido. Totalmente recomendado.', 'iniciales' => 'MP', 'nombre' => 'María Pérez', 'desde' => 'Paciente desde 2021', 'color' => 'avatar-c1'],
+                    ['estrellas' => 5, 'texto' => 'Los médicos son muy humanos y profesionales. Me siento en buenas manos cada vez que vengo. Las instalaciones son limpias y modernas.', 'iniciales' => 'JR', 'nombre' => 'Jose Rodríguez', 'desde' => 'Paciente desde 2019', 'color' => 'avatar-c2'],
+                    ['estrellas' => 4, 'texto' => 'El servicio de pediatría es excepcional. Mi hijo siempre sale tranquilo después de sus controles. Los tiempos de espera son muy cortos.', 'iniciales' => 'CG', 'nombre' => 'Carolina Gómez', 'desde' => 'Paciente desde 2022', 'color' => 'avatar-c3'],
                 ];
             @endphp
 
             <div class="grid md:grid-cols-3 gap-6 text-left">
                 @foreach ($testimonios as $t)
-                    <div class="reveal bg-white border border-gray-200 rounded-xl p-6">
+                    <div class="reveal bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
                         <div class="text-yellow-400 mb-3">
                             {{ str_repeat('★', $t['estrellas']) }}{{ str_repeat('☆', 5 - $t['estrellas']) }}
                         </div>
@@ -470,7 +554,7 @@
                             "{{ $t['texto'] }}"
                         </p>
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                            <div class="w-9 h-9 rounded-full {{ $t['color'] }} text-white flex items-center justify-center text-xs font-bold">
                                 {{ $t['iniciales'] }}
                             </div>
                             <div>
@@ -486,7 +570,7 @@
 
     <!-- Mapa de ubicacion -->
     <section class="max-w-7xl mx-auto px-6 py-16">
-        <span class="inline-block border border-teal-500 text-teal-600 text-xs px-3 py-1 rounded-full mb-4">
+        <span class="inline-block border text-xs px-3 py-1 rounded-full mb-4" style="border-color: var(--azul-claro); color: var(--azul-claro);">
             Ubicación
         </span>
         <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
@@ -494,7 +578,6 @@
         </h2>
 
         <div class="grid md:grid-cols-3 gap-6 items-stretch">
-            <!-- Mapa: ocupa 2 columnas en desktop -->
             <div class="reveal mapa-wrap border border-gray-200 md:col-span-2">
                 <iframe
                     src="https://www.google.com/maps?q=Calle+42+%235-28,+Ibagué,+Tolima&output=embed"
@@ -503,21 +586,20 @@
                 </iframe>
             </div>
 
-            <!-- Tarjeta con datos de la sede -->
             <div class="reveal bg-gray-50 border border-gray-200 rounded-xl p-6 flex flex-col justify-between">
                 <div>
                     <h3 class="font-semibold text-gray-900 mb-4">Sede principal</h3>
                     <ul class="space-y-3 text-sm text-gray-600">
                         <li class="flex items-start gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 flex-shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color: var(--teal);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                             <span>Calle 42 #5-28, Ibagué, Tolima</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 flex-shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5c0 9 7 16 16 16l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color: var(--teal);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5c0 9 7 16 16 16l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
                             <span>(601) 123-4667</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 flex-shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color: var(--teal);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
                             <span>Lun - Vie: 7:00 am - 7:00 pm</span>
                         </li>
                     </ul>
@@ -525,7 +607,7 @@
                 <a href="https://www.google.com/maps?q=Calle+42+%235-28,+Ibagué,+Tolima"
                    target="_blank" rel="noopener"
                    class="mt-6 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-md hover:opacity-90 transition"
-                   style="background: linear-gradient(120deg, #0f766e, #0d9488);">
+                   style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                     Cómo llegar
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 12h15"/></svg>
                 </a>
@@ -533,11 +615,48 @@
         </div>
     </section>
 
+    <!-- Blog -->
+    <section id="blog" class="max-w-7xl mx-auto px-6 py-20">
+        <div class="text-center mb-12">
+            <span class="inline-block border text-xs px-3 py-1 rounded-full mb-4" style="border-color: var(--teal); color: var(--teal);">
+                Blog
+            </span>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900">
+                Consejos para cuidar tu salud
+            </h2>
+        </div>
+
+        @php
+            $articulos = [
+                ['color' => 'icono-c1', 'icono' => '🫀', 'fecha' => '10 sep 2026', 'titulo' => '5 hábitos para un corazón sano', 'resumen' => 'Pequeños cambios diarios que reducen el riesgo cardiovascular a largo plazo.'],
+                ['color' => 'icono-c2', 'icono' => '🧒', 'fecha' => '2 sep 2026', 'titulo' => 'Calendario de vacunación infantil', 'resumen' => 'Qué vacunas necesita tu hijo y en qué edades, según el esquema nacional.'],
+                ['color' => 'icono-c3', 'icono' => '🧠', 'fecha' => '25 ago 2026', 'titulo' => 'Manejo del estrés en el trabajo', 'resumen' => 'Estrategias simples respaldadas por psicología para el día a día.'],
+            ];
+        @endphp
+
+        <div class="grid md:grid-cols-3 gap-6">
+            @foreach ($articulos as $art)
+                <a href="#" class="reveal block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition">
+                    <div class="{{ $art['color'] }} h-36 flex items-center justify-center text-4xl">
+                        {{ $art['icono'] }}
+                    </div>
+                    <div class="p-5">
+                        <p class="text-xs text-gray-400 mb-2">{{ $art['fecha'] }}</p>
+                        <h3 class="font-semibold text-gray-900 mb-2">{{ $art['titulo'] }}</h3>
+                        <p class="text-sm text-gray-500">{{ $art['resumen'] }}</p>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+        <p class="text-xs text-gray-400 mt-6 text-center">* Artículos de ejemplo, se reemplazan por contenido real.</p>
+    </section>
+
     <!-- Banner CTA -->
     <section class="gradiente-salud text-white">
         <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <h2 class="text-2xl md:text-3xl font-bold text-center md:text-left">
-                ¿Listo para cuidar tu <span class="text-teal-300">salud</span> hoy?
+                ¿Listo para cuidar tu
+                <span style="background: linear-gradient(90deg, #e0f7f4, #b6f5e8); -webkit-background-clip: text; background-clip: text; color: transparent;">salud</span> hoy?
             </h2>
             <a href="{{ url('/login') }}" class="btn-cta">
                 Agendar tu cita ahora
@@ -548,9 +667,9 @@
 
     <!-- Footer -->
     <footer class="text-white/80" style="background-color: #1A5C3A;">
-        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left">
+        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left">
 
-            <div class="col-span-2 md:col-span-1 flex flex-col items-center md:items-start">
+            <div class="col-span-2 lg:col-span-2 flex flex-col items-center md:items-start">
                 <p class="text-white font-bold text-lg mb-2">
                     Prisma<span class="text-teal-300">Salud</span> IPS
                 </p>
@@ -572,7 +691,6 @@
                 </div>
             </div>
 
-            <!-- En móvil va a la IZQUIERDA (orden natural del grid de 2 columnas) -->
             <div>
                 <p class="text-white font-semibold mb-3">Servicios</p>
                 <ul class="space-y-2 text-sm">
@@ -584,7 +702,6 @@
                 </ul>
             </div>
 
-            <!-- En móvil va a la DERECHA -->
             <div>
                 <p class="text-white font-semibold mb-3">Navegación</p>
                 <ul class="space-y-2 text-sm">
@@ -596,7 +713,17 @@
                 </ul>
             </div>
 
-            <div id="contacto" class="col-span-2 md:col-span-1">
+            <div>
+                <p class="text-white font-semibold mb-3">Marco legal</p>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="{{ route('terminos.index') }}" class="hover:text-white">Términos y Condiciones</a></li>
+                    <li><a href="{{ route('privacidad.index') }}" class="hover:text-white">Política de Privacidad</a></li>
+                    <li><a href="#contacto" class="hover:text-white">PQRS</a></li>
+                    <li><a href="#contacto" class="hover:text-white">Derechos del paciente</a></li>
+                </ul>
+            </div>
+
+            <div id="contacto" class="col-span-2 lg:col-span-1">
                 <p class="text-white font-semibold mb-3">Contacto</p>
                 <ul class="space-y-2.5 text-sm">
                     <li class="flex items-center gap-2 justify-center md:justify-start">
@@ -618,11 +745,24 @@
                 </ul>
             </div>
         </div>
+
+        {{-- Barra legal inferior: normas y avisos de privacidad --}}
+        <div class="border-t border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col-reverse md:flex-row items-center justify-between gap-3 text-xs text-white/60">
+                <p>© {{ date('Y') }} PrismaSalud IPS · NIT 900.000.000-0 · Todos los derechos reservados</p>
+                <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                    <a href="{{ route('terminos.index') }}" class="hover:text-white transition">Términos y Condiciones</a>
+                    <span class="opacity-30">•</span>
+                    <a href="{{ route('privacidad.index') }}" class="hover:text-white transition">Política de Privacidad</a>
+                    <span class="opacity-30">•</span>
+                    <a href="#contacto" class="hover:text-white transition">PQRS</a>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script>
         const siteHeader = document.getElementById('site-header');
-
         function actualizarHeaderSegunScroll() {
             if (window.scrollY > 40) {
                 siteHeader.classList.add('scrolled');
@@ -630,7 +770,6 @@
                 siteHeader.classList.remove('scrolled');
             }
         }
-
         window.addEventListener('scroll', actualizarHeaderSegunScroll);
         document.addEventListener('DOMContentLoaded', actualizarHeaderSegunScroll);
 
@@ -639,27 +778,16 @@
         const botonCerrarDrawer = document.getElementById('boton-cerrar-drawer');
         const drawerMovil = document.getElementById('drawer-movil');
         const overlayMovil = document.getElementById('overlay-movil');
-
-        function abrirMenuMovil() {
-            drawerMovil.classList.add('abierto');
-            overlayMovil.classList.add('abierto');
-        }
-
-        function cerrarMenuMovil() {
-            drawerMovil.classList.remove('abierto');
-            overlayMovil.classList.remove('abierto');
-        }
-
+        function abrirMenuMovil() { drawerMovil.classList.add('abierto'); overlayMovil.classList.add('abierto'); }
+        function cerrarMenuMovil() { drawerMovil.classList.remove('abierto'); overlayMovil.classList.remove('abierto'); }
         botonHamburguesa.addEventListener('click', abrirMenuMovil);
         botonCerrarDrawer.addEventListener('click', cerrarMenuMovil);
         overlayMovil.addEventListener('click', cerrarMenuMovil);
-
         drawerMovil.querySelectorAll('a').forEach(function (enlace) {
             enlace.addEventListener('click', cerrarMenuMovil);
         });
 
-        // Animacion "reveal": agrega la clase "visible" cuando el
-        // elemento entra en pantalla al hacer scroll.
+        // Animacion "reveal"
         const observadorReveal = new IntersectionObserver(function (entradas) {
             entradas.forEach(function (entrada) {
                 if (entrada.isIntersecting) {
@@ -668,30 +796,22 @@
                 }
             });
         }, { threshold: 0.15 });
-
         document.querySelectorAll('.reveal').forEach(function (el) {
             observadorReveal.observe(el);
         });
 
-        // Contador animado de la barra de estadisticas: sube de 0
-        // al numero real solo cuando el usuario llega a esa seccion.
+        // Contador animado
         function animarContador(elemento) {
             const meta = parseInt(elemento.dataset.target, 10);
             const duracion = 1200;
             const inicio = performance.now();
-
             function paso(ahora) {
                 const progreso = Math.min((ahora - inicio) / duracion, 1);
                 elemento.textContent = Math.floor(progreso * meta);
-                if (progreso < 1) {
-                    requestAnimationFrame(paso);
-                } else {
-                    elemento.textContent = meta;
-                }
+                if (progreso < 1) { requestAnimationFrame(paso); } else { elemento.textContent = meta; }
             }
             requestAnimationFrame(paso);
         }
-
         const statsBar = document.getElementById('stats-bar');
         if (statsBar) {
             const observadorStats = new IntersectionObserver(function (entradas) {
@@ -704,7 +824,46 @@
             }, { threshold: 0.3 });
             observadorStats.observe(statsBar);
         }
+
+        // Glow que sigue el cursor dentro del hero
+        const heroSection = document.getElementById('contenido-principal');
+        const glow = document.getElementById('glow-cursor');
+        if (heroSection && glow) {
+            heroSection.addEventListener('mousemove', function (e) {
+                const rect = heroSection.getBoundingClientRect();
+                glow.style.left = (e.clientX - rect.left) + 'px';
+                glow.style.top = (e.clientY - rect.top) + 'px';
+            });
+        }
+
+        // Efecto tilt 3D en las tarjetas del hero
+        document.querySelectorAll('.tarjeta-hero').forEach(function (tarjeta) {
+            tarjeta.addEventListener('mousemove', function (e) {
+                const rect = tarjeta.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centroX = rect.width / 2;
+                const centroY = rect.height / 2;
+                const rotX = ((y - centroY) / centroY) * -6;
+                const rotY = ((x - centroX) / centroX) * 6;
+                tarjeta.style.transform = 'perspective(600px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateY(-2px)';
+            });
+            tarjeta.addEventListener('mouseleave', function () {
+                tarjeta.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) translateY(0)';
+            });
+        });
     </script>
+
+    <!-- Boton flotante de WhatsApp -->
+    <a href="https://wa.me/573017880161?text=Hola%2C%20quiero%20agendar%20una%20cita"
+       target="_blank"
+       rel="noopener"
+       aria-label="Escribir por WhatsApp"
+       class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-lg transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2a10 10 0 00-8.6 15.1L2 22l5.1-1.3A10 10 0 1012 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .5 0 .7.5.3.7.9 2.2 1 2.4.1.2.1.4 0 .6-.1.2-.2.4-.4.6-.2.2-.4.5-.5.6-.2.2-.4.4-.2.8.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.6 2.9 1.8.4.2.6.1.8-.1.2-.2.9-1 1.1-1.4.2-.4.5-.3.8-.2.3.1 2 .9 2.3 1.1.3.2.5.3.6.4.1.2.1.9-.1 1.7z"/>
+        </svg>
+    </a>
 
 </body>
 </html>

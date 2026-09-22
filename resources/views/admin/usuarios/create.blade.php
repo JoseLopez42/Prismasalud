@@ -25,20 +25,8 @@
         border-radius: 50%;
         animation: girar .6s linear infinite;
     }
-    @keyframes girar { to { transform: rotate(360deg); } }
-
-    /* Bloque de EPS: aparece/desaparece suavemente según el rol elegido */
-    #bloque-eps {
-        overflow: hidden;
-        max-height: 0;
-        opacity: 0;
-        transition: max-height .25s ease, opacity .25s ease;
-    }
-    #bloque-eps.visible {
-        max-height: 200px;
-        opacity: 1;
-    }
-</style>
+@keyframes girar { to { transform: rotate(360deg); } }
+    </style>
 @endpush
 
 @section('contenido')
@@ -131,19 +119,6 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-
-                    {{-- NIT de EPS: solo se muestra y se exige si el rol es Paciente.
-                         El "2" es el id de Paciente según el seeder. --}}
-                    <div id="bloque-eps">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">NIT de la EPS</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-teal-50 flex items-center justify-center text-sm">🗂️</span>
-                            <input type="text" name="nit_eps" id="campo-nit-eps" value="{{ old('nit_eps') }}"
-                                   class="campo-form w-full border border-gray-300 rounded-lg pl-11 pr-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                                   placeholder="Ej: 900123456">
-                        </div>
-                        <p class="text-xs text-gray-400 mt-1">Obligatorio para pacientes.</p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -243,33 +218,12 @@
     </div>
 
     <script>
-        // ID de Paciente según el seeder de tipos_usuario
-        const ID_PACIENTE = '2';
-
         // Cédula, edad y teléfono: solo dígitos
         ['campo-cedula', 'campo-edad', 'campo-telefono'].forEach(function (idCampo) {
             document.getElementById(idCampo).addEventListener('input', function () {
                 this.value = this.value.replace(/\D/g, '');
             });
         });
-
-        // Muestra/oculta el bloque de EPS según el rol elegido, y hace
-        // que el campo NIT sea obligatorio solo cuando está visible.
-        const campoRol = document.getElementById('campo-rol');
-        const bloqueEps = document.getElementById('bloque-eps');
-        const campoNitEps = document.getElementById('campo-nit-eps');
-
-        function actualizarBloqueEps() {
-            const esPaciente = campoRol.value === ID_PACIENTE;
-            bloqueEps.classList.toggle('visible', esPaciente);
-            campoNitEps.required = esPaciente;
-            if (!esPaciente) {
-                campoNitEps.value = ''; // limpia el NIT si cambian de rol
-            }
-        }
-
-        campoRol.addEventListener('change', actualizarBloqueEps);
-        actualizarBloqueEps(); // por si vuelve con "old()" tras un error de validación
 
         // Validación visual + spinner al enviar
         const formUsuario = document.getElementById('form-usuario');

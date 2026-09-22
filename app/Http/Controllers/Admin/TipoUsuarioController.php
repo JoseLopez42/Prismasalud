@@ -57,19 +57,15 @@ class TipoUsuarioController extends Controller
         return redirect()->route('roles.index')->with('exito', 'Rol actualizado correctamente.');
     }
 
-    // Elimina el rol, siempre que no tenga usuarios asociados
-    // (si se dejara borrar, esos usuarios quedarían sin rol válido).
-    public function destroy($id)
+    // Activa o desactiva el rol (en vez de eliminarlo)
+    public function cambiarEstado($id)
     {
-        $rol = TipoUsuario::withCount('usuarios')->findOrFail($id);
+        $rol = TipoUsuario::findOrFail($id);
+        $rol->activo = !$rol->activo;
+        $rol->save();
 
-        if ($rol->usuarios_count > 0) {
-            return redirect()->route('roles.index')
-                ->with('error', 'No se puede eliminar: hay usuarios con este rol.');
-        }
+        $mensaje = $rol->activo ? 'Rol activado correctamente.' : 'Rol desactivado correctamente.';
 
-        $rol->delete();
-
-        return redirect()->route('roles.index')->with('exito', 'Rol eliminado correctamente.');
+        return redirect()->route('roles.index')->with('exito', $mensaje);
     }
 }

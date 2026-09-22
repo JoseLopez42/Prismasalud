@@ -9,7 +9,7 @@ class Sede extends Model
     protected $table = 'sedes';
     protected $primaryKey = 'id_sede';
 
-    protected $fillable = ['nombre_sede', 'direccion', 'telefono', 'id_ciudad'];
+    protected $fillable = ['nombre_sede', 'direccion', 'telefono', 'id_ciudad', 'activo'];
 
     // Una sede pertenece a una ciudad
     public function ciudad()

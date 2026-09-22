@@ -591,8 +591,8 @@
 
     <!-- Footer -->
     <footer class="text-white/80" style="background-color: #1A5C3A;">
-        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left">
-            <div class="col-span-2 md:col-span-1 flex flex-col items-center md:items-start">
+        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left">
+            <div class="col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
                 <p class="text-white font-bold text-lg mb-2">
                     Prisma<span class="text-teal-300">Salud</span> IPS
                 </p>
@@ -623,13 +623,36 @@
                 </ul>
             </div>
 
-            <div class="col-span-2 md:col-span-1">
+            <div>
+                <p class="text-white font-semibold mb-3">Marco legal</p>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="{{ route('terminos.index') }}" class="hover:text-white">Términos y Condiciones</a></li>
+                    <li><a href="{{ route('privacidad.index') }}" class="hover:text-white">Política de Privacidad</a></li>
+                    <li><a href="{{ url('/#contacto') }}" class="hover:text-white">PQRS</a></li>
+                    <li><a href="{{ url('/#contacto') }}" class="hover:text-white">Derechos del paciente</a></li>
+                </ul>
+            </div>
+
+            <div class="col-span-2 lg:col-span-1">
                 <p class="text-white font-semibold mb-3">Contacto</p>
                 <ul class="space-y-2 text-sm">
                     <li>Calle 42 #5-28, Ibagué</li>
                     <li>(601) 123-4667</li>
                     <li>info@prismasaludips.com</li>
                 </ul>
+            </div>
+        </div>
+
+        <div class="border-t border-white/10">
+            <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col-reverse md:flex-row items-center justify-between gap-3 text-xs text-white/60">
+                <p>© {{ date('Y') }} PrismaSalud IPS · NIT 900.000.000-0 · Todos los derechos reservados</p>
+                <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                    <a href="{{ route('terminos.index') }}" class="hover:text-white transition">Términos y Condiciones</a>
+                    <span class="opacity-30">•</span>
+                    <a href="{{ route('privacidad.index') }}" class="hover:text-white transition">Política de Privacidad</a>
+                    <span class="opacity-30">•</span>
+                    <a href="{{ url('/#contacto') }}" class="hover:text-white transition">PQRS</a>
+                </div>
             </div>
         </div>
     </footer>

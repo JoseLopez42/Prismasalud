@@ -57,10 +57,15 @@ class TipoDocumentoController extends Controller
         return redirect()->route('tipos_documento.index')->with('exito', 'Tipo de documento actualizado correctamente.');
     }
 
-    // Elimina el tipo de documento
-    public function destroy($id)
+    // Activa o desactiva el tipo de documento (en vez de eliminarlo)
+    public function cambiarEstado($id)
     {
-        TipoDocumento::findOrFail($id)->delete();
-        return redirect()->route('tipos_documento.index')->with('exito', 'Tipo de documento eliminado correctamente.');
+        $tipoDocumento = TipoDocumento::findOrFail($id);
+        $tipoDocumento->activo = !$tipoDocumento->activo;
+        $tipoDocumento->save();
+
+        $mensaje = $tipoDocumento->activo ? 'Tipo de documento activado correctamente.' : 'Tipo de documento desactivado correctamente.';
+
+        return redirect()->route('tipos_documento.index')->with('exito', $mensaje);
     }
 }

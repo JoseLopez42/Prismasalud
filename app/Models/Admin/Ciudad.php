@@ -9,7 +9,7 @@ class Ciudad extends Model
     protected $table = 'ciudades';
     protected $primaryKey = 'id_ciudad';
 
-    protected $fillable = ['ciudad', 'id_departamento'];
+    protected $fillable = ['ciudad', 'id_departamento', 'activo'];
 
     // Una ciudad pertenece a un departamento
     public function departamento()

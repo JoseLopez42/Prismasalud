@@ -66,10 +66,15 @@ class SedeController extends Controller
         return redirect()->route('sedes.index')->with('exito', 'Sede actualizada correctamente.');
     }
 
-    // Elimina la sede
-    public function destroy($id)
+    // Activa o desactiva la sede (en vez de eliminarla)
+    public function cambiarEstado($id)
     {
-        Sede::findOrFail($id)->delete();
-        return redirect()->route('sedes.index')->with('exito', 'Sede eliminada correctamente.');
+        $sede = Sede::findOrFail($id);
+        $sede->activo = !$sede->activo;
+        $sede->save();
+
+        $mensaje = $sede->activo ? 'Sede activada correctamente.' : 'Sede desactivada correctamente.';
+
+        return redirect()->route('sedes.index')->with('exito', $mensaje);
     }
 }
