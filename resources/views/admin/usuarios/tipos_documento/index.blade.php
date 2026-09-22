@@ -3,49 +3,34 @@
 @section('titulo', 'Tipos de documento')
 @section('encabezado', 'Usuarios y Roles · Tipos de documento')
 
-@push('estilos')
-<style>
-    #modal-confirmar {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity .2s ease, visibility .2s ease;
-    }
-    #modal-confirmar.abierto {
-        opacity: 1;
-        visibility: visible;
-    }
-    #modal-confirmar .tarjeta-modal {
-        transform: scale(.95);
-        transition: transform .2s ease;
-    }
-    #modal-confirmar.abierto .tarjeta-modal {
-        transform: scale(1);
-    }
-</style>
-@endpush
-
 @section('contenido')
 
     <a href="{{ route('usuarios.index') }}" class="text-sm text-teal-600 hover:underline">
         ← Volver a usuarios
     </a>
 
-    <div class="flex items-center justify-between mt-2 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-2 mb-5">
         <div>
-            <h2 class="text-xl font-bold text-gray-900">Tipos de documento</h2>
+            <h2 id="titulo-listado" class="text-xl font-bold text-gray-900">Tipos de documento</h2>
             <p class="text-sm text-gray-500">Se usan al registrar un usuario</p>
         </div>
-        <a href="{{ route('tipos_documento.create') }}"
-           class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700">
-            + Nuevo tipo
-        </a>
+        <div class="flex items-center gap-2">
+            <button type="button" id="boton-exportar-pdf" onclick="exportarPdf()"
+                    data-titulo-pdf="Listado de Tipos de Documento" data-nombre-archivo="tipos-documento"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-md hover:bg-gray-50 hover:shadow-sm transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descargar PDF
+            </button>
+            <a href="{{ route('tipos_documento.create') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 hover:shadow-md transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Nuevo tipo
+            </a>
+        </div>
     </div>
 
     @if (session('exito'))
@@ -54,9 +39,23 @@
         </div>
     @endif
 
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden max-w-xl">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-gray-100 text-gray-600">
+    {{-- Buscador rápido --}}
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div class="relative sm:w-80">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </span>
+            <input type="text" id="buscador-listado" placeholder="Buscar tipo de documento..."
+                   class="w-full border border-gray-200 rounded-lg pl-10 pr-3 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+        </div>
+        <span id="contador-resultados" class="text-xs text-gray-400 font-medium"></span>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto max-w-2xl">
+        <table id="tabla-listado" class="w-full text-sm text-left">
+            <thead class="bg-gray-50 text-gray-600">
                 <tr>
                     <th class="px-4 py-3">ID</th>
                     <th class="px-4 py-3">Tipo de documento</th>
@@ -64,48 +63,69 @@
                     <th class="px-4 py-3 text-right">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
                 @forelse ($tiposDocumento as $tipo)
-                    <tr class="border-t border-gray-100 hover:bg-gray-50 {{ !$tipo->activo ? 'bg-gray-50/60' : '' }}">
+                    <tr class="fila-dato hover:bg-teal-50/40 transition {{ !$tipo->activo ? 'bg-gray-50/60' : '' }}">
                         <td class="px-4 py-3 text-gray-500">#{{ $tipo->id_tipo_documento }}</td>
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $tipo->tipo_documento }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-gray-900">{{ $tipo->tipo_documento }}</span>
+                            </div>
+                        </td>
                         <td class="px-4 py-3">
                             @if ($tipo->activo)
-                                <span class="text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">Activo</span>
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Activo
+                                </span>
                             @else
-                                <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">Inactivo</span>
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactivo
+                                </span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-right space-x-3">
-                            <a href="{{ route('tipos_documento.edit', $tipo->id_tipo_documento) }}"
-                               class="text-teal-600 hover:underline font-medium">Editar</a>
-
-                            <form id="form-estado-tipo-doc-{{ $tipo->id_tipo_documento }}"
-                                  action="{{ route('tipos_documento.estado', $tipo->id_tipo_documento) }}"
-                                  method="POST" class="inline">
-                                @csrf
-                                @method('PATCH')
-                            </form>
-
-                            @if ($tipo->activo)
-                                <button type="button"
-                                        onclick="abrirModalConfirmacion('form-estado-tipo-doc-{{ $tipo->id_tipo_documento }}', '¿Desactivar este tipo de documento?', 'Ya no se podrá seleccionar al registrar un usuario.', 'Desactivar')"
-                                        class="text-red-600 hover:underline font-medium">
-                                    Desactivar
-                                </button>
-                            @else
-                                <button type="button"
-                                        onclick="abrirModalConfirmacion('form-estado-tipo-doc-{{ $tipo->id_tipo_documento }}', '¿Activar este tipo de documento?', 'Volverá a estar disponible al registrar un usuario.', 'Activar')"
-                                        class="text-green-600 hover:underline font-medium">
-                                    Activar
-                                </button>
-                            @endif
+                        <td class="px-4 py-3">
+                            @include('admin.partials.acciones_fila', [
+                                'rutaEditar' => route('tipos_documento.edit', $tipo->id_tipo_documento),
+                                'formId' => 'form-estado-tipo-doc-' . $tipo->id_tipo_documento,
+                                'rutaEstado' => route('tipos_documento.estado', $tipo->id_tipo_documento),
+                                'activo' => $tipo->activo,
+                                'tituloDesactivar' => '¿Desactivar este tipo de documento?',
+                                'textoDesactivar' => 'Ya no se podrá seleccionar al registrar un usuario.',
+                                'tituloActivar' => '¿Activar este tipo de documento?',
+                                'textoActivar' => 'Volverá a estar disponible al registrar un usuario.',
+                            ])
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-10 text-center text-gray-400">
-                            Todavía no hay tipos de documento registrados.
+                    <tr class="fila-vacio">
+                        <td colspan="4" class="px-4 py-16 text-center">
+                            <div class="inline-flex flex-col items-center">
+                                <div class="w-20 h-20 rounded-full bg-sky-50 flex items-center justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </div>
+                                <p class="text-base font-semibold text-gray-700">Todavía no hay tipos de documento</p>
+                                <p class="text-sm text-gray-400 mt-1 mb-5">Registra el primer tipo de documento para poder crear usuarios.</p>
+                                <a href="{{ route('tipos_documento.create') }}"
+                                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Crear tipo
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="fila-vacio-busqueda" class="fila-vacio oculto">
+                        <td colspan="4" class="px-4 py-12 text-center">
+                            <p class="text-sm font-semibold text-gray-500">Sin resultados</p>
+                            <p class="text-xs text-gray-400 mt-1">No se encontraron tipos de documento con ese criterio de búsqueda.</p>
                         </td>
                     </tr>
                 @endforelse
@@ -113,67 +133,12 @@
         </table>
     </div>
 
-    <div id="modal-confirmar">
-        <div class="tarjeta-modal bg-white rounded-2xl shadow-xl max-w-sm w-full mx-4 p-6 text-center">
-            <div id="modal-icono" class="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl mb-4 bg-red-50">
-                ⚠️
-            </div>
-            <h3 id="modal-titulo" class="text-lg font-bold text-gray-900 mb-1">¿Estás seguro?</h3>
-            <p id="modal-texto" class="text-sm text-gray-500 mb-6">Esta acción se puede revertir.</p>
-
-            <div class="flex gap-3">
-                <button type="button" onclick="cerrarModalConfirmacion()"
-                        class="flex-1 border border-gray-300 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition">
-                    Cancelar
-                </button>
-                <button type="button" id="modal-boton-confirmar"
-                        class="flex-1 bg-red-600 text-white font-semibold py-2.5 rounded-lg hover:bg-red-700 transition">
-                    Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let formularioPendiente = null;
-
-        function abrirModalConfirmacion(idFormulario, titulo, texto, textoBoton) {
-            formularioPendiente = document.getElementById(idFormulario);
-
-            document.getElementById('modal-titulo').textContent = titulo;
-            document.getElementById('modal-texto').textContent = texto;
-
-            const botonConfirmar = document.getElementById('modal-boton-confirmar');
-            botonConfirmar.textContent = textoBoton;
-
-            const esActivar = textoBoton === 'Activar';
-            document.getElementById('modal-icono').className =
-                'w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl mb-4 ' +
-                (esActivar ? 'bg-green-50' : 'bg-red-50');
-            document.getElementById('modal-icono').textContent = esActivar ? '✅' : '⚠️';
-            botonConfirmar.className =
-                'flex-1 text-white font-semibold py-2.5 rounded-lg transition ' +
-                (esActivar ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700');
-
-            document.getElementById('modal-confirmar').classList.add('abierto');
-        }
-
-        function cerrarModalConfirmacion() {
-            document.getElementById('modal-confirmar').classList.remove('abierto');
-            formularioPendiente = null;
-        }
-
-        document.getElementById('modal-boton-confirmar').addEventListener('click', function () {
-            if (formularioPendiente) {
-                formularioPendiente.submit();
-            }
-        });
-
-        document.getElementById('modal-confirmar').addEventListener('click', function (evento) {
-            if (evento.target.id === 'modal-confirmar') {
-                cerrarModalConfirmacion();
-            }
-        });
-    </script>
+    @include('admin.partials.modal_confirmacion')
 
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    @include('admin.partials.script_listado')
+@endpush

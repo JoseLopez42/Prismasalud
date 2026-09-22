@@ -3,45 +3,30 @@
 @section('titulo', 'Sedes')
 @section('encabezado', 'Ubicaciones · Sedes')
 
-@push('estilos')
-<style>
-    #modal-confirmar {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity .2s ease, visibility .2s ease;
-    }
-    #modal-confirmar.abierto {
-        opacity: 1;
-        visibility: visible;
-    }
-    #modal-confirmar .tarjeta-modal {
-        transform: scale(.95);
-        transition: transform .2s ease;
-    }
-    #modal-confirmar.abierto .tarjeta-modal {
-        transform: scale(1);
-    }
-</style>
-@endpush
-
 @section('contenido')
 
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
         <div>
-            <h2 class="text-xl font-bold text-gray-900">Sedes</h2>
+            <h2 id="titulo-listado" class="text-xl font-bold text-gray-900">Sedes</h2>
             <p class="text-sm text-gray-500">Sedes físicas de PrismaSalud IPS, agrupadas por ciudad</p>
         </div>
-        <a href="{{ route('sedes.create') }}"
-           class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700">
-            + Nueva sede
-        </a>
+        <div class="flex items-center gap-2">
+            <button type="button" id="boton-exportar-pdf" onclick="exportarPdf()"
+                    data-titulo-pdf="Listado de Sedes" data-nombre-archivo="sedes"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-md hover:bg-gray-50 hover:shadow-sm transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descargar PDF
+            </button>
+            <a href="{{ route('sedes.create') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 hover:shadow-md transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Nueva sede
+            </a>
+        </div>
     </div>
 
     @if (session('exito'))
@@ -50,9 +35,23 @@
         </div>
     @endif
 
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-gray-100 text-gray-600">
+    {{-- Buscador rápido --}}
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div class="relative sm:w-80">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </span>
+            <input type="text" id="buscador-listado" placeholder="Buscar por nombre, dirección, teléfono o ciudad..."
+                   class="w-full border border-gray-200 rounded-lg pl-10 pr-3 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+        </div>
+        <span id="contador-resultados" class="text-xs text-gray-400 font-medium"></span>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
+        <table id="tabla-listado" class="w-full text-sm text-left">
+            <thead class="bg-gray-50 text-gray-600">
                 <tr>
                     <th class="px-4 py-3">ID</th>
                     <th class="px-4 py-3">Nombre</th>
@@ -63,51 +62,76 @@
                     <th class="px-4 py-3 text-right">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
                 @forelse ($sedes as $sede)
-                    <tr class="border-t border-gray-100 hover:bg-gray-50 {{ !$sede->activo ? 'bg-gray-50/60' : '' }}">
+                    <tr class="fila-dato hover:bg-teal-50/40 transition {{ !$sede->activo ? 'bg-gray-50/60' : '' }}">
                         <td class="px-4 py-3 text-gray-500">#{{ $sede->id_sede }}</td>
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ $sede->nombre_sede }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <span class="font-semibold text-gray-900">{{ $sede->nombre_sede }}</span>
+                            </div>
+                        </td>
                         <td class="px-4 py-3 text-gray-600">{{ $sede->direccion }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $sede->telefono }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $sede->ciudad->ciudad ?? '—' }}</td>
+                        <td class="px-4 py-3">
+                            <span class="text-xs font-semibold text-gray-600 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
+                                {{ $sede->ciudad->ciudad ?? '—' }}
+                            </span>
+                        </td>
                         <td class="px-4 py-3">
                             @if ($sede->activo)
-                                <span class="text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">Activo</span>
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Activo
+                                </span>
                             @else
-                                <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">Inactivo</span>
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactivo
+                                </span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-right space-x-3">
-                            <a href="{{ route('sedes.edit', $sede->id_sede) }}"
-                               class="text-teal-600 hover:underline font-medium">Editar</a>
-
-                            <form id="form-estado-sede-{{ $sede->id_sede }}"
-                                  action="{{ route('sedes.estado', $sede->id_sede) }}"
-                                  method="POST" class="inline">
-                                @csrf
-                                @method('PATCH')
-                            </form>
-
-                            @if ($sede->activo)
-                                <button type="button"
-                                        onclick="abrirModalConfirmacion('form-estado-sede-{{ $sede->id_sede }}', '¿Desactivar esta sede?', 'Ya no aparecerá disponible para nuevas agendaciones.', 'Desactivar')"
-                                        class="text-red-600 hover:underline font-medium">
-                                    Desactivar
-                                </button>
-                            @else
-                                <button type="button"
-                                        onclick="abrirModalConfirmacion('form-estado-sede-{{ $sede->id_sede }}', '¿Activar esta sede?', 'Volverá a estar disponible para nuevas agendaciones.', 'Activar')"
-                                        class="text-green-600 hover:underline font-medium">
-                                    Activar
-                                </button>
-                            @endif
+                        <td class="px-4 py-3">
+                            @include('admin.partials.acciones_fila', [
+                                'rutaEditar' => route('sedes.edit', $sede->id_sede),
+                                'formId' => 'form-estado-sede-' . $sede->id_sede,
+                                'rutaEstado' => route('sedes.estado', $sede->id_sede),
+                                'activo' => $sede->activo,
+                                'tituloDesactivar' => '¿Desactivar esta sede?',
+                                'textoDesactivar' => 'Ya no aparecerá disponible para nuevas agendaciones.',
+                                'tituloActivar' => '¿Activar esta sede?',
+                                'textoActivar' => 'Volverá a estar disponible para nuevas agendaciones.',
+                            ])
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="7" class="px-4 py-10 text-center text-gray-400">
-                            Todavía no hay sedes registradas.
+                    <tr class="fila-vacio">
+                        <td colspan="7" class="px-4 py-16 text-center">
+                            <div class="inline-flex flex-col items-center">
+                                <div class="w-20 h-20 rounded-full bg-teal-50 flex items-center justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <p class="text-base font-semibold text-gray-700">Todavía no hay sedes</p>
+                                <p class="text-sm text-gray-400 mt-1 mb-5">Crea la primera sede para comenzar a agendar servicios.</p>
+                                <a href="{{ route('sedes.create') }}"
+                                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Crear sede
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="fila-vacio-busqueda" class="fila-vacio oculto">
+                        <td colspan="7" class="px-4 py-12 text-center">
+                            <p class="text-sm font-semibold text-gray-500">Sin resultados</p>
+                            <p class="text-xs text-gray-400 mt-1">No se encontraron sedes con ese criterio de búsqueda.</p>
                         </td>
                     </tr>
                 @endforelse
@@ -115,67 +139,12 @@
         </table>
     </div>
 
-    <div id="modal-confirmar">
-        <div class="tarjeta-modal bg-white rounded-2xl shadow-xl max-w-sm w-full mx-4 p-6 text-center">
-            <div id="modal-icono" class="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl mb-4 bg-red-50">
-                ⚠️
-            </div>
-            <h3 id="modal-titulo" class="text-lg font-bold text-gray-900 mb-1">¿Estás seguro?</h3>
-            <p id="modal-texto" class="text-sm text-gray-500 mb-6">Esta acción se puede revertir.</p>
-
-            <div class="flex gap-3">
-                <button type="button" onclick="cerrarModalConfirmacion()"
-                        class="flex-1 border border-gray-300 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition">
-                    Cancelar
-                </button>
-                <button type="button" id="modal-boton-confirmar"
-                        class="flex-1 bg-red-600 text-white font-semibold py-2.5 rounded-lg hover:bg-red-700 transition">
-                    Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let formularioPendiente = null;
-
-        function abrirModalConfirmacion(idFormulario, titulo, texto, textoBoton) {
-            formularioPendiente = document.getElementById(idFormulario);
-
-            document.getElementById('modal-titulo').textContent = titulo;
-            document.getElementById('modal-texto').textContent = texto;
-
-            const botonConfirmar = document.getElementById('modal-boton-confirmar');
-            botonConfirmar.textContent = textoBoton;
-
-            const esActivar = textoBoton === 'Activar';
-            document.getElementById('modal-icono').className =
-                'w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl mb-4 ' +
-                (esActivar ? 'bg-green-50' : 'bg-red-50');
-            document.getElementById('modal-icono').textContent = esActivar ? '✅' : '⚠️';
-            botonConfirmar.className =
-                'flex-1 text-white font-semibold py-2.5 rounded-lg transition ' +
-                (esActivar ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700');
-
-            document.getElementById('modal-confirmar').classList.add('abierto');
-        }
-
-        function cerrarModalConfirmacion() {
-            document.getElementById('modal-confirmar').classList.remove('abierto');
-            formularioPendiente = null;
-        }
-
-        document.getElementById('modal-boton-confirmar').addEventListener('click', function () {
-            if (formularioPendiente) {
-                formularioPendiente.submit();
-            }
-        });
-
-        document.getElementById('modal-confirmar').addEventListener('click', function (evento) {
-            if (evento.target.id === 'modal-confirmar') {
-                cerrarModalConfirmacion();
-            }
-        });
-    </script>
+    @include('admin.partials.modal_confirmacion')
 
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    @include('admin.partials.script_listado')
+@endpush

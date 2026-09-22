@@ -19,7 +19,7 @@
             PrismaSalud IPS
         </p>
 
-        <h2 style="color: #111827; margin-top: 20px;">Hola, {{ $nombreUsuario }} 👋</h2>
+        <h2 style="color: #111827; margin-top: 20px;">Hola, {{ $nombreUsuario }}</h2>
 
         <p style="color: #4b5563; font-size: 14px;">
             Recibimos una solicitud para restablecer tu contraseña.

@@ -56,10 +56,15 @@ class DepartamentoController extends Controller
         return redirect()->route('departamentos.index')->with('exito', 'Departamento actualizado correctamente.');
     }
 
-    // Elimina el departamento
-    public function destroy($id)
+    // Activa o desactiva el departamento (en vez de eliminarlo)
+    public function cambiarEstado($id)
     {
-        Departamento::findOrFail($id)->delete();
-        return redirect()->route('departamentos.index')->with('exito', 'Departamento eliminado correctamente.');
+        $departamento = Departamento::findOrFail($id);
+        $departamento->activo = !$departamento->activo;
+        $departamento->save();
+
+        $mensaje = $departamento->activo ? 'Departamento activado correctamente.' : 'Departamento desactivado correctamente.';
+
+        return redirect()->route('departamentos.index')->with('exito', $mensaje);
     }
 }

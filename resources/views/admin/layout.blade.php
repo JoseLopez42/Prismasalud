@@ -13,6 +13,19 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
 
+        /* Fondo suave y con un toque de color: la zona de contenido se
+           diferencia de las tarjetas blancas sin llegar a verse plana. */
+        .contenido-admin {
+            background: linear-gradient(180deg, #f2fbf7 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+
+        /* Las tarjetas de listado usan overflow-x-auto (para que el menú de
+           acciones no se corte al desplegarse), así que redondeamos la
+           cabecera de la tabla a mano para conservar la esquina superior. */
+        #tabla-listado thead th:first-child { border-top-left-radius: 1rem; }
+        #tabla-listado thead th:last-child { border-top-right-radius: 1rem; }
+
         .sidebar-admin { background-color: #1A5C3A; }
         .sidebar-admin .nav-item { color: rgba(255, 255, 255, 0.75); transition: color .15s ease, background-color .15s ease; }
         .sidebar-admin .nav-item:hover { background-color: rgba(255, 255, 255, 0.08); color: #60a5fa; }
@@ -54,6 +67,37 @@
         }
         .flecha-submenu-movil.rotada {
             transform: rotate(90deg);
+        }
+
+        /* Modal de confirmación propio (activar/desactivar) */
+        #modal-confirmar {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .2s ease, visibility .2s ease;
+        }
+        #modal-confirmar.abierto {
+            opacity: 1;
+            visibility: visible;
+        }
+        #modal-confirmar .tarjeta-modal {
+            transform: scale(.95) translateY(8px);
+            transition: transform .2s ease;
+        }
+        #modal-confirmar.abierto .tarjeta-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Fila oculta por el buscador rápido */
+        tr.oculto {
+            display: none;
         }
     </style>
     @stack('estilos')
@@ -219,7 +263,7 @@
                 </div>
             </header>
 
-            <main class="p-4 md:p-8">
+            <main class="contenido-admin p-4 md:p-8">
                 @yield('contenido')
             </main>
         </div>
@@ -273,6 +317,8 @@
             boton.addEventListener('click', alternarSubmenu);
         });
     </script>
+
+    @stack('scripts')
 
 </body>
 </html>

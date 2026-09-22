@@ -504,16 +504,16 @@
         </div>
         @php
             $instalaciones = [
-                ['icono' => '🏥', 'texto' => 'Recepción y sala de espera'],
-                ['icono' => '🩺', 'texto' => 'Consultorios médicos'],
-                ['icono' => '🧪', 'texto' => 'Laboratorio clínico'],
-                ['icono' => '💊', 'texto' => 'Farmacia interna'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>', 'texto' => 'Recepción y sala de espera'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>', 'texto' => 'Consultorios médicos'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>', 'texto' => 'Laboratorio clínico'],
+                ['icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 9h13a2.5 2.5 0 010 6h-13a2.5 2.5 0 010-6z"/><path d="M12 9v6"/></svg>', 'texto' => 'Farmacia interna'],
             ];
         @endphp
         <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
             @foreach ($instalaciones as $foto)
                 <div class="reveal aspect-[4/3] rounded-xl flex flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, #1A5C3A, #0d9488);">
-                    <span class="text-2xl mb-1">{{ $foto['icono'] }}</span>
+                    <span class="mb-1 flex justify-center">{!! $foto['icono'] !!}</span>
                     <span class="text-xs font-medium px-3 text-center">{{ $foto['texto'] }}</span>
                 </div>
             @endforeach

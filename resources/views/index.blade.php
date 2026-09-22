@@ -547,8 +547,10 @@
             <div class="grid md:grid-cols-3 gap-6 text-left">
                 @foreach ($testimonios as $t)
                     <div class="reveal bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
-                        <div class="text-yellow-400 mb-3">
-                            {{ str_repeat('★', $t['estrellas']) }}{{ str_repeat('☆', 5 - $t['estrellas']) }}
+                        <div class="mb-3 flex gap-0.5">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $i <= $t['estrellas'] ? 'text-amber-400 fill-amber-400' : 'text-gray-300 fill-gray-300' }}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                            @endfor
                         </div>
                         <p class="text-sm text-gray-600 italic mb-4">
                             "{{ $t['texto'] }}"
@@ -628,17 +630,17 @@
 
         @php
             $articulos = [
-                ['color' => 'icono-c1', 'icono' => '🫀', 'fecha' => '10 sep 2026', 'titulo' => '5 hábitos para un corazón sano', 'resumen' => 'Pequeños cambios diarios que reducen el riesgo cardiovascular a largo plazo.'],
-                ['color' => 'icono-c2', 'icono' => '🧒', 'fecha' => '2 sep 2026', 'titulo' => 'Calendario de vacunación infantil', 'resumen' => 'Qué vacunas necesita tu hijo y en qué edades, según el esquema nacional.'],
-                ['color' => 'icono-c3', 'icono' => '🧠', 'fecha' => '25 ago 2026', 'titulo' => 'Manejo del estrés en el trabajo', 'resumen' => 'Estrategias simples respaldadas por psicología para el día a día.'],
+                ['color' => 'icono-c1', 'icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>', 'fecha' => '10 sep 2026', 'titulo' => '5 hábitos para un corazón sano', 'resumen' => 'Pequeños cambios diarios que reducen el riesgo cardiovascular a largo plazo.'],
+                ['color' => 'icono-c2', 'icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>', 'fecha' => '2 sep 2026', 'titulo' => 'Calendario de vacunación infantil', 'resumen' => 'Qué vacunas necesita tu hijo y en qué edades, según el esquema nacional.'],
+                ['color' => 'icono-c3', 'icono' => '<svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>', 'fecha' => '25 ago 2026', 'titulo' => 'Manejo del estrés en el trabajo', 'resumen' => 'Estrategias simples respaldadas por psicología para el día a día.'],
             ];
         @endphp
 
         <div class="grid md:grid-cols-3 gap-6">
             @foreach ($articulos as $art)
                 <a href="#" class="reveal block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition">
-                    <div class="{{ $art['color'] }} h-36 flex items-center justify-center text-4xl">
-                        {{ $art['icono'] }}
+                    <div class="{{ $art['color'] }} h-36 flex items-center justify-center">
+                        {!! $art['icono'] !!}
                     </div>
                     <div class="p-5">
                         <p class="text-xs text-gray-400 mb-2">{{ $art['fecha'] }}</p>

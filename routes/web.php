@@ -63,7 +63,7 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
         Route::post('/departamentos', [DepartamentoController::class, 'store'])->name('departamentos.store');
         Route::get('/departamentos/{id}/editar', [DepartamentoController::class, 'edit'])->name('departamentos.edit');
         Route::put('/departamentos/{id}', [DepartamentoController::class, 'update'])->name('departamentos.update');
-        Route::delete('/departamentos/{id}', [DepartamentoController::class, 'destroy'])->name('departamentos.destroy');
+        Route::patch('/departamentos/{id}/estado', [DepartamentoController::class, 'cambiarEstado'])->name('departamentos.estado');
 
         // Ciudades: /admin/ubicaciones/ciudades
         Route::get('/ciudades', [CiudadController::class, 'index'])->name('ciudades.index');
