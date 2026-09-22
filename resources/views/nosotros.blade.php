@@ -15,15 +15,22 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
+        :root {
+            --azul: #1B4D6B;
+            --azul-claro: #2E86AB;
+            --naranja: #0C7B93;
+            --teal: #12A594;
+            --teal-claro: #4ADE80;
+        }
+
         body { font-family: 'Inter', sans-serif; }
 
-        /* Degradado verde/teal (mismo del index), con movimiento sutil */
+        /* Degradado multicolor (azul -> teal -> naranja), tal como el logo */
         .gradiente-salud {
-            background: linear-gradient(120deg, #1A5C3A 0%, #0f766e 50%, #0d9488 100%);
-            background-size: 200% 200%;
-            animation: moverGradiente 7s ease infinite;
+            background: linear-gradient(120deg, var(--azul) 0%, var(--teal) 55%, var(--naranja) 100%);
+            background-size: 220% 220%;
+            animation: moverGradiente 8s ease infinite;
         }
         @keyframes moverGradiente {
             0%   { background-position: 0% 50%; }
@@ -48,16 +55,20 @@
         }
         .site-header .logo-text { color: #111827; }
         .site-header .logo-sub { color: #9ca3af; }
-        .site-header .brand-accent { color: #0d9488; }
+        .site-header .brand-accent {
+            background: linear-gradient(90deg, var(--azul-claro), var(--teal));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
         .site-header .nav-link { color: #4b5563; position: relative; }
-        .site-header .nav-link:hover { color: #0d9488; }
+        .site-header .nav-link:hover { color: var(--teal); }
         .nav-link::after {
             content: '';
             position: absolute;
             left: 0; bottom: -4px;
-            width: 0;
-            height: 2px;
-            background-color: #0d9488;
+            width: 0; height: 2px;
+            background: linear-gradient(90deg, var(--azul-claro), var(--naranja));
             transition: width .25s ease;
         }
         .nav-link:hover::after { width: 100%; }
@@ -102,7 +113,7 @@
         .drawer-movil .drawer-link:active,
         .drawer-movil .drawer-link:hover {
             background-color: #f0fdfa;
-            color: #0f766e;
+            color: var(--teal);
         }
         .drawer-movil .drawer-icono {
             width: 34px;
@@ -116,21 +127,21 @@
 
         /* Boton CTA unico (igual al del index) */
         .btn-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
+            display: inline-flex; align-items: center; gap: 0.4rem;
             padding: 0.85rem 1.6rem;
-            background: #ffffff;
-            color: #0f766e;
+            background: linear-gradient(120deg, var(--naranja), var(--teal));
+            background-size: 180% 180%;
+            color: #ffffff;
             font-weight: 600;
             border-radius: 0.5rem;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-            transition: transform .2s ease, box-shadow .2s ease;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+            transition: transform .2s ease, box-shadow .2s ease, background-position .4s ease;
             white-space: nowrap;
         }
         .btn-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.24);
+            background-position: 100% 50%;
         }
 
         /* Animacion de aparicion al hacer scroll (igual al index) */
@@ -165,7 +176,7 @@
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-medium ml-10">
                 <a href="{{ url('/') }}" class="nav-link">Inicio</a>
-                <a href="{{ route('nosotros') }}" class="nav-link" style="color:#0d9488;">Nosotros</a>
+                <a href="{{ route('nosotros') }}" class="nav-link" style="color:var(--teal);">Nosotros</a>
                 <a href="{{ url('/#servicios') }}" class="nav-link">Servicios</a>
                 <a href="{{ url('/#blog') }}" class="nav-link">Blog</a>
                 <a href="{{ url('/#contacto') }}" class="nav-link">Contacto</a>
@@ -174,7 +185,7 @@
             <div class="hidden md:flex items-center gap-3 ml-auto">
                 <a href="{{ url('/login') }}"
                    class="px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
-                   style="background: linear-gradient(120deg, #0f766e, #0d9488);">
+                   style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                     Inicio sesión
                 </a>
             </div>
@@ -227,7 +238,7 @@
             <div class="p-5 border-t border-gray-100 bg-gray-50">
                 <a href="{{ url('/login') }}"
                    class="px-4 py-2.5 text-sm font-semibold border rounded-md text-center bg-white block"
-                   style="color:#0d9488; border-color:#0d9488;">
+                   style="color:var(--teal); border-color:var(--teal);">
                     Inicio sesión
                 </a>
             </div>
@@ -512,7 +523,7 @@
         @endphp
         <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
             @foreach ($instalaciones as $foto)
-                <div class="reveal aspect-[4/3] rounded-xl flex flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, #1A5C3A, #0d9488);">
+                <div class="reveal aspect-[4/3] rounded-xl flex flex-col items-center justify-center text-white" style="background: linear-gradient(135deg, var(--azul-claro), var(--teal));">
                     <span class="text-2xl mb-1">{{ $foto['icono'] }}</span>
                     <span class="text-xs font-medium px-3 text-center">{{ $foto['texto'] }}</span>
                 </div>
@@ -569,7 +580,9 @@
                 <h3 class="font-semibold text-gray-900 text-lg mb-1">¿Quieres conocernos por escrito?</h3>
                 <p class="text-sm text-gray-500">Descarga nuestro portafolio institucional con misión, servicios y certificaciones.</p>
             </div>
-            <a href="#" class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-md hover:opacity-90 transition whitespace-nowrap" style="background: linear-gradient(120deg, #1A5C3A, #0d9488);">
+            <a href="{{ asset('descargas/portafolio-prismasalud.pdf') }}"
+               download="Portafolio-PrismaSalud-IPS.pdf"
+               class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-md hover:opacity-90 transition whitespace-nowrap" style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
                 Descargar portafolio (PDF)
             </a>

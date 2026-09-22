@@ -15,7 +15,7 @@
 
     <div style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 10px; padding: 30px; text-align: center;">
 
-        <p style="color: #0d9488; font-weight: bold; font-size: 18px; margin-bottom: 4px;">
+        <p style="color: #12A594; font-weight: bold; font-size: 18px; margin-bottom: 4px;">
             PrismaSalud IPS
         </p>
 
@@ -26,8 +26,8 @@
             Usa el siguiente código para continuar (es válido por 15 minutos):
         </p>
 
-        <div style="background-color: #f0fdfa; border: 1px dashed #0d9488; border-radius: 8px; padding: 16px; margin: 20px 0;">
-            <span style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #0d9488;">
+        <div style="background-color: #f0fdfa; border: 1px dashed #12A594; border-radius: 8px; padding: 16px; margin: 20px 0;">
+            <span style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #12A594;">
                 {{ $codigo }}
             </span>
         </div>
