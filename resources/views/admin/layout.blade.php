@@ -133,7 +133,7 @@
                     ['icono' => 'dashboard',     'texto' => 'Dashboard',              'ruta' => route('admin.dashboard'),     'clave' => 'dashboard',    'tablas' => null],
                     ['icono' => 'usuarios',      'texto' => 'Usuarios y Roles',        'ruta' => route('usuarios.index'),      'clave' => 'usuarios',     'tablas' => ['usuarios', 'roles', 'tipos de documento']],
                     ['icono' => 'ubicaciones',   'texto' => 'Ubicaciones',             'ruta' => route('departamentos.index'), 'clave' => 'ubicaciones',  'tablas' => ['departamentos', 'ciudades', 'sedes']],
-                    ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => '#', 'clave' => 'eps',            'tablas' => ['eps', 'regimen']],
+                    ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => route('eps.index'), 'clave' => 'eps', 'tablas' => ['eps', 'regimen']],
                     ['icono' => 'afiliaciones',  'texto' => 'Afiliaciones',           'ruta' => '#', 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
                     ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => '#', 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
                     ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => '#', 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
@@ -186,6 +186,8 @@
                                             'sede', 'sedes' => route('sedes.index'),
                                             'usuario', 'usuarios' => route('usuarios.index'),
                                             'tipo de documento', 'tipos de documento' => route('tipos_documento.index'),
+                                            'eps' => route('eps.index'),
+                                            'regimen' => route('regimen.index'),
                                             default => '#',
                                         };
                                     @endphp
@@ -211,6 +213,8 @@
                                             'usuario', 'usuarios' => route('usuarios.index'),
                                             'tipo de documento', 'tipos de documento' => route('tipos_documento.index'),
                                             'rol', 'roles' => route('roles.index'),
+                                            'eps' => route('eps.index'),
+                                            'regimen' => route('regimen.index'),
                                             default => '#',
                                         };
                                     @endphp
@@ -319,6 +323,8 @@
     </script>
 
     @stack('scripts')
+
+    @include('partials.cookies')
 
 </body>
 </html>

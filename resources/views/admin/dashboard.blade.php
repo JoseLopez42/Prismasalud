@@ -98,6 +98,8 @@
                                 'usuario', 'usuarios' => route('usuarios.index'),
                                 'tipo de documento', 'tipos de documento' => route('tipos_documento.index'),
                                 'rol', 'roles' => route('roles.index'),
+                                'eps' => route('eps.index'),
+                                'regimen' => route('regimen.index'),
                                 default => '#',
                             };
                         @endphp

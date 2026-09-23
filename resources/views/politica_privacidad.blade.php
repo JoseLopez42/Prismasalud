@@ -170,15 +170,18 @@
                 </div>
             </div>
 
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium ml-10">
+            <nav class="hidden md:flex items-center gap-5 xl:gap-8 text-sm font-medium ml-10" aria-label="Navegación principal">
                 <a href="{{ url('/') }}" class="nav-link">Inicio</a>
                 <a href="{{ route('nosotros') }}" class="nav-link">Nosotros</a>
-                <a href="{{ url('/#servicios') }}" class="nav-link">Servicios</a>
-                <a href="{{ url('/#contacto') }}" class="nav-link">Contacto</a>
+                <a href="{{ route('servicios.index') }}" class="nav-link">Servicios</a>
+                <a href="{{ route('blog.index') }}" class="nav-link">Blog</a>
+                <a href="{{ route('contacto.index') }}" class="nav-link text-sm">Contacto</a>
+                <a href="{{ route('planes.index') }}" class="nav-link text-sm">Planes</a>
             </nav>
 
             <div class="hidden md:flex items-center gap-3 ml-auto">
-                <a href="{{ url('/login') }}" class="px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
+                <a href="{{ url('/login') }}"
+                   class="px-4 xl:px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
                    style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                     Inicio sesión
                 </a>
@@ -216,15 +219,25 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
                     </span> Nosotros
                 </a>
-                <a href="{{ url('/#servicios') }}" class="drawer-link">
+                <a href="{{ route('servicios.index') }}" class="drawer-link">
                     <span class="drawer-icono bg-green-50 text-green-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-4.35-9.3-8.4C.8 9.4 1.9 5.6 5.3 4.6c2-.6 4 .1 5.2 1.7l1.5 2 1.5-2c1.2-1.6 3.2-2.3 5.2-1.7 3.4 1 4.5 4.8 2.6 8-2.8 4.05-9.3 8.4-9.3 8.4z"/></svg>
                     </span> Servicios
                 </a>
-                <a href="{{ url('/#contacto') }}" class="drawer-link">
+                <a href="{{ route('blog.index') }}" class="drawer-link">
+                    <span class="drawer-icono bg-purple-50 text-purple-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/></svg>
+                    </span> Blog
+                </a>
+                <a href="{{ route('contacto.index') }}" class="drawer-link">
                     <span class="drawer-icono bg-amber-50 text-amber-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                     </span> Contacto
+                </a>
+                <a href="{{ route('planes.index') }}" class="drawer-link">
+                    <span class="drawer-icono bg-teal-50 text-teal-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" d="M3 10h18M7 15h4"/></svg>
+                    </span> Planes
                 </a>
                 <a href="{{ route('privacidad.index') }}" class="drawer-link" style="color:var(--teal);">
                     <span class="drawer-icono bg-teal-50 text-teal-600">
@@ -422,7 +435,7 @@
 
     <!-- Footer -->
     <footer class="text-white/80" style="background-color: #1A5C3A;">
-        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left">
+        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left break-words">
             <div class="col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
                 <p class="text-white font-bold text-lg mb-2">Prisma<span class="text-teal-300">Salud</span> IPS</p>
                 <p class="text-sm mb-4">
@@ -433,9 +446,9 @@
             <div>
                 <p class="text-white font-semibold mb-3">Servicios</p>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="{{ url('/#servicios') }}" class="hover:text-white">Medicina General</a></li>
-                    <li><a href="{{ url('/#servicios') }}" class="hover:text-white">Cardiología</a></li>
-                    <li><a href="{{ url('/#servicios') }}" class="hover:text-white">Pediatría</a></li>
+                    <li><a href="{{ url('/servicios#medicina-general') }}" class="hover:text-white">Medicina General</a></li>
+                    <li><a href="{{ url('/servicios#cardiologia') }}" class="hover:text-white">Cardiología</a></li>
+                    <li><a href="{{ url('/servicios#pediatria') }}" class="hover:text-white">Pediatría</a></li>
                 </ul>
             </div>
             <div>
@@ -443,8 +456,9 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="{{ url('/') }}" class="hover:text-white">Inicio</a></li>
                     <li><a href="{{ route('nosotros') }}" class="hover:text-white">Nosotros</a></li>
-                    <li><a href="{{ url('/#servicios') }}" class="hover:text-white">Servicios</a></li>
-                    <li><a href="{{ url('/#contacto') }}" class="hover:text-white">Contacto</a></li>
+                    <li><a href="{{ route('servicios.index') }}" class="hover:text-white">Servicios</a></li>
+                    <li><a href="{{ route('contacto.index') }}" class="hover:text-white">Contacto</a></li>
+                    <li><a href="{{ route('planes.index') }}" class="hover:text-white">Planes</a></li>
                 </ul>
             </div>
             <div>
@@ -452,10 +466,10 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="{{ route('terminos.index') }}" class="hover:text-white">Términos y Condiciones</a></li>
                     <li><a href="{{ route('privacidad.index') }}" class="hover:text-white">Política de Privacidad</a></li>
-                    <li><a href="{{ url('/#contacto') }}" class="hover:text-white">PQRS</a></li>
+                    <li><a href="{{ url('/contacto#pqrs') }}" class="hover:text-white">PQRS</a></li>
                 </ul>
             </div>
-            <div class="col-span-2 lg:col-span-1">
+            <div>
                 <p class="text-white font-semibold mb-3">Contacto</p>
                 <ul class="space-y-2 text-sm">
                     <li>Calle 42 #5-28, Ibagué</li>
@@ -473,7 +487,7 @@
                     <span class="opacity-30">•</span>
                     <a href="{{ route('privacidad.index') }}" class="hover:text-white transition">Política de Privacidad</a>
                     <span class="opacity-30">•</span>
-                    <a href="{{ url('/#contacto') }}" class="hover:text-white transition">PQRS</a>
+                    <a href="{{ url('/contacto#pqrs') }}" class="hover:text-white transition">PQRS</a>
                 </div>
             </div>
         </div>
@@ -500,6 +514,8 @@
         }, { threshold: 0.1 });
         document.querySelectorAll('.reveal').forEach((el) => observadorReveal.observe(el));
     </script>
+
+    @include('partials.cookies')
 
 </body>
 </html>

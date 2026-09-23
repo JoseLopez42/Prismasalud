@@ -264,17 +264,18 @@
                 </div>
             </div>
 
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium ml-10">
+            <nav class="hidden md:flex items-center gap-5 xl:gap-8 text-sm font-medium ml-10" aria-label="Navegación principal">
                 <a href="{{ url('/') }}" class="nav-link">Inicio</a>
                 <a href="{{ route('nosotros') }}" class="nav-link">Nosotros</a>
-                <a href="#servicios" class="nav-link">Servicios</a>
-                <a href="#blog" class="nav-link">Blog</a>
-                <a href="#contacto" class="nav-link">Contacto</a>
+                <a href="{{ route('servicios.index') }}" class="nav-link">Servicios</a>
+                <a href="{{ route('blog.index') }}" class="nav-link">Blog</a>
+                <a href="{{ route('contacto.index') }}" class="nav-link text-sm">Contacto</a>
+                <a href="{{ route('planes.index') }}" class="nav-link text-sm">Planes</a>
             </nav>
 
             <div class="hidden md:flex items-center gap-3 ml-auto">
                 <a href="{{ url('/login') }}"
-                   class="px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
+                   class="px-4 xl:px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
                    style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                     Inicio sesión
                 </a>
@@ -314,20 +315,25 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
                     </span> Nosotros
                 </a>
-                <a href="#servicios" class="drawer-link">
+                <a href="{{ route('servicios.index') }}" class="drawer-link">
                     <span class="drawer-icono icono-c3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-4.35-9.3-8.4C.8 9.4 1.9 5.6 5.3 4.6c2-.6 4 .1 5.2 1.7l1.5 2 1.5-2c1.2-1.6 3.2-2.3 5.2-1.7 3.4 1 4.5 4.8 2.6 8-2.8 4.05-9.3 8.4-9.3 8.4z"/></svg>
                     </span> Servicios
                 </a>
-                <a href="#blog" class="drawer-link">
+                <a href="{{ route('blog.index') }}" class="drawer-link">
                     <span class="drawer-icono icono-c1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/></svg>
                     </span> Blog
                 </a>
-                <a href="#contacto" class="drawer-link">
+                <a href="{{ route('contacto.index') }}" class="drawer-link">
                     <span class="drawer-icono icono-c3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                     </span> Contacto
+                </a>
+                <a href="{{ route('planes.index') }}" class="drawer-link">
+                    <span class="drawer-icono bg-teal-50 text-teal-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" d="M3 10h18M7 15h4"/></svg>
+                    </span> Planes
                 </a>
             </nav>
             <div class="p-5 border-t border-gray-100 bg-gray-50 flex flex-col gap-3">
@@ -369,7 +375,7 @@
                 </p>
 
                 <div class="flex flex-wrap gap-4">
-                    <a href="#servicios"
+                    <a href="{{ route('servicios.index') }}"
                        class="btn-outline px-5 py-3 rounded-md font-semibold hover:bg-white hover:text-[var(--azul)] transition">
                         Ver nuestros servicios
                     </a>
@@ -669,7 +675,7 @@
 
     <!-- Footer -->
     <footer class="text-white/80" style="background-color: #1A5C3A;">
-        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left">
+        <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-10 md:gap-10 text-center md:text-left break-words">
 
             <div class="col-span-2 lg:col-span-2 flex flex-col items-center md:items-start">
                 <p class="text-white font-bold text-lg mb-2">
@@ -696,11 +702,11 @@
             <div>
                 <p class="text-white font-semibold mb-3">Servicios</p>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#servicios" class="hover:text-white">Medicina General</a></li>
-                    <li><a href="#servicios" class="hover:text-white">Cardiología</a></li>
-                    <li><a href="#servicios" class="hover:text-white">Pediatría</a></li>
-                    <li><a href="#servicios" class="hover:text-white">Laboratorio</a></li>
-                    <li><a href="#servicios" class="hover:text-white">Odontología</a></li>
+                    <li><a href="{{ url('/servicios#medicina-general') }}" class="hover:text-white">Medicina General</a></li>
+                    <li><a href="{{ url('/servicios#cardiologia') }}" class="hover:text-white">Cardiología</a></li>
+                    <li><a href="{{ url('/servicios#pediatria') }}" class="hover:text-white">Pediatría</a></li>
+                    <li><a href="{{ url('/servicios#laboratorio') }}" class="hover:text-white">Laboratorio</a></li>
+                    <li><a href="{{ url('/servicios#odontologia') }}" class="hover:text-white">Odontología</a></li>
                 </ul>
             </div>
 
@@ -709,9 +715,10 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="{{ url('/') }}" class="hover:text-white">Inicio</a></li>
                     <li><a href="{{ route('nosotros') }}" class="hover:text-white">Nosotros</a></li>
-                    <li><a href="#servicios" class="hover:text-white">Servicios</a></li>
-                    <li><a href="#blog" class="hover:text-white">Blog</a></li>
-                    <li><a href="#contacto" class="hover:text-white">Contacto</a></li>
+                    <li><a href="{{ route('servicios.index') }}" class="hover:text-white">Servicios</a></li>
+                    <li><a href="{{ route('blog.index') }}" class="hover:text-white">Blog</a></li>
+                    <li><a href="{{ route('contacto.index') }}" class="hover:text-white">Contacto</a></li>
+                    <li><a href="{{ route('planes.index') }}" class="hover:text-white">Planes</a></li>
                 </ul>
             </div>
 
@@ -720,27 +727,27 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="{{ route('terminos.index') }}" class="hover:text-white">Términos y Condiciones</a></li>
                     <li><a href="{{ route('privacidad.index') }}" class="hover:text-white">Política de Privacidad</a></li>
-                    <li><a href="#contacto" class="hover:text-white">PQRS</a></li>
-                    <li><a href="#contacto" class="hover:text-white">Derechos del paciente</a></li>
+                    <li><a href="{{ url('/contacto#pqrs') }}" class="hover:text-white">PQRS</a></li>
+                    <li><a href="{{ url('/contacto#derechos') }}" class="hover:text-white">Derechos del paciente</a></li>
                 </ul>
             </div>
 
-            <div id="contacto" class="col-span-2 lg:col-span-1">
+            <div id="contacto">
                 <p class="text-white font-semibold mb-3">Contacto</p>
                 <ul class="space-y-2.5 text-sm">
-                    <li class="flex items-center gap-2 justify-center md:justify-start">
+                    <li class="flex items-center gap-2 justify-center md:justify-start min-w-0 break-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                         Calle 42 #5-28, Ibagué
                     </li>
-                    <li class="flex items-center gap-2 justify-center md:justify-start">
+                    <li class="flex items-center gap-2 justify-center md:justify-start min-w-0 break-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5c0 9 7 16 16 16l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
                         (601) 123-4667
                     </li>
-                    <li class="flex items-center gap-2 justify-center md:justify-start">
+                    <li class="flex items-center gap-2 justify-center md:justify-start min-w-0 break-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/></svg>
                         info@prismasaludips.com
                     </li>
-                    <li class="flex items-center gap-2 justify-center md:justify-start">
+                    <li class="flex items-center gap-2 justify-center md:justify-start min-w-0 break-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
                         Lun - Vie: 7am - 7pm
                     </li>
@@ -757,7 +764,7 @@
                     <span class="opacity-30">•</span>
                     <a href="{{ route('privacidad.index') }}" class="hover:text-white transition">Política de Privacidad</a>
                     <span class="opacity-30">•</span>
-                    <a href="#contacto" class="hover:text-white transition">PQRS</a>
+                    <a href="{{ url('/contacto#pqrs') }}" class="hover:text-white transition">PQRS</a>
                 </div>
             </div>
         </div>
@@ -866,6 +873,8 @@
             <path d="M12 2a10 10 0 00-8.6 15.1L2 22l5.1-1.3A10 10 0 1012 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3.1s.8-2.2 1.1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .5 0 .7.5.3.7.9 2.2 1 2.4.1.2.1.4 0 .6-.1.2-.2.4-.4.6-.2.2-.4.5-.5.6-.2.2-.4.4-.2.8.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.6 2.9 1.8.4.2.6.1.8-.1.2-.2.9-1 1.1-1.4.2-.4.5-.3.8-.2.3.1 2 .9 2.3 1.1.3.2.5.3.6.4.1.2.1.9-.1 1.7z"/>
         </svg>
     </a>
+
+    @include('partials.cookies')
 
 </body>
 </html>
