@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\CiudadController;
 use App\Http\Controllers\Admin\SedeController;
 use App\Http\Controllers\Admin\TipoDocumentoController;
 use App\Http\Controllers\Admin\TipoUsuarioController;
+use App\Http\Controllers\Admin\EpsController;
+use App\Http\Controllers\Admin\RegimenController;
 
 Route::get('/', function () {
     return view('index');
@@ -18,6 +20,18 @@ Route::get('/', function () {
 
 // Pagina institucional "Nosotros" (publica)
 Route::view('/nosotros', 'nosotros')->name('nosotros');
+
+// Catalogo de servicios (publico)
+Route::view('/servicios', 'servicios')->name('servicios.index');
+
+// Blog (publico)
+Route::view('/blog', 'blog')->name('blog.index');
+
+// Contacto (publico)
+Route::view('/contacto', 'contacto')->name('contacto.index');
+
+// Planes del software (publico)
+Route::view('/planes', 'planes')->name('planes.index');
 
 // Marco legal (publico)
 Route::view('/terminos-y-condiciones', 'terminos_condiciones')->name('terminos.index');
@@ -80,6 +94,26 @@ Route::prefix('admin')->middleware('esadministrador')->group(function () {
         Route::get('/sedes/{id}/editar', [SedeController::class, 'edit'])->name('sedes.edit');
         Route::put('/sedes/{id}', [SedeController::class, 'update'])->name('sedes.update');
         Route::patch('/sedes/{id}/estado', [SedeController::class, 'cambiarEstado'])->name('sedes.estado');
+    });
+
+    // EPS: http://127.0.0.1:8000/admin/eps/...
+    Route::prefix('eps')->group(function () {
+
+        // EPS: /admin/eps
+        Route::get('/', [EpsController::class, 'index'])->name('eps.index');
+        Route::get('/crear', [EpsController::class, 'create'])->name('eps.create');
+        Route::post('/', [EpsController::class, 'store'])->name('eps.store');
+        Route::get('/{nit_eps}/editar', [EpsController::class, 'edit'])->name('eps.edit');
+        Route::put('/{nit_eps}', [EpsController::class, 'update'])->name('eps.update');
+        Route::patch('/{nit_eps}/estado', [EpsController::class, 'cambiarEstado'])->name('eps.estado');
+
+        // Regímenes: /admin/eps/regimen
+        Route::get('/regimen', [RegimenController::class, 'index'])->name('regimen.index');
+        Route::get('/regimen/crear', [RegimenController::class, 'create'])->name('regimen.create');
+        Route::post('/regimen', [RegimenController::class, 'store'])->name('regimen.store');
+        Route::get('/regimen/{id}/editar', [RegimenController::class, 'edit'])->name('regimen.edit');
+        Route::put('/regimen/{id}', [RegimenController::class, 'update'])->name('regimen.update');
+        Route::patch('/regimen/{id}/estado', [RegimenController::class, 'cambiarEstado'])->name('regimen.estado');
     });
 });
 

@@ -231,5 +231,7 @@
         });
     </script>
 
+    @include('partials.cookies')
+
 </body>
 </html>

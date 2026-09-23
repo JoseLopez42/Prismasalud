@@ -105,5 +105,7 @@
     </div>
 
     @stack('scripts')
+
+    @include('partials.cookies')
 </body>
 </html>
