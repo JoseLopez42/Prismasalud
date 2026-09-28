@@ -351,16 +351,16 @@
             </div>
 
             <nav class="hidden md:flex items-center gap-5 xl:gap-8 text-sm font-medium ml-10" aria-label="Navegación principal">
-                <a href="#" class="nav-link">Inicio</a>
-                <a href="#" class="nav-link">Nosotros</a>
-                <a href="#" class="nav-link">Servicios</a>
-                <a href="#" class="nav-link">Blog</a>
-                <a href="#" class="nav-link text-sm">Contacto</a>
-                <a href="#" class="nav-link text-sm">Planes</a>
+                <a href="{{ url('/') }}" class="nav-link">Inicio</a>
+                <a href="{{ route('nosotros') }}" class="nav-link">Nosotros</a>
+                <a href="{{ route('servicios.index') }}" class="nav-link">Servicios</a>
+                <a href="{{ route('blog.index') }}" class="nav-link">Blog</a>
+                <a href="{{ route('contacto.index') }}" class="nav-link text-sm">Contacto</a>
+                <a href="{{ route('planes.index') }}" class="nav-link text-sm">Planes</a>
             </nav>
 
             <div class="hidden md:flex items-center gap-3 ml-auto">
-                <a href="#"
+                <a href="{{ route('login') }}"
                    class="px-4 xl:px-5 py-2 text-sm font-semibold text-white rounded-md shadow-sm hover:opacity-90 transition"
                    style="background: linear-gradient(120deg, var(--azul-claro), var(--teal));">
                     Inicio sesión
@@ -389,27 +389,27 @@
                 </button>
             </div>
             <nav class="flex-1 overflow-y-auto py-2" aria-label="Navegación móvil">
-                <a href="#" class="drawer-link">
+                <a href="{{ url('/') }}" class="drawer-link">
                     <span class="drawer-icono bg-teal-50 text-teal-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></span> Inicio
                 </a>
-                <a href="#" class="drawer-link">
+                <a href="{{ route('nosotros') }}" class="drawer-link">
                     <span class="drawer-icono bg-blue-50 text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg></span> Nosotros
                 </a>
-                <a href="#" class="drawer-link">
+                <a href="{{ route('servicios.index') }}" class="drawer-link">
                     <span class="drawer-icono bg-green-50 text-green-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6.5-4.35-9.3-8.4C.8 9.4 1.9 5.6 5.3 4.6c2-.6 4 .1 5.2 1.7l1.5 2 1.5-2c1.2-1.6 3.2-2.3 5.2-1.7 3.4 1 4.5 4.8 2.6 8-2.8 4.05-9.3 8.4-9.3 8.4z"/></svg></span> Servicios
                 </a>
-                <a href="#" class="drawer-link">
+                <a href="{{ route('blog.index') }}" class="drawer-link">
                     <span class="drawer-icono bg-purple-50 text-purple-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/></svg></span> Blog
                 </a>
-                <a href="#" class="drawer-link">
+                <a href="{{ route('contacto.index') }}" class="drawer-link">
                     <span class="drawer-icono bg-amber-50 text-amber-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span> Contacto
                 </a>
-                <a href="#" class="drawer-link" style="color:var(--teal);">
+                <a href="{{ route('planes.index') }}" class="drawer-link" style="color:var(--teal);">
                     <span class="drawer-icono bg-teal-50 text-teal-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M17 7.5c0-1.38-2.24-2.5-5-2.5S7 6.12 7 7.5 9.24 10 12 10s5 1.12 5 2.5S14.76 15 12 15s-5 1.12-5 2.5S9.24 20 12 20s5-1.12 5-2.5"/></svg></span> Planes
                 </a>
             </nav>
             <div class="p-5 border-t border-gray-100 bg-gray-50 flex flex-col gap-3">
-                <a href="#" class="px-4 py-2.5 text-sm font-semibold border rounded-md text-center bg-white" style="color:var(--teal); border-color:var(--teal);">Iniciar sesión</a>
+                <a href="{{ route('login') }}" class="px-4 py-2.5 text-sm font-semibold border rounded-md text-center bg-white" style="color:var(--teal); border-color:var(--teal);">Iniciar sesión</a>
             </div>
         </div>
     </header>
@@ -437,7 +437,7 @@
                         Ver todos los planes
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </a>
-                    <a href="#" class="inline-flex items-center justify-center px-5 py-3 text-sm font-bold text-white border border-white/40 rounded-lg hover:bg-white/10 transition">
+                    <a href="{{ route('contacto.index') }}?plan=asesoria" class="inline-flex items-center justify-center px-5 py-3 text-sm font-bold text-white border border-white/40 rounded-lg hover:bg-white/10 transition">
                         Solicitar una demo
                     </a>
                 </div>
@@ -844,8 +844,8 @@
                     <h2 class="text-3xl md:text-4xl font-extrabold mt-3 mb-4">Haz que tu equipo trabaje mejor desde mañana</h2>
                     <p class="text-white/80 max-w-2xl mx-auto mb-7">Conoce PrismaSalud Software y descubre cómo puedes ordenar tu operación, mejorar tus servicios y liberar tiempo para tus pacientes.</p>
                     <div class="flex flex-col sm:flex-row justify-center gap-3">
-                        <button type="button" class="px-5 py-3 text-sm font-extrabold rounded-lg bg-white text-teal-800 hover:bg-teal-50 transition">Probar gratis</button>
-                        <button type="button" class="px-5 py-3 text-sm font-extrabold rounded-lg border border-white/50 text-white hover:bg-white/10 transition">Hablar con un asesor</button>
+                        <a href="{{ route('login') }}" class="px-5 py-3 text-sm font-extrabold rounded-lg bg-white text-teal-800 hover:bg-teal-50 transition">Probar gratis</a>
+                        <a href="https://wa.me/573017880161?text=Hola%2C%20quiero%20agendar%20una%20cita" target="_blank" rel="noopener" class="px-5 py-3 text-sm font-extrabold rounded-lg border border-white/50 text-white hover:bg-white/10 transition">Hablar con un asesor</a>
                     </div>
                 </div>
             </div>
@@ -862,10 +862,10 @@
             <div>
                 <p class="text-white font-semibold mb-3">Navegación</p>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="footer-link">Servicios</a></li>
-                    <li><a href="#" class="footer-link">Blog</a></li>
-                    <li><a href="#" class="footer-link">Contacto</a></li>
-                    <li><a href="#" class="footer-link">Planes</a></li>
+                    <li><a href="{{ route('servicios.index') }}" class="footer-link">Servicios</a></li>
+                    <li><a href="{{ route('blog.index') }}" class="footer-link">Blog</a></li>
+                    <li><a href="{{ route('contacto.index') }}" class="footer-link">Contacto</a></li>
+                    <li><a href="{{ route('planes.index') }}" class="footer-link">Planes</a></li>
                 </ul>
             </div>
             <div>
@@ -881,8 +881,8 @@
             <div>
                 <p class="text-white font-semibold mb-3">Marco legal</p>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="footer-link">Términos y condiciones</a></li>
-                    <li><a href="#" class="footer-link">Política de privacidad</a></li>
+                    <li><a href="{{ route('terminos.index') }}" class="footer-link">Términos y condiciones</a></li>
+                    <li><a href="{{ route('privacidad.index') }}" class="footer-link">Política de privacidad</a></li>
                 </ul>
             </div>
             <div>
@@ -898,20 +898,15 @@
             <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col-reverse md:flex-row items-center justify-between gap-3 text-xs text-white/60">
                 <p>© {{ date('Y') }} PrismaSalud IPS · Todos los derechos reservados</p>
                 <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-                    <a href="#" class="footer-link">Términos y Condiciones</a>
+                    <a href="{{ route('terminos.index') }}" class="footer-link">Términos y Condiciones</a>
                     <span class="opacity-30">•</span>
-                    <a href="#" class="footer-link">Política de Privacidad</a>
+                    <a href="{{ route('privacidad.index') }}" class="footer-link">Política de Privacidad</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
-        // Enlaces sin ruta todavía: evita que "#" suba la página al inicio
-        document.querySelectorAll('a[href="#"]').forEach(function (enlace) {
-            enlace.addEventListener('click', function (e) { e.preventDefault(); });
-        });
-
         const siteHeader = document.getElementById('site-header');
         function actualizarHeaderPlanes() {
             if (!siteHeader) return;
