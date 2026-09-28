@@ -357,7 +357,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5c0 9 7 16 16 16l3-4-6-3-2 2c-2-1-4-3-5-5l2-2-3-6z"/></svg>
                 </div>
                 <h2 class="font-semibold text-gray-900 mb-1">Teléfono</h2>
-                <a href="tel:+576011234667" class="text-sm text-gray-500 hover:text-teal-600 transition">
+                <a href="tel:+573017880161" class="text-sm text-gray-500 hover:text-teal-600 transition">
                     (601) 123-4667
                 </a>
             </div>
