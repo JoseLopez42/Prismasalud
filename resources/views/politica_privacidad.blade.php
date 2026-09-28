@@ -74,7 +74,9 @@
 
         .overlay-movil {
             position: fixed;
-            inset: 0;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
             background: rgba(0, 0, 0, 0.5);
             opacity: 0;
             visibility: hidden;
@@ -85,7 +87,7 @@
         .drawer-movil {
             position: fixed;
             top: 0; right: 0;
-            height: 100%;
+            height: 100vh;
             width: 78%;
             max-width: 320px;
             background: #ffffff;

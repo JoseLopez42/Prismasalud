@@ -79,7 +79,9 @@
 
         .overlay-movil {
             position: fixed;
-            inset: 0;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
             background: rgba(0, 0, 0, 0.5);
             opacity: 0;
             visibility: hidden;
@@ -92,7 +94,7 @@
         .drawer-movil {
             position: fixed;
             top: 0; right: 0;
-            height: 100%;
+            height: 100vh;
             width: 78%;
             max-width: 320px;
             background: #ffffff;
@@ -264,12 +266,12 @@
             justify-content: center;
             width: 100%;
             min-height: 2.75rem;
-            margin: 1.15rem 0;
+            margin: 0;
             padding: .65rem 1rem;
             border-radius: .65rem;
-            font-size: .8rem;
+            font-size: .78rem;
             font-weight: 800;
-            white-space: nowrap;
+            line-height: 1.25;
             transition: transform .15s ease, background-color .15s ease, border-color .15s ease;
         }
 
@@ -405,7 +407,7 @@
                     <span class="drawer-icono bg-amber-50 text-amber-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span> Contacto
                 </a>
                 <a href="{{ route('planes.index') }}" class="drawer-link" style="color:var(--teal);">
-                    <span class="drawer-icono bg-teal-50 text-teal-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M17 7.5c0-1.38-2.24-2.5-5-2.5S7 6.12 7 7.5 9.24 10 12 10s5 1.12 5 2.5S14.76 15 12 15s-5 1.12-5 2.5S9.24 20 12 20s5-1.12 5-2.5"/></svg></span> Planes
+                    <span class="drawer-icono bg-teal-50 text-teal-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" d="M3 10h18M7 15h4"/></svg></span> Planes
                 </a>
             </nav>
             <div class="p-5 border-t border-gray-100 bg-gray-50 flex flex-col gap-3">
@@ -484,37 +486,35 @@
 
     <!-- Planes -->
     <section id="planes" class="bg-gray-50 py-20">
-        <div class="max-w-[1500px] mx-auto px-6">
+        <div class="max-w-[1200px] mx-auto px-6">
             <div class="reveal text-center max-w-3xl mx-auto mb-10">
                 <span class="inline-block text-xs font-extrabold uppercase tracking-[.18em]" style="color:var(--teal);">Elige tu plan</span>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-3 mb-4">Una opción para cada etapa de tu operación</h2>
                 <p class="text-gray-500 leading-relaxed">Empieza con una prueba de un mes o elige una vigencia de 1 o 2 años, con o sin entrega directa a farmacia.</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-6 items-stretch">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch">
 
                 <!-- Plan Gratis -->
                 <article id="plan-gratis" class="plan-card plan-card--free reveal">
-                    <span class="plan-badge plan-badge--free">Gratis por 1 mes</span>
-                    <span class="plan-icon plan-icon--teal">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></svg>
-                    </span>
-                    <h3 class="plan-title">Gratis</h3>
-                    <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Prueba de 1 mes</p>
-                    <p class="plan-description mt-3">Conoce la plataforma sin inversión inicial y digitaliza tu agenda durante el primer mes.</p>
-                    <div class="mt-5">
+                    <div class="text-center">
+                        <span class="plan-badge plan-badge--free">Gratis por 1 mes</span>
+                        <span class="plan-icon plan-icon--teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></svg>
+                        </span>
+                        <h3 class="plan-title">Gratis</h3>
+                        <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Prueba de 1 mes</p>
+                        <p class="plan-description mt-3">Conoce la plataforma sin inversión inicial y digitaliza tu agenda durante el primer mes.</p>
+                    </div>
+                    <div class="mt-5 text-center">
                         <div class="plan-price" style="color:var(--teal);">Gratis</div>
                         <p class="plan-period mt-2">1 mes · sin tarjeta</p>
                     </div>
-                    <button type="button" class="plan-cta plan-cta--primary">
-                        Comenzar gratis
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                    </button>
-                    <div class="plan-ideal mb-3">
+                    <div class="plan-ideal mt-5 text-center">
                         <p class="text-[.68rem] text-gray-400">Ideal para</p>
                         <p class="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">Consultorios y EPS pequeñas que quieren probar antes de decidir.</p>
                     </div>
-                    <div class="plan-summary">
+                    <div class="plan-summary mt-4">
                         <p class="text-xs font-extrabold text-gray-700 mb-3">Incluye:</p>
                         <ul class="plan-list">
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Hasta 15 pacientes activos</span></li>
@@ -522,33 +522,37 @@
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Agenda de citas y ficha clínica básica</span></li>
                         </ul>
                     </div>
-                    <button type="button" class="plan-more">
-                        Ver más
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                    </button>
+                    <div class="mt-auto pt-4 space-y-3">
+                        <button type="button" class="plan-cta plan-cta--primary">
+                            Comenzar gratis
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                        <button type="button" class="plan-more">
+                            Ver más
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
                 </article>
 
                 <!-- Plan 1 año -->
                 <article id="plan-un-anio" class="plan-card reveal">
-                    <span class="plan-icon plan-icon--blue">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8ZM22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                    </span>
-                    <h3 class="plan-title">1 año</h3>
-                    <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Plan estándar</p>
-                    <p class="plan-description mt-3">Todo lo esencial para gestionar citas, pacientes e historia clínica completa durante 12 meses.</p>
-                    <div class="mt-5">
+                    <div class="text-center">
+                        <span class="plan-icon plan-icon--blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8ZM22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                        </span>
+                        <h3 class="plan-title">1 año</h3>
+                        <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Plan estándar</p>
+                        <p class="plan-description mt-3">Todo lo esencial para gestionar citas, pacientes e historia clínica completa durante 12 meses.</p>
+                    </div>
+                    <div class="mt-5 text-center">
                         <div class="plan-price"><span class="plan-price-currency">$</span><span>1.200.000</span></div>
                         <p class="plan-period mt-2">Pago único · 12 meses</p>
                     </div>
-                    <button type="button" class="plan-cta plan-cta--outline">
-                        Elegir 1 año
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                    </button>
-                    <div class="plan-ideal mb-3">
+                    <div class="plan-ideal mt-5 text-center">
                         <p class="text-[.68rem] text-gray-400">Ideal para</p>
                         <p class="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">Consultorios e IPS pequeñas con una o dos sedes.</p>
                     </div>
-                    <div class="plan-summary">
+                    <div class="plan-summary mt-4">
                         <p class="text-xs font-extrabold text-gray-700 mb-3">Incluye:</p>
                         <ul class="plan-list">
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Pacientes sin límite</span></li>
@@ -556,34 +560,38 @@
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Recordatorios y fórmula al correo del paciente</span></li>
                         </ul>
                     </div>
-                    <button type="button" class="plan-more">
-                        Ver más
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                    </button>
+                    <div class="mt-auto pt-4 space-y-3">
+                        <button type="button" class="plan-cta plan-cta--outline">
+                            Elegir 1 año
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                        <button type="button" class="plan-more">
+                            Ver más
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
                 </article>
 
                 <!-- Plan 2 años (recomendado) -->
                 <article id="plan-dos-anios" class="plan-card plan-card--featured reveal">
-                    <span class="plan-badge plan-badge--featured">Recomendado</span>
-                    <span class="plan-icon plan-icon--purple">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-7M20 16v-3"/></svg>
-                    </span>
-                    <h3 class="plan-title">2 años</h3>
-                    <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Plan profesional</p>
-                    <p class="plan-description mt-3">Más usuarios, más sedes, facturación, dashboard ejecutivo y API para operaciones en crecimiento.</p>
-                    <div class="mt-5">
+                    <div class="text-center">
+                        <span class="plan-badge plan-badge--featured">Recomendado</span>
+                        <span class="plan-icon plan-icon--purple">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-7M20 16v-3"/></svg>
+                        </span>
+                        <h3 class="plan-title">2 años</h3>
+                        <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Plan profesional</p>
+                        <p class="plan-description mt-3">Más usuarios, más sedes, facturación, dashboard ejecutivo y API para operaciones en crecimiento.</p>
+                    </div>
+                    <div class="mt-5 text-center">
                         <div class="plan-price"><span class="plan-price-currency">$</span><span>2.100.000</span></div>
                         <p class="plan-period mt-2">Pago único · 24 meses</p>
                     </div>
-                    <button type="button" class="plan-cta plan-cta--primary">
-                        Elegir 2 años
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                    </button>
-                    <div class="plan-ideal mb-3">
+                    <div class="plan-ideal mt-5 text-center">
                         <p class="text-[.68rem] text-gray-400">Ideal para</p>
                         <p class="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">IPS y clínicas con varias sedes y equipos grandes.</p>
                     </div>
-                    <div class="plan-summary">
+                    <div class="plan-summary mt-4">
                         <p class="text-xs font-extrabold text-gray-700 mb-3">Incluye:</p>
                         <ul class="plan-list">
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>20 usuarios y 10 sedes</span></li>
@@ -591,33 +599,37 @@
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>API estándar y soporte prioritario</span></li>
                         </ul>
                     </div>
-                    <button type="button" class="plan-more">
-                        Ver más
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                    </button>
+                    <div class="mt-auto pt-4 space-y-3">
+                        <button type="button" class="plan-cta plan-cta--primary">
+                            Elegir 2 años
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                        <button type="button" class="plan-more">
+                            Ver más
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
                 </article>
 
                 <!-- Plan 1 año + Farmacia -->
                 <article id="plan-un-anio-farmacia" class="plan-card reveal">
-                    <span class="plan-icon plan-icon--orange">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m10.5 20.5 10-10a4.95 4.95 0 0 0-7-7l-10 10a4.95 4.95 0 0 0 7 7Z"/><path stroke-linecap="round" d="m8.5 8.5 7 7"/></svg>
-                    </span>
-                    <h3 class="plan-title">1 año + Farmacia</h3>
-                    <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Estándar con farmacia</p>
-                    <p class="plan-description mt-3">El plan de 1 año con envío directo de la fórmula al farmaceuta para que el paciente no haga fila.</p>
-                    <div class="mt-5">
+                    <div class="text-center">
+                        <span class="plan-icon plan-icon--orange">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m10.5 20.5 10-10a4.95 4.95 0 0 0-7-7l-10 10a4.95 4.95 0 0 0 7 7Z"/><path stroke-linecap="round" d="m8.5 8.5 7 7"/></svg>
+                        </span>
+                        <h3 class="plan-title">1 año + Farmacia</h3>
+                        <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Estándar con farmacia</p>
+                        <p class="plan-description mt-3">El plan de 1 año con envío directo de la fórmula al farmaceuta para que el paciente no haga fila.</p>
+                    </div>
+                    <div class="mt-5 text-center">
                         <div class="plan-price"><span class="plan-price-currency">$</span><span>1.600.000</span></div>
                         <p class="plan-period mt-2">Pago único · 12 meses</p>
                     </div>
-                    <button type="button" class="plan-cta plan-cta--outline">
-                        Elegir 1 año + Farmacia
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                    </button>
-                    <div class="plan-ideal mb-3">
+                    <div class="plan-ideal mt-5 text-center">
                         <p class="text-[.68rem] text-gray-400">Ideal para</p>
                         <p class="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">IPS pequeñas que trabajan con una farmacia aliada.</p>
                     </div>
-                    <div class="plan-summary">
+                    <div class="plan-summary mt-4">
                         <p class="text-xs font-extrabold text-gray-700 mb-3">Incluye:</p>
                         <ul class="plan-list">
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Todo lo del plan 1 año</span></li>
@@ -625,33 +637,37 @@
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Aviso de sede y horario de reclamo</span></li>
                         </ul>
                     </div>
-                    <button type="button" class="plan-more">
-                        Ver más
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                    </button>
+                    <div class="mt-auto pt-4 space-y-3">
+                        <button type="button" class="plan-cta plan-cta--outline">
+                            Elegir 1 año + Farmacia
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                        <button type="button" class="plan-more">
+                            Ver más
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
                 </article>
 
                 <!-- Plan 2 años + Farmacia -->
                 <article id="plan-dos-anios-farmacia" class="plan-card reveal">
-                    <span class="plan-icon plan-icon--green">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5l7-2v18M19 21V9l-7-2M8 8h.01M8 12h.01M8 16h.01M15 13h.01M15 17h.01"/></svg>
-                    </span>
-                    <h3 class="plan-title">2 años + Farmacia</h3>
-                    <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Profesional con farmacia</p>
-                    <p class="plan-description mt-3">La solución más completa: plan de 2 años, farmacia integrada, inventario avanzado y asesor dedicado.</p>
-                    <div class="mt-5">
+                    <div class="text-center">
+                        <span class="plan-icon plan-icon--green">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5l7-2v18M19 21V9l-7-2M8 8h.01M8 12h.01M8 16h.01M15 13h.01M15 17h.01"/></svg>
+                        </span>
+                        <h3 class="plan-title">2 años + Farmacia</h3>
+                        <p class="mt-1 text-[.7rem] font-bold uppercase tracking-wider" style="color:var(--teal);">Profesional con farmacia</p>
+                        <p class="plan-description mt-3">La solución más completa: plan de 2 años, farmacia integrada, inventario avanzado y asesor dedicado.</p>
+                    </div>
+                    <div class="mt-5 text-center">
                         <div class="plan-price"><span class="plan-price-currency">$</span><span>2.800.000</span></div>
                         <p class="plan-period mt-2">Pago único · 24 meses</p>
                     </div>
-                    <button type="button" class="plan-cta plan-cta--outline">
-                        Elegir 2 años + Farmacia
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                    </button>
-                    <div class="plan-ideal mb-3">
+                    <div class="plan-ideal mt-5 text-center">
                         <p class="text-[.68rem] text-gray-400">Ideal para</p>
                         <p class="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">Clínicas y redes de IPS con farmacia propia o aliada.</p>
                     </div>
-                    <div class="plan-summary">
+                    <div class="plan-summary mt-4">
                         <p class="text-xs font-extrabold text-gray-700 mb-3">Incluye:</p>
                         <ul class="plan-list">
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Todo lo del plan 2 años</span></li>
@@ -659,10 +675,16 @@
                             <li><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></svg><span>Asesor dedicado</span></li>
                         </ul>
                     </div>
-                    <button type="button" class="plan-more">
-                        Ver más
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                    </button>
+                    <div class="mt-auto pt-4 space-y-3">
+                        <button type="button" class="plan-cta plan-cta--outline">
+                            Elegir 2 años + Farmacia
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                        </button>
+                        <button type="button" class="plan-more">
+                            Ver más
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
                 </article>
 
             </div>

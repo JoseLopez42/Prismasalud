@@ -116,7 +116,7 @@
 
         /* Menu hamburguesa - drawer */
         .overlay-movil {
-            position: fixed; inset: 0;
+            position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.5);
             opacity: 0; visibility: hidden;
             transition: opacity .25s ease, visibility .25s ease;
@@ -124,7 +124,7 @@
         }
         .overlay-movil.abierto { opacity: 1; visibility: visible; }
         .drawer-movil {
-            position: fixed; top: 0; right: 0; height: 100%;
+            position: fixed; top: 0; right: 0; height: 100vh;
             width: 78%; max-width: 320px;
             background: #ffffff;
             box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
