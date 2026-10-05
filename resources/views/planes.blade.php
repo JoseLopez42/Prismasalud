@@ -358,7 +358,7 @@
                 <a href="{{ route('servicios.index') }}" class="nav-link">Servicios</a>
                 <a href="{{ route('blog.index') }}" class="nav-link">Blog</a>
                 <a href="{{ route('contacto.index') }}" class="nav-link text-sm">Contacto</a>
-                <a href="{{ route('planes.index') }}" class="nav-link text-sm">Planes</a>
+                <a href="{{ route('planes.index') }}" class="nav-link text-sm" style="color:var(--teal);">Planes</a>
             </nav>
 
             <div class="hidden md:flex items-center gap-3 ml-auto">

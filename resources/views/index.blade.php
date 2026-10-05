@@ -265,7 +265,7 @@
             </div>
 
             <nav class="hidden md:flex items-center gap-5 xl:gap-8 text-sm font-medium ml-10" aria-label="Navegación principal">
-                <a href="{{ url('/') }}" class="nav-link">Inicio</a>
+                <a href="{{ url('/') }}" class="nav-link" style="color:var(--teal);">Inicio</a>
                 <a href="{{ route('nosotros') }}" class="nav-link">Nosotros</a>
                 <a href="{{ route('servicios.index') }}" class="nav-link">Servicios</a>
                 <a href="{{ route('blog.index') }}" class="nav-link">Blog</a>
@@ -305,7 +305,7 @@
                 </button>
             </div>
             <nav class="flex-1 overflow-y-auto py-2">
-                <a href="{{ url('/') }}" class="drawer-link">
+                <a href="{{ url('/') }}" class="drawer-link" style="color:var(--teal);">
                     <span class="drawer-icono icono-c1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
                     </span> Inicio

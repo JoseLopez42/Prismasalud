@@ -1,7 +1,7 @@
 {{-- Scripts comunes de los listados del panel admin:
      1) Modal de confirmación propio (activar/desactivar) con iconos SVG.
      2) Buscador rápido que filtra las filas de la tabla en vivo.
-     3) Exportar a PDF lo que se está viendo (fila filtradas incluidas).
+     3) Exportar a Excel (.xlsx) lo que se está viendo (filas filtradas incluidas).
 
      Requiere que en la página existan:
      - Un input con id="buscador-listado"
@@ -135,74 +135,55 @@
     });
 
     // ======================================================================
-    // EXPORTAR A PDF lo que se está viendo (respeta el filtro activo)
+    // EXPORTAR A EXCEL (.xlsx) lo que se está viendo (respeta el filtro)
     // ======================================================================
-    function exportarPdf() {
+    // Excel no admite más de 31 caracteres ni estos signos en el nombre
+    // de una hoja, así que el título se normaliza antes de usarlo.
+    function nombreHoja(texto) {
+        return (texto || 'Listado').replace(/[\\/?*[\]:]/g, ' ').trim().slice(0, 31) || 'Listado';
+    }
+
+    function exportarExcel() {
         const tabla = document.getElementById('tabla-listado');
-        const boton = document.getElementById('boton-exportar-pdf');
-        if (!tabla || !window.jspdf) return;
+        const boton = document.getElementById('boton-exportar-excel');
+        if (!tabla || !window.XLSX) return;
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
-
-        const titulo = (boton && boton.getAttribute('data-titulo-pdf')) || (document.getElementById('titulo-listado')?.textContent || 'Reporte');
-
-        // Encabezado del PDF
-        doc.setFillColor(26, 92, 58);
-        doc.rect(0, 0, 595.28, 60, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.text('PrismaSalud IPS', 40, 28);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        doc.text('Institución Prestadora de Servicios de Salud · Panel Administrador', 40, 44);
-
-        doc.setTextColor(31, 41, 55);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.text(titulo, 40, 90);
-
-        const hoy = new Date();
-        const fecha = hoy.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(107, 114, 128);
-        doc.text('Generado el ' + fecha + ' · ' + hoy.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), 40, 106);
+        const titulo = (boton && boton.getAttribute('data-titulo')) || (document.getElementById('titulo-listado')?.textContent.trim() || 'Reporte');
 
         // Cabeceras: todas menos la última columna (Acciones)
-        const celdasCabecera = Array.from(tabla.querySelectorAll('thead th'));
-        const cabeceras = celdasCabecera.slice(0, -1).map(th => th.textContent.trim());
+        const cabeceras = Array.from(tabla.querySelectorAll('thead th'))
+            .slice(0, -1)
+            .map(th => th.textContent.trim());
 
         // Filas visibles (filtro activo), excluyendo Acciones
-        const filasVisibles = Array.from(tabla.querySelectorAll('tbody tr.fila-dato'))
-            .filter(fila => !fila.classList.contains('oculto') && !fila.classList.contains('fila-vacio'));
-
-        const cuerpo = filasVisibles.map(fila => {
-            return Array.from(fila.querySelectorAll('td'))
+        const cuerpo = Array.from(tabla.querySelectorAll('tbody tr.fila-dato'))
+            .filter(fila => !fila.classList.contains('oculto') && !fila.classList.contains('fila-vacio'))
+            .map(fila => Array.from(fila.querySelectorAll('td'))
                 .slice(0, -1)
-                .map(td => (td.textContent || '').replace(/\s+/g, ' ').trim());
-        });
+                .map(td => (td.textContent || '').replace(/\s+/g, ' ').trim()));
 
-        doc.autoTable({
-            head: [cabeceras],
-            body: cuerpo,
-            startY: 116,
-            styles: { font: 'helvetica', fontSize: 9, cellPadding: 6, textColor: [51, 65, 85] },
-            headStyles: { fillColor: [26, 92, 58], textColor: 255, fontStyle: 'bold' },
-            alternateRowStyles: { fillColor: [246, 250, 249] },
-            margin: { left: 40, right: 40 },
-            columnStyles: { 0: { cellWidth: 'auto' } }
-        });
+        if (!cuerpo.length) {
+            alert('No hay registros visibles para exportar.');
+            return;
+        }
 
-        // Resumen al final
-        const total = cuerpo.length;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(31, 41, 55);
-        doc.text('Total: ' + total + ' registro(s)', 40, doc.lastAutoTable.finalY + 20);
+        const libro = XLSX.utils.book_new();
+        const hoja = XLSX.utils.aoa_to_sheet([cabeceras, ...cuerpo]);
 
+        // Ancho de columna aproximado según el texto más largo de cada una.
+        hoja['!cols'] = cabeceras.map((encabezado, i) => ({
+            wch: Math.min(
+                50,
+                Math.max(encabezado.length, ...cuerpo.map(fila => String(fila[i] ?? '').length)) + 2
+            )
+        }));
+
+        XLSX.utils.book_append_sheet(libro, hoja, nombreHoja(titulo));
+
+        const hoy = new Date();
         const nombreArchivo = (boton && boton.getAttribute('data-nombre-archivo')) || 'reporte';
-        doc.save(nombreArchivo + '_' + new Date().toISOString().slice(0, 10) + '.pdf');
+        const sello = hoy.toISOString().slice(0, 10);
+
+        XLSX.writeFile(libro, nombreArchivo + '_' + sello + '.xlsx');
     }
 </script>

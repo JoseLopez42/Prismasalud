@@ -306,7 +306,7 @@
                 </button>
                 <button type="button" id="boton-aceptar-terminos"
                         class="flex-1 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 transition">
-                    Acepto los términos
+                    Entendido
                 </button>
             </div>
         </div>
@@ -317,7 +317,6 @@
 @push('scripts')
 <script>
     const modalTerminos = document.getElementById('modal-terminos');
-    const checkboxTerminos = document.getElementById('checkbox-terminos');
 
     function abrirTerminos() {
         modalTerminos.classList.add('abierto');
@@ -328,7 +327,6 @@
     }
 
     document.getElementById('boton-aceptar-terminos').addEventListener('click', function () {
-        checkboxTerminos.checked = true;
         cerrarTerminos();
     });
 

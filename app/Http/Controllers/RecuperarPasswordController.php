@@ -6,6 +6,7 @@ use App\Models\Usuario;
 use App\Mail\CodigoRecuperacionMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 
 /**
  * Recuperación de contraseña en tres pasos independientes:
@@ -145,9 +146,26 @@ class RecuperarPasswordController extends Controller
         }
 
         $request->validate([
-            'contrasena' => 'required|string|min:6|confirmed',
-            // "confirmed" exige que también venga un campo
-            // "contrasena_confirmation" igual a "contrasena".
+            'contrasena' => [
+                'required',
+                'string',
+                // Mínimo 8 caracteres, con al menos una mayúscula, una
+                // minúscula, un número y un símbolo.
+                Password::min(8)->mixedCase()->numbers()->symbols(),
+                // "confirmed" exige que también venga un campo
+                // "contrasena_confirmation" igual a "contrasena".
+                'confirmed',
+            ],
+            'contrasena_confirmation' => 'required|string',
+        ], [
+            // El rule Password reporta con las claves "password.*" (no
+            // "contrasena.*"), por eso los mensajes van con ese prefijo.
+            'password.mixed'      => 'La contraseña debe tener al menos una letra mayúscula y una minúscula.',
+            'password.numbers'    => 'La contraseña debe tener al menos un número.',
+            'password.symbols'    => 'La contraseña debe tener al menos un signo especial (por ejemplo ! @ # $ % & * ?).',
+            'password.min'        => 'La contraseña debe tener al menos 8 caracteres.',
+            'contrasena.confirmed' => 'Las contraseñas no coinciden.',
+            'contrasena_confirmation.required' => 'Debes confirmar tu nueva contraseña.',
         ]);
 
         $usuario->contrasena = bcrypt($request->contrasena);
