@@ -13,6 +13,10 @@ use App\Http\Controllers\Admin\TipoDocumentoController;
 use App\Http\Controllers\Admin\TipoUsuarioController;
 use App\Http\Controllers\Admin\EpsController;
 use App\Http\Controllers\Admin\RegimenController;
+use App\Http\Controllers\Admin\EspecialidadController;
+use App\Http\Controllers\Admin\MedicoController;
+use App\Http\Controllers\Admin\ConsultorioController;
+use App\Http\Controllers\Admin\HorarioMedicoController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminLoginController;
 use App\Http\Controllers\SuperAdminRecuperarController;
@@ -148,6 +152,42 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
         Route::get('/regimen/{id}/editar', [RegimenController::class, 'edit'])->name('regimen.edit');
         Route::put('/regimen/{id}', [RegimenController::class, 'update'])->name('regimen.update');
         Route::patch('/regimen/{id}/estado', [RegimenController::class, 'cambiarEstado'])->name('regimen.estado');
+    });
+
+    // Médicos y Consultorios: /admin/medicos/...
+    Route::prefix('medicos')->group(function () {
+
+        // Médicos (su cuenta de acceso se crea aquí): /admin/medicos/medicos
+        Route::get('/medicos', [MedicoController::class, 'index'])->name('medico.index');
+        Route::get('/medicos/crear', [MedicoController::class, 'create'])->name('medico.create');
+        Route::post('/medicos', [MedicoController::class, 'store'])->name('medico.store');
+        Route::get('/medicos/{cedula}/editar', [MedicoController::class, 'edit'])->name('medico.edit');
+        Route::put('/medicos/{cedula}', [MedicoController::class, 'update'])->name('medico.update');
+        Route::patch('/medicos/{cedula}/estado', [MedicoController::class, 'cambiarEstado'])->name('medico.estado');
+
+        // Especialidades: /admin/medicos/especialidades
+        Route::get('/especialidades', [EspecialidadController::class, 'index'])->name('especialidad.index');
+        Route::get('/especialidades/crear', [EspecialidadController::class, 'create'])->name('especialidad.create');
+        Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('especialidad.store');
+        Route::get('/especialidades/{id}/editar', [EspecialidadController::class, 'edit'])->name('especialidad.edit');
+        Route::put('/especialidades/{id}', [EspecialidadController::class, 'update'])->name('especialidad.update');
+        Route::patch('/especialidades/{id}/estado', [EspecialidadController::class, 'cambiarEstado'])->name('especialidad.estado');
+
+        // Consultorios: /admin/medicos/consultorios
+        Route::get('/consultorios', [ConsultorioController::class, 'index'])->name('consultorio.index');
+        Route::get('/consultorios/crear', [ConsultorioController::class, 'create'])->name('consultorio.create');
+        Route::post('/consultorios', [ConsultorioController::class, 'store'])->name('consultorio.store');
+        Route::get('/consultorios/{id}/editar', [ConsultorioController::class, 'edit'])->name('consultorio.edit');
+        Route::put('/consultorios/{id}', [ConsultorioController::class, 'update'])->name('consultorio.update');
+        Route::patch('/consultorios/{id}/estado', [ConsultorioController::class, 'cambiarEstado'])->name('consultorio.estado');
+
+        // Horarios de atención: /admin/medicos/horarios
+        Route::get('/horarios', [HorarioMedicoController::class, 'index'])->name('horario_medico.index');
+        Route::get('/horarios/crear', [HorarioMedicoController::class, 'create'])->name('horario_medico.create');
+        Route::post('/horarios', [HorarioMedicoController::class, 'store'])->name('horario_medico.store');
+        Route::get('/horarios/{id}/editar', [HorarioMedicoController::class, 'edit'])->name('horario_medico.edit');
+        Route::put('/horarios/{id}', [HorarioMedicoController::class, 'update'])->name('horario_medico.update');
+        Route::patch('/horarios/{id}/estado', [HorarioMedicoController::class, 'cambiarEstado'])->name('horario_medico.estado');
     });
 });
 

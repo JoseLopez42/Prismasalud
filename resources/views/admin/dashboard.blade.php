@@ -100,6 +100,10 @@
                                 'rol', 'roles' => route('roles.index'),
                                 'eps' => route('eps.index'),
                                 'regimen' => route('regimen.index'),
+                                'medico' => route('medico.index'),
+                                'especialidad' => route('especialidad.index'),
+                                'consultorio' => route('consultorio.index'),
+                                'horario_medico' => route('horario_medico.index'),
                                 default => '#',
                             };
                         @endphp

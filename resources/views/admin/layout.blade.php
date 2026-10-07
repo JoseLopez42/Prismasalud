@@ -136,7 +136,7 @@
                     ['icono' => 'ubicaciones',   'texto' => 'Ubicaciones',             'ruta' => route('departamentos.index'), 'clave' => 'ubicaciones',  'tablas' => ['departamentos', 'ciudades', 'sedes']],
                     ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => route('eps.index'), 'clave' => 'eps', 'tablas' => ['eps', 'regimen']],
                     ['icono' => 'afiliaciones',  'texto' => 'Afiliaciones',           'ruta' => '#', 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
-                    ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => '#', 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
+                    ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => route('medico.index'), 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
                     ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => '#', 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
                     ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => '#', 'clave' => 'historia',       'tablas' => ['historia_clinica', 'diagnostico', 'enfermedad']],
                     ['icono' => 'procedimientos','texto' => 'Procedimientos',         'ruta' => '#', 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
@@ -189,6 +189,10 @@
                                             'tipo de documento', 'tipos de documento' => route('tipos_documento.index'),
                                             'eps' => route('eps.index'),
                                             'regimen' => route('regimen.index'),
+                                            'medico' => route('medico.index'),
+                                            'especialidad' => route('especialidad.index'),
+                                            'consultorio' => route('consultorio.index'),
+                                            'horario_medico' => route('horario_medico.index'),
                                             default => '#',
                                         };
                                     @endphp
@@ -216,6 +220,10 @@
                                             'rol', 'roles' => route('roles.index'),
                                             'eps' => route('eps.index'),
                                             'regimen' => route('regimen.index'),
+                                            'medico' => route('medico.index'),
+                                            'especialidad' => route('especialidad.index'),
+                                            'consultorio' => route('consultorio.index'),
+                                            'horario_medico' => route('horario_medico.index'),
                                             default => '#',
                                         };
                                     @endphp
