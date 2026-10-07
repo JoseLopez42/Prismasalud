@@ -12,8 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'esadministrador' => \App\Http\Middleware\EsAdministrador::class,
-            'esusuario'       => \App\Http\Middleware\EsUsuario::class,
+            'esadministrador'  => \App\Http\Middleware\EsAdministrador::class,
+            'esusuario'        => \App\Http\Middleware\EsUsuario::class,
+            'essuperadmin'     => \App\Http\Middleware\EsSuperAdmin::class,
+            'verificarlicencia' => \App\Http\Middleware\VerificarLicencia::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

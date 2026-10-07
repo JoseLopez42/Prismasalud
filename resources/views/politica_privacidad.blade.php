@@ -178,7 +178,6 @@
                 <a href="{{ route('servicios.index') }}" class="nav-link">Servicios</a>
                 <a href="{{ route('blog.index') }}" class="nav-link">Blog</a>
                 <a href="{{ route('contacto.index') }}" class="nav-link text-sm">Contacto</a>
-                <a href="{{ route('planes.index') }}" class="nav-link text-sm">Planes</a>
             </nav>
 
             <div class="hidden md:flex items-center gap-3 ml-auto">
@@ -235,11 +234,6 @@
                     <span class="drawer-icono bg-amber-50 text-amber-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.5 7-11a7 7 0 10-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                     </span> Contacto
-                </a>
-                <a href="{{ route('planes.index') }}" class="drawer-link">
-                    <span class="drawer-icono bg-teal-50 text-teal-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" d="M3 10h18M7 15h4"/></svg>
-                    </span> Planes
                 </a>
                 <a href="{{ route('privacidad.index') }}" class="drawer-link" style="color:var(--teal);">
                     <span class="drawer-icono bg-teal-50 text-teal-600">
@@ -460,7 +454,6 @@
                     <li><a href="{{ route('nosotros') }}" class="hover:text-white">Nosotros</a></li>
                     <li><a href="{{ route('servicios.index') }}" class="hover:text-white">Servicios</a></li>
                     <li><a href="{{ route('contacto.index') }}" class="hover:text-white">Contacto</a></li>
-                    <li><a href="{{ route('planes.index') }}" class="hover:text-white">Planes</a></li>
                 </ul>
             </div>
             <div>

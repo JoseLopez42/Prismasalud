@@ -3,29 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
+use App\Models\Licencia;
+use App\Models\Plan;
+use App\Models\Transaccion;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Muestra el panel principal del Administrador.
-     * La protección de "solo Administrador puede entrar" ya la
-     * hace el middleware EsAdministrador, asignado en las rutas.
-     */
     public function index()
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        // Traemos el usuario logueado (guardado en la sesión) para
-        // mostrar su nombre en el saludo de bienvenida.
         $usuarioActual = Usuario::find($_SESSION['usuario_cedula']);
 
-        // NOTA: estos números son de ejemplo (placeholder), tal como
-        // en el diseño de Figma. Cuando construyamos cada módulo
-        // (citas, afiliados, médicos, farmacia), estos valores se
-        // reemplazan por consultas reales a la base de datos.
         $estadisticas = [
             ['icono' => 'citas',       'numero' => '128',   'texto' => 'Citas de hoy'],
             ['icono' => 'afiliados',   'numero' => '3,542', 'texto' => 'Afiliados activos'],
@@ -33,6 +25,47 @@ class DashboardController extends Controller
             ['icono' => 'medicamentos','numero' => '212',   'texto' => 'Entregas de medicamentos'],
         ];
 
-        return view('admin.dashboard', compact('usuarioActual', 'estadisticas'))->with('seccionActiva', 'dashboard');
+        // Licencia de la IPS de ESTE Administrador (no la ultima creada
+        // en todo el sistema, sino la que pertenece a su propia cuenta).
+        $licenciaActual = $usuarioActual->licencia;
+
+        return view('admin.dashboard', compact('usuarioActual', 'estadisticas', 'licenciaActual'))
+            ->with('seccionActiva', 'dashboard');
+    }
+
+    public function miPlan()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $usuarioActual = Usuario::find($_SESSION['usuario_cedula']);
+        $licenciaActual = $usuarioActual->licencia;
+
+        $planInfo = $licenciaActual
+            ? Plan::porSlug($licenciaActual->plan)
+            : null;
+
+        $historialPagos = $licenciaActual
+            ? Transaccion::where('licencia_id', $licenciaActual->id)
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
+
+        return view('admin.mi-plan', compact('licenciaActual', 'planInfo', 'historialPagos'))
+            ->with('seccionActiva', 'plan');
+    }
+
+    public function planes()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $usuarioActual = Usuario::find($_SESSION['usuario_cedula']);
+        $planes = Plan::catalogoArray();
+
+        return view('admin.planes', compact('planes', 'usuarioActual'))
+            ->with('seccionActiva', 'plan');
     }
 }

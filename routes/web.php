@@ -13,6 +13,11 @@ use App\Http\Controllers\Admin\TipoDocumentoController;
 use App\Http\Controllers\Admin\TipoUsuarioController;
 use App\Http\Controllers\Admin\EpsController;
 use App\Http\Controllers\Admin\RegimenController;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\SuperAdminLoginController;
+use App\Http\Controllers\SuperAdminRecuperarController;
+use App\Http\Controllers\CompraController;
+use App\Models\Plan;
 
 Route::get('/', function () {
     return view('index');
@@ -33,15 +38,44 @@ Route::view('/contacto', 'contacto')->name('contacto.index');
 // Planes del software (publico)
 Route::view('/planes', 'planes')->name('planes.index');
 
+// Detalle de un plan (publico; es el "Ver más")
+Route::get('/planes/{plan}', function (string $plan) {
+    $selectedPlan = Plan::porSlug($plan);
+
+    abort_unless($selectedPlan, 404);
+
+    return view('planes.detalle', [
+        'plan' => $selectedPlan,
+        'planes' => Plan::catalogoArray(),
+        'faqs' => array_merge(
+            config('planes.faq_general', []),
+            config('planes.faq_por_plan.' . $plan, [])
+        ),
+    ]);
+})->where('plan', '[a-z0-9-]+')->name('planes.detalle');
+
+// Compra de un plan (publico): formulario + procesamiento.
+// throttle:5,1 -> maximo 5 intentos por minuto, para evitar spam de licencias falsas.
+Route::middleware('throttle:5,1')->group(function () {
+    Route::get('/comprar/{plan}', [CompraController::class, 'mostrarFormulario'])->where('plan', '[a-z0-9-]+')->name('comprar.form');
+    Route::post('/comprar/{plan}', [CompraController::class, 'procesar'])->where('plan', '[a-z0-9-]+')->name('comprar.procesar');
+});
+
 // Marco legal (publico)
 Route::view('/terminos-y-condiciones', 'terminos_condiciones')->name('terminos.index');
 Route::view('/politica-de-privacidad', 'politica_privacidad')->name('privacidad.index');
 
 // Todo lo que hace el Administrador va bajo /admin/...
-Route::prefix('admin')->middleware('esadministrador')->group(function () {
+Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->group(function () {
 
     // Dashboard: http://127.0.0.1:8000/admin
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Mi Plan: http://127.0.0.1:8000/admin/mi-plan
+    Route::get('/mi-plan', [DashboardController::class, 'miPlan'])->name('admin.plan');
+
+    // Ver planes disponibles sin salir del panel: http://127.0.0.1:8000/admin/planes
+    Route::get('/planes', [DashboardController::class, 'planes'])->name('admin.planes');
 
     // Usuarios: http://127.0.0.1:8000/admin/usuarios
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
@@ -126,6 +160,30 @@ Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')
 Route::prefix('usuario')->middleware('esusuario')->group(function () {
     Route::get('/', [PanelUsuarioController::class, 'index'])->name('usuario.inicio');
 });
+
+// Login del Superadministrador (dueños de PrismaSalud): URL aparte, NO es el login de IPS.
+// throttle:5,1 -> máximo 5 intentos por minuto.
+Route::prefix('super-admin')->group(function () {
+    Route::get('/login', [SuperAdminLoginController::class, 'mostrarFormulario'])->name('superadmin.login');
+    Route::post('/login', [SuperAdminLoginController::class, 'iniciarSesion'])->middleware('throttle:5,1')->name('superadmin.login.post');
+    Route::post('/logout', [SuperAdminLoginController::class, 'cerrarSesion'])->name('superadmin.logout');
+
+    // Recuperar contraseña del Superadministrador (3 pasos)
+    Route::get('/recuperar', [SuperAdminRecuperarController::class, 'paso1'])->name('superadmin.recuperar');
+    Route::post('/recuperar', [SuperAdminRecuperarController::class, 'enviarCodigo'])->middleware('throttle:5,1')->name('superadmin.recuperar.enviar');
+    Route::get('/recuperar/codigo', [SuperAdminRecuperarController::class, 'paso2'])->name('superadmin.recuperar.codigo');
+    Route::post('/recuperar/codigo', [SuperAdminRecuperarController::class, 'verificarCodigo'])->middleware('throttle:5,1')->name('superadmin.recuperar.codigo.verificar');
+    Route::get('/recuperar/nueva', [SuperAdminRecuperarController::class, 'paso3'])->name('superadmin.recuperar.nueva');
+    Route::post('/recuperar/nueva', [SuperAdminRecuperarController::class, 'guardarContrasena'])->middleware('throttle:5,1')->name('superadmin.recuperar.nueva.guardar');
+});
+
+// Panel del Superadministrador: http://127.0.0.1:8000/super-admin
+Route::prefix('super-admin')->middleware('essuperadmin')->group(function () {
+    Route::get('/', [SuperAdminController::class, 'index'])->name('superadmin.dashboard');
+});
+
+// Empresas y Administradores del Superadmin (están en routes/superadmin.php)
+require __DIR__.'/superadmin.php';
 
 // Rutas de recuperación de contraseña (públicas).
 // Son tres pasos separados: 1) correo -> 2) código -> 3) nueva contraseña.
