@@ -131,6 +131,7 @@
             @php
                 $menu = [
                     ['icono' => 'dashboard',     'texto' => 'Dashboard',              'ruta' => route('admin.dashboard'),     'clave' => 'dashboard',    'tablas' => null],
+                    ['icono' => 'licencias',     'texto' => 'Mi Plan',                'ruta' => route('admin.plan'),          'clave' => 'plan',         'tablas' => null],
                     ['icono' => 'usuarios',      'texto' => 'Usuarios y Roles',        'ruta' => route('usuarios.index'),      'clave' => 'usuarios',     'tablas' => ['usuarios', 'roles', 'tipos de documento']],
                     ['icono' => 'ubicaciones',   'texto' => 'Ubicaciones',             'ruta' => route('departamentos.index'), 'clave' => 'ubicaciones',  'tablas' => ['departamentos', 'ciudades', 'sedes']],
                     ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => route('eps.index'), 'clave' => 'eps', 'tablas' => ['eps', 'regimen']],

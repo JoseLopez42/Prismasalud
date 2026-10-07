@@ -29,6 +29,7 @@ class Usuario extends Model
         'id_tipo_documento',
         'nit_eps',
         'activo',
+        'licencia_id',
     ];
 
     protected $hidden = [
@@ -51,5 +52,11 @@ class Usuario extends Model
     public function tipoDocumento()
     {
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
+    }
+
+    // Licencia (plan comprado) del usuario
+    public function licencia()
+    {
+        return $this->belongsTo(Licencia::class, 'licencia_id');
     }
 }
