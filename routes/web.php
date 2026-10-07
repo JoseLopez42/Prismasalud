@@ -166,6 +166,9 @@ Route::prefix('usuario')->middleware('esusuario')->group(function () {
 Route::prefix('super-admin')->group(function () {
     Route::get('/login', [SuperAdminLoginController::class, 'mostrarFormulario'])->name('superadmin.login');
     Route::post('/login', [SuperAdminLoginController::class, 'iniciarSesion'])->middleware('throttle:5,1')->name('superadmin.login.post');
+    Route::get('/login/codigo', [SuperAdminLoginController::class, 'mostrarCodigo'])->name('superadmin.login.codigo');
+    Route::post('/login/codigo', [SuperAdminLoginController::class, 'verificarCodigo'])->middleware('throttle:5,1')->name('superadmin.login.codigo.verificar');
+    Route::post('/login/codigo/reenviar', [SuperAdminLoginController::class, 'reenviarCodigo'])->middleware('throttle:5,1')->name('superadmin.login.codigo.reenviar');
     Route::post('/logout', [SuperAdminLoginController::class, 'cerrarSesion'])->name('superadmin.logout');
 
     // Recuperar contraseña del Superadministrador (3 pasos)
