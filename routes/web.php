@@ -5,6 +5,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PanelUsuarioController;
+use App\Http\Controllers\UsuarioCitaController;
 use App\Http\Controllers\RecuperarPasswordController;
 use App\Http\Controllers\Admin\DepartamentoController;
 use App\Http\Controllers\Admin\CiudadController;
@@ -17,6 +18,14 @@ use App\Http\Controllers\Admin\EspecialidadController;
 use App\Http\Controllers\Admin\MedicoController;
 use App\Http\Controllers\Admin\ConsultorioController;
 use App\Http\Controllers\Admin\HorarioMedicoController;
+use App\Http\Controllers\Admin\TipoCitaController;
+use App\Http\Controllers\Admin\EstadoCitaController;
+use App\Http\Controllers\Admin\CitaMedicaController;
+use App\Http\Controllers\Admin\HistoriaClinicaController;
+use App\Http\Controllers\Medico\PanelMedicoController;
+use App\Http\Controllers\Medico\HistoriaMedicaController;
+use App\Http\Controllers\Medico\ProcedimientoController;
+use App\Http\Controllers\Medico\ConsultaMedicaController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminLoginController;
 use App\Http\Controllers\SuperAdminRecuperarController;
@@ -189,6 +198,38 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
         Route::put('/horarios/{id}', [HorarioMedicoController::class, 'update'])->name('horario_medico.update');
         Route::patch('/horarios/{id}/estado', [HorarioMedicoController::class, 'cambiarEstado'])->name('horario_medico.estado');
     });
+
+    // Citas Médicas: /admin/citas/...
+    Route::prefix('citas')->group(function () {
+
+        // Citas: /admin/citas
+        Route::get('/', [CitaMedicaController::class, 'index'])->name('cita.index');
+        Route::get('/crear', [CitaMedicaController::class, 'create'])->name('cita.create');
+        Route::post('/', [CitaMedicaController::class, 'store'])->name('cita.store');
+        Route::get('/{id}/editar', [CitaMedicaController::class, 'edit'])->name('cita.edit');
+        Route::put('/{id}', [CitaMedicaController::class, 'update'])->name('cita.update');
+        Route::patch('/{id}/estado', [CitaMedicaController::class, 'cambiarEstado'])->name('cita.estado');
+
+        // Tipos de cita: /admin/citas/tipos
+        Route::get('/tipos', [TipoCitaController::class, 'index'])->name('tipo_cita.index');
+        Route::get('/tipos/crear', [TipoCitaController::class, 'create'])->name('tipo_cita.create');
+        Route::post('/tipos', [TipoCitaController::class, 'store'])->name('tipo_cita.store');
+        Route::get('/tipos/{id}/editar', [TipoCitaController::class, 'edit'])->name('tipo_cita.edit');
+        Route::put('/tipos/{id}', [TipoCitaController::class, 'update'])->name('tipo_cita.update');
+        Route::patch('/tipos/{id}/estado', [TipoCitaController::class, 'cambiarEstado'])->name('tipo_cita.estado');
+
+        // Estados de cita: /admin/citas/estados
+        Route::get('/estados', [EstadoCitaController::class, 'index'])->name('estado_cita.index');
+        Route::get('/estados/crear', [EstadoCitaController::class, 'create'])->name('estado_cita.create');
+        Route::post('/estados', [EstadoCitaController::class, 'store'])->name('estado_cita.store');
+        Route::get('/estados/{id}/editar', [EstadoCitaController::class, 'edit'])->name('estado_cita.edit');
+        Route::put('/estados/{id}', [EstadoCitaController::class, 'update'])->name('estado_cita.update');
+        Route::patch('/estados/{id}/estado', [EstadoCitaController::class, 'cambiarEstado'])->name('estado_cita.estado');
+    });
+
+    // Historia Clínica: el administrador visualiza TODAS las historias
+    // médicas creadas por los médicos (búsqueda por cédula del paciente).
+    Route::get('/historia', [HistoriaClinicaController::class, 'index'])->name('historia.index');
 });
 
 // Rutas de login (públicas, cualquiera puede acceder al formulario)
@@ -199,6 +240,44 @@ Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout')
 // Panel del Usuario (roles distintos a Administrador)
 Route::prefix('usuario')->middleware('esusuario')->group(function () {
     Route::get('/', [PanelUsuarioController::class, 'index'])->name('usuario.inicio');
+
+    // Citas del paciente: agendar y consultar sus propias citas
+    Route::get('/citas', [UsuarioCitaController::class, 'misCitas'])->name('usuario.citas.index');
+    Route::get('/citas/crear', [UsuarioCitaController::class, 'crearCita'])->name('usuario.citas.create');
+    Route::post('/citas', [UsuarioCitaController::class, 'guardarCita'])->name('usuario.citas.store');
+
+    // Medicamentos formulados al paciente
+    Route::get('/medicamentos', [PanelUsuarioController::class, 'misMedicamentos'])->name('usuario.medicamentos.index');
+});
+
+// Panel del Médico. Su cuenta vive en la tabla "medico" (cédula +
+// contraseña propia), por eso tiene su propio espacio /medico.
+Route::prefix('medico')->middleware('esmedico')->group(function () {
+    // Inicio: citas programadas del médico
+    Route::get('/', [PanelMedicoController::class, 'inicio'])->name('medico.inicio');
+
+    // Atención de una cita: historia clínica, procedimientos y medicamentos
+    Route::get('/citas/{id}', [ConsultaMedicaController::class, 'show'])->name('medico.cita.show');
+    Route::post('/citas/{id}/historia', [ConsultaMedicaController::class, 'storeHistoria'])->name('medico.cita.historia');
+    Route::post('/citas/{id}/diagnostico', [ConsultaMedicaController::class, 'storeDiagnostico'])->name('medico.cita.diagnostico');
+    Route::post('/citas/{id}/enfermedad', [ConsultaMedicaController::class, 'storeEnfermedad'])->name('medico.cita.enfermedad');
+    Route::post('/citas/{id}/procedimiento', [ConsultaMedicaController::class, 'storeProcedimiento'])->name('medico.cita.procedimiento');
+    Route::post('/citas/{id}/prescripcion', [ConsultaMedicaController::class, 'storePrescripcion'])->name('medico.cita.prescripcion');
+    Route::patch('/citas/{id}/atendida', [ConsultaMedicaController::class, 'marcarAtendida'])->name('medico.cita.atendida');
+
+    // Historia médica: buscar la historia de un paciente por cédula
+    // y registrar historia clínica, diagnósticos y enfermedades.
+    Route::get('/historia', [HistoriaMedicaController::class, 'index'])->name('medico.historia.index');
+    Route::post('/historia', [HistoriaMedicaController::class, 'storeHistoria'])->name('medico.historia.store');
+    Route::post('/diagnostico', [HistoriaMedicaController::class, 'storeDiagnostico'])->name('medico.diagnostico.store');
+    Route::post('/enfermedad', [HistoriaMedicaController::class, 'storeEnfermedad'])->name('medico.enfermedad.store');
+
+    // Procedimientos: buscar por cédula y registrar el procedimiento,
+    // su tipo (catálogo) y el detalle del procedimiento.
+    Route::get('/procedimientos', [ProcedimientoController::class, 'index'])->name('medico.procedimiento.index');
+    Route::post('/procedimiento', [ProcedimientoController::class, 'storeProcedimiento'])->name('medico.procedimiento.store');
+    Route::post('/tipo-procedimiento', [ProcedimientoController::class, 'storeTipoProcedimiento'])->name('medico.tipo_procedimiento.store');
+    Route::post('/detalle-procedimiento', [ProcedimientoController::class, 'storeDetalleProcedimiento'])->name('medico.detalle_procedimiento.store');
 });
 
 // Login del Superadministrador (dueños de PrismaSalud): URL aparte, NO es el login de IPS.

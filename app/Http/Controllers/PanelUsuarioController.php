@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin\Prescripcion;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 
@@ -38,5 +39,24 @@ class PanelUsuarioController extends Controller
         ];
 
         return view('usuario.inicio', compact('usuario', 'resumen', 'servicios'))->with('seccionActiva', 'inicio');
+    }
+
+    /**
+     * Medicamentos que los médicos le han formulado al paciente.
+     */
+    public function misMedicamentos()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $prescripciones = Prescripcion::with(['medico', 'cita'])
+            ->where('cedula_paciente', $_SESSION['usuario_cedula'])
+            ->orderBy('fecha', 'desc')
+            ->get();
+
+        $seccionActiva = 'medicinas';
+
+        return view('usuario.medicamentos.index', compact('prescripciones', 'seccionActiva'));
     }
 }

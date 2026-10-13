@@ -1,0 +1,363 @@
+@extends('medico.layout')
+
+@section('titulo', 'Atender cita')
+@section('encabezado', 'Atención de la cita')
+
+@section('contenido')
+
+    <a href="{{ route('medico.inicio') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-900 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver a mis citas
+    </a>
+
+    @if (session('exito'))
+        <div class="bg-green-50 text-green-700 text-sm rounded-md px-4 py-2 mb-4">{{ session('exito') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="bg-red-50 text-red-600 text-sm rounded-md px-4 py-2 mb-4">{{ $errors->first() }}</div>
+    @endif
+
+    {{-- Ficha de la cita y del paciente --}}
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full bg-teal-600 text-white flex items-center justify-center text-lg font-bold flex-shrink-0">
+                    {{ $cita->paciente ? strtoupper(substr($cita->paciente->nombres, 0, 1) . substr($cita->paciente->apellidos, 0, 1)) : '?' }}
+                </div>
+                <div class="min-w-0">
+                    <p class="text-lg font-bold text-gray-900 truncate">
+                        {{ $cita->paciente ? $cita->paciente->nombres . ' ' . $cita->paciente->apellidos : 'Paciente no encontrado' }}
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        C.C. {{ $cita->cedula_usuario }}
+                        @if ($cita->paciente && $cita->paciente->edad) · {{ $cita->paciente->edad }} años @endif
+                        @if ($cita->paciente) · {{ $cita->paciente->telefono ?: 'Sin teléfono' }} @endif
+                    </p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        {{ $cita->fecha->format('d/m/Y') }} · {{ substr($cita->hora_inicio, 0, 5) }}–{{ substr($cita->hora_fin, 0, 5) }}
+                        · {{ $cita->consultorio->nombre ?? 'Sin consultorio' }}
+                        · {{ $cita->tipoCita->nombre ?? 'Consulta' }}
+                    </p>
+                    @if ($cita->motivo)
+                        <p class="text-xs text-gray-500 mt-1"><strong>Motivo:</strong> {{ $cita->motivo }}</p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-3 py-1.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    {{ $cita->estadoCita->nombre ?? 'Pendiente' }}
+                </span>
+                <form method="POST" action="{{ route('medico.cita.atendida', $cita->id) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 hover:shadow-md transition">
+                        Marcar como atendida
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Pestañas --}}
+    @php $tabInicial = old('_tab', 'historia'); @endphp
+
+    <div class="flex flex-wrap gap-2 mb-4" id="tabs-cita">
+        <button type="button" data-tab="historia"
+                class="tab-boton inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition">
+            @include('admin.partials.icono', ['icono' => 'historia', 'clase' => 'w-4 h-4'])
+            Historia clínica
+            <span class="text-xs bg-white/70 text-gray-500 rounded-full px-2 py-0.5">{{ $historias->count() }}</span>
+        </button>
+        <button type="button" data-tab="procedimiento"
+                class="tab-boton inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition">
+            @include('admin.partials.icono', ['icono' => 'procedimientos', 'clase' => 'w-4 h-4'])
+            Procedimientos
+            <span class="text-xs bg-white/70 text-gray-500 rounded-full px-2 py-0.5">{{ $procedimientos->count() }}</span>
+        </button>
+        <button type="button" data-tab="medicamento"
+                class="tab-boton inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition">
+            @include('admin.partials.icono', ['icono' => 'medicamentos', 'clase' => 'w-4 h-4'])
+            Medicamentos
+            <span class="text-xs bg-white/70 text-gray-500 rounded-full px-2 py-0.5">{{ $prescripciones->count() }}</span>
+        </button>
+    </div>
+
+    {{-- ===================== HISTORIA CLÍNICA ===================== --}}
+    <section id="panel-historia" class="tab-panel">
+        <div class="grid lg:grid-cols-2 gap-6">
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                    <h3 class="font-bold text-gray-900 mb-4">Registrar historia clínica</h3>
+                    <form method="POST" action="{{ route('medico.cita.historia', $cita->id) }}" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="_tab" value="historia">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha *</label>
+                            <input type="date" name="fecha" value="{{ old('fecha', now()->toDateString()) }}" required
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Motivo de consulta</label>
+                            <textarea name="motivo_consulta" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('motivo_consulta', $cita->motivo) }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Antecedentes</label>
+                            <textarea name="antecedentes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('antecedentes') }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Examen físico</label>
+                            <textarea name="examen_fisico" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('examen_fisico') }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Observaciones</label>
+                            <textarea name="observaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('observaciones') }}</textarea>
+                        </div>
+                        <button type="submit"
+                                class="w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 hover:shadow-md transition">
+                            Guardar historia clínica
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 mb-4">Historia de esta cita</h3>
+                @forelse ($historias as $historia)
+                    <div class="border border-gray-100 rounded-xl p-4 mb-3 last:mb-0">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-sm font-semibold text-gray-900">{{ $historia->fecha->format('d/m/Y') }}</span>
+                        </div>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            @if ($historia->motivo_consulta)<p><strong>Motivo:</strong> {{ $historia->motivo_consulta }}</p>@endif
+                            @if ($historia->antecedentes)<p><strong>Antecedentes:</strong> {{ $historia->antecedentes }}</p>@endif
+                            @if ($historia->examen_fisico)<p><strong>Examen físico:</strong> {{ $historia->examen_fisico }}</p>@endif
+                            @if ($historia->observaciones)<p><strong>Observaciones:</strong> {{ $historia->observaciones }}</p>@endif
+                        </div>
+
+                        @if ($historia->diagnosticos->count())
+                            <div class="mt-3">
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Diagnósticos</p>
+                                @foreach ($historia->diagnosticos as $diagnostico)
+                                    <span class="inline-block text-xs text-teal-700 bg-teal-50 border border-teal-100 rounded-full px-2 py-0.5 mr-1 mb-1">{{ $diagnostico->descripcion }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        @if ($historia->enfermedades->count())
+                            <div class="mt-2">
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Enfermedades</p>
+                                @foreach ($historia->enfermedades as $enfermedad)
+                                    <span class="inline-block text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-full px-2 py-0.5 mr-1 mb-1">{{ $enfermedad->nombre }}</span>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-400 text-center py-8">Aún no has registrado la historia clínica de esta cita.</p>
+                @endforelse
+
+                @if ($historias->count())
+                    <div class="mt-6 pt-5 border-t border-gray-100 grid sm:grid-cols-2 gap-5">
+                        {{-- Diagnóstico --}}
+                        <form method="POST" action="{{ route('medico.cita.diagnostico', $cita->id) }}" class="space-y-3">
+                            @csrf
+                            <input type="hidden" name="_tab" value="historia">
+                            <p class="text-sm font-semibold text-gray-800">Agregar diagnóstico</p>
+                            <input type="text" name="descripcion" required maxlength="255" placeholder="Ej: Faringitis aguda"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="hidden" name="fecha" value="{{ now()->toDateString() }}">
+                            <select name="id_historia_clinica"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                @foreach ($historias as $historia)
+                                    <option value="{{ $historia->id }}">Historia {{ $historia->fecha->format('d/m/Y') }}</option>
+                                @endforeach
+                            </select>
+                            <button class="w-full bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">Guardar diagnóstico</button>
+                        </form>
+
+                        {{-- Enfermedad --}}
+                        <form method="POST" action="{{ route('medico.cita.enfermedad', $cita->id) }}" class="space-y-3">
+                            @csrf
+                            <input type="hidden" name="_tab" value="historia">
+                            <p class="text-sm font-semibold text-gray-800">Agregar enfermedad</p>
+                            <input type="text" name="nombre" required maxlength="150" placeholder="Ej: Hipertensión arterial"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <input type="hidden" name="fecha" value="{{ now()->toDateString() }}">
+                            <select name="id_historia_clinica"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                @foreach ($historias as $historia)
+                                    <option value="{{ $historia->id }}">Historia {{ $historia->fecha->format('d/m/Y') }}</option>
+                                @endforeach
+                            </select>
+                            <button class="w-full bg-indigo-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-indigo-700 transition">Guardar enfermedad</button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+
+    {{-- ===================== PROCEDIMIENTO ===================== --}}
+    <section id="panel-procedimiento" class="tab-panel hidden">
+        <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 mb-4">Registrar procedimiento</h3>
+                <form method="POST" action="{{ route('medico.cita.procedimiento', $cita->id) }}" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="_tab" value="procedimiento">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de procedimiento</label>
+                        <select name="id_tipo_procedimiento"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <option value="">Selecciona...</option>
+                            @foreach ($tipos as $tipo)
+                                <option value="{{ $tipo->id }}" {{ old('id_tipo_procedimiento') == $tipo->id ? 'selected' : '' }}>{{ $tipo->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción *</label>
+                        <input type="text" name="descripcion" value="{{ old('descripcion') }}" required maxlength="255"
+                               placeholder="Ej: Sutura de herida"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Observaciones</label>
+                        <textarea name="observaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('observaciones') }}</textarea>
+                    </div>
+                    <input type="hidden" name="fecha" value="{{ now()->toDateString() }}">
+                    <button type="submit"
+                            class="w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 hover:shadow-md transition">
+                        Guardar procedimiento
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 mb-4">Procedimientos de esta cita</h3>
+                @forelse ($procedimientos as $procedimiento)
+                    <div class="border border-gray-100 rounded-xl p-4 mb-3 last:mb-0">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="text-sm font-semibold text-gray-900">{{ $procedimiento->descripcion }}</span>
+                            <span class="text-xs text-gray-400">{{ $procedimiento->fecha->format('d/m/Y') }}</span>
+                        </div>
+                        @if ($procedimiento->tipoProcedimiento)
+                            <span class="inline-block text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">{{ $procedimiento->tipoProcedimiento->nombre }}</span>
+                        @endif
+                        @if ($procedimiento->observaciones)
+                            <p class="text-xs text-gray-600 mt-2">{{ $procedimiento->observaciones }}</p>
+                        @endif
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-400 text-center py-8">Aún no has registrado procedimientos en esta cita.</p>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    {{-- ===================== MEDICAMENTOS ===================== --}}
+    <section id="panel-medicamento" class="tab-panel hidden">
+        <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 mb-4">Formular medicamento</h3>
+                <form method="POST" action="{{ route('medico.cita.prescripcion', $cita->id) }}" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="_tab" value="medicamento">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Medicamento *</label>
+                        <input type="text" name="medicamento" list="lista-medicamentos" required maxlength="150"
+                               value="{{ old('medicamento') }}" placeholder="Escribe o selecciona un medicamento"
+                               autocomplete="off"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        <datalist id="lista-medicamentos">
+                            @foreach ($medicamentos as $medicamento)
+                                <option value="{{ $medicamento->nombre }}">{{ $medicamento->presentacion }}</option>
+                            @endforeach
+                        </datalist>
+                    </div>
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Dosis</label>
+                            <input type="text" name="dosis" value="{{ old('dosis') }}" maxlength="100" placeholder="500 mg"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Frecuencia</label>
+                            <input type="text" name="frecuencia" value="{{ old('frecuencia') }}" maxlength="100" placeholder="Cada 8 horas"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Duración</label>
+                            <input type="text" name="duracion" value="{{ old('duracion') }}" maxlength="100" placeholder="5 días"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Indicaciones</label>
+                        <textarea name="indicaciones" rows="2" placeholder="Ej: Tomar después de las comidas"
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('indicaciones') }}</textarea>
+                    </div>
+                    <button type="submit"
+                            class="w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 hover:shadow-md transition">
+                        Formular medicamento
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 mb-4">Fórmula de esta cita</h3>
+                @forelse ($prescripciones as $prescripcion)
+                    <div class="border border-gray-100 rounded-xl p-4 mb-3 last:mb-0">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="text-sm font-semibold text-gray-900">{{ $prescripcion->medicamento }}</span>
+                            <span class="text-xs text-gray-400">{{ $prescripcion->fecha->format('d/m/Y') }}</span>
+                        </div>
+                        <div class="text-xs text-gray-600 space-y-0.5">
+                            @if ($prescripcion->dosis)<p><strong>Dosis:</strong> {{ $prescripcion->dosis }}</p>@endif
+                            @if ($prescripcion->frecuencia)<p><strong>Frecuencia:</strong> {{ $prescripcion->frecuencia }}</p>@endif
+                            @if ($prescripcion->duracion)<p><strong>Duración:</strong> {{ $prescripcion->duracion }}</p>@endif
+                            @if ($prescripcion->indicaciones)<p><strong>Indicaciones:</strong> {{ $prescripcion->indicaciones }}</p>@endif
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-400 text-center py-8">Aún no has formulado medicamentos en esta cita.</p>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+@endsection
+
+@push('scripts')
+    <script>
+        const botones = document.querySelectorAll('#tabs-cita .tab-boton');
+        const paneles = document.querySelectorAll('.tab-panel');
+
+        function activarTab(nombre) {
+            botones.forEach(function (b) {
+                const activo = b.getAttribute('data-tab') === nombre;
+                b.classList.toggle('bg-teal-600', activo);
+                b.classList.toggle('text-white', activo);
+                b.classList.toggle('border-teal-600', activo);
+                b.classList.toggle('bg-white', !activo);
+                b.classList.toggle('text-gray-600', !activo);
+                b.classList.toggle('border-gray-200', !activo);
+            });
+            paneles.forEach(function (p) {
+                p.classList.toggle('hidden', p.id !== 'panel-' + nombre);
+            });
+        }
+
+        botones.forEach(function (b) {
+            b.addEventListener('click', function () { activarTab(b.getAttribute('data-tab')); });
+        });
+
+        activarTab('{{ $tabInicial }}');
+    </script>
+@endpush

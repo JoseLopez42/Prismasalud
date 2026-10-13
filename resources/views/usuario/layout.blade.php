@@ -85,11 +85,11 @@
             @php
                 $menu = [
                     ['icono' => 'dashboard',      'texto' => 'Inicio',             'ruta' => route('usuario.inicio'), 'clave' => 'inicio',   'tablas' => null],
-                    ['icono' => 'citas',          'texto' => 'Agendar cita',        'ruta' => '#', 'clave' => 'agendar',     'tablas' => null],
-                    ['icono' => 'citas',          'texto' => 'Mis citas',           'ruta' => '#', 'clave' => 'mis_citas',   'tablas' => null],
+                    ['icono' => 'citas',          'texto' => 'Agendar cita',        'ruta' => route('usuario.citas.create'), 'clave' => 'agendar',     'tablas' => null],
+                    ['icono' => 'citas',          'texto' => 'Mis citas',           'ruta' => route('usuario.citas.index'),  'clave' => 'mis_citas',   'tablas' => null],
                     ['icono' => 'historia',       'texto' => 'Historia clínica',    'ruta' => '#', 'clave' => 'historia',    'tablas' => null],
                     ['icono' => 'afiliaciones',   'texto' => 'Mi afiliación',       'ruta' => '#', 'clave' => 'afiliacion',  'tablas' => ['beneficiarios', 'eps', 'estado']],
-                    ['icono' => 'farmacia',       'texto' => 'Mis medicamentos',    'ruta' => '#', 'clave' => 'medicinas',   'tablas' => ['medicamentos', 'entregas']],
+                    ['icono' => 'farmacia',       'texto' => 'Mis medicamentos',    'ruta' => route('usuario.medicamentos.index'), 'clave' => 'medicinas', 'tablas' => null],
                     ['icono' => 'configuracion',  'texto' => 'Mi perfil',           'ruta' => '#', 'clave' => 'perfil',      'tablas' => null],
                 ];
             @endphp

@@ -137,9 +137,8 @@
                     ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => route('eps.index'), 'clave' => 'eps', 'tablas' => ['eps', 'regimen']],
                     ['icono' => 'afiliaciones',  'texto' => 'Afiliaciones',           'ruta' => '#', 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
                     ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => route('medico.index'), 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
-                    ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => '#', 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
-                    ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => '#', 'clave' => 'historia',       'tablas' => ['historia_clinica', 'diagnostico', 'enfermedad']],
-                    ['icono' => 'procedimientos','texto' => 'Procedimientos',         'ruta' => '#', 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
+                    ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => route('cita.index'), 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
+                    ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => route('historia.index'), 'clave' => 'historia',       'tablas' => null],
                     ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => '#', 'clave' => 'farmacia',       'tablas' => ['medicamentos', 'entrega_medicamento', 'estado_entrega', 'farmacia']],
                     ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
                     ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
@@ -193,6 +192,9 @@
                                             'especialidad' => route('especialidad.index'),
                                             'consultorio' => route('consultorio.index'),
                                             'horario_medico' => route('horario_medico.index'),
+                                            'cita' => route('cita.index'),
+                                            'tipo_cita' => route('tipo_cita.index'),
+                                            'estado_cita' => route('estado_cita.index'),
                                             default => '#',
                                         };
                                     @endphp
@@ -224,6 +226,9 @@
                                             'especialidad' => route('especialidad.index'),
                                             'consultorio' => route('consultorio.index'),
                                             'horario_medico' => route('horario_medico.index'),
+                                            'cita' => route('cita.index'),
+                                            'tipo_cita' => route('tipo_cita.index'),
+                                            'estado_cita' => route('estado_cita.index'),
                                             default => '#',
                                         };
                                     @endphp

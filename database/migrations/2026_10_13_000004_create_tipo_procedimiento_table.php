@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Tabla "tipo_procedimiento": catálogo de tipos de procedimiento
+     * (consulta, laboratorio, cirugía, ...). Es compartido por todos
+     * los médicos y alimenta el selector al registrar un procedimiento.
+     */
+    public function up(): void
+    {
+        Schema::create('tipo_procedimiento', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('nombre', 150)->unique();
+            $table->text('descripcion')->nullable();
+
+            $table->boolean('activo')->default(true);
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('tipo_procedimiento');
+    }
+};

@@ -58,64 +58,25 @@
         @endforeach
     </div>
 
-    <h3 class="text-base font-bold text-gray-900 mb-1">Gestión de la base de datos</h3>
-    <p class="text-sm text-gray-500 mb-4">Acceso directo a las tablas del sistema, agrupadas por módulo</p>
-
-    @php
-        $modulos = [
-            ['icono' => 'usuarios',     'titulo' => 'Usuarios y Roles',        'cantidad' => 3, 'tablas' => ['usuarios', 'roles', 'tipos de documento']],
-            ['icono' => 'ubicaciones',  'titulo' => 'Ubicaciones',             'cantidad' => 3, 'tablas' => ['departamento', 'ciudad', 'sede']],
-            ['icono' => 'eps',          'titulo' => 'EPS',                    'cantidad' => 2, 'tablas' => ['eps', 'regimen']],
-            ['icono' => 'afiliaciones', 'titulo' => 'Afiliaciones',           'cantidad' => 4, 'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
-            ['icono' => 'citas',        'titulo' => 'Citas Médicas',          'cantidad' => 6, 'tablas' => ['cita', 'tipo_cita', 'estado_cita', 'Enfermedad', 'Tipo Enfermedad', 'Historia Clínica(solo admin)']],
-            ['icono' => 'historia',     'titulo' => 'Historia Clínica',        'cantidad' => 3, 'tablas' => ['historia_clinica', 'diagnostico', 'enfermedad']],
-            ['icono' => 'procedimientos','titulo' => 'Procedimientos',         'cantidad' => 3, 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
-            ['icono' => 'medicos',      'titulo' => 'Médicos y Consultorios',  'cantidad' => 4, 'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
-            ['icono' => 'farmacia',     'titulo' => 'Farmacia y Medicamentos', 'cantidad' => 4, 'tablas' => ['medicamentos', 'entrega_medicamento', 'Fecha Vencimiento', 'estado_entrega', 'farmacia']],
-        ];
-    @endphp
+    <h3 class="text-base font-bold text-gray-900 mb-1">Historia clínica</h3>
+    <p class="text-sm text-gray-500 mb-4">Consulta todas las historias médicas que los médicos han registrado para los pacientes</p>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        @foreach ($modulos as $modulo)
-            <div class="dashboard-entrada bg-white border border-gray-200 rounded-xl p-5 hover:-translate-y-1 hover:shadow-lg hover:border-teal-300 transition-all duration-300"
-                 style="animation-delay: {{ 300 + $loop->index * 60 }}ms">
-                <div class="flex items-center gap-3 mb-1">
-                    <div class="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                        @include('admin.partials.icono', ['icono' => $modulo['icono'], 'clase' => 'w-5 h-5'])
-                    </div>
-                    <p class="font-semibold text-gray-900 text-sm">{{ $modulo['titulo'] }}</p>
+        <a href="{{ route('historia.index') }}"
+           class="dashboard-entrada group bg-white border border-gray-200 rounded-xl p-5 hover:-translate-y-1 hover:shadow-lg hover:border-teal-300 transition-all duration-300"
+           style="animation-delay: 300ms">
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    @include('admin.partials.icono', ['icono' => 'historia', 'clase' => 'w-5 h-5'])
                 </div>
-                <p class="text-xs text-gray-400 mb-3">{{ $modulo['cantidad'] }} tablas</p>
-
-                {{-- Botón pill por tabla, listo para su ruta real --}}
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($modulo['tablas'] as $tabla)
-                        @php
-                            $rutaTabla = match ($tabla) {
-                                'departamento', 'departamentos' => route('departamentos.index'),
-                                'ciudad', 'ciudades' => route('ciudades.index'),
-                                'sede', 'sedes' => route('sedes.index'),
-                                'usuario', 'usuarios' => route('usuarios.index'),
-                                'tipo de documento', 'tipos de documento' => route('tipos_documento.index'),
-                                'rol', 'roles' => route('roles.index'),
-                                'eps' => route('eps.index'),
-                                'regimen' => route('regimen.index'),
-                                'medico' => route('medico.index'),
-                                'especialidad' => route('especialidad.index'),
-                                'consultorio' => route('consultorio.index'),
-                                'horario_medico' => route('horario_medico.index'),
-                                default => '#',
-                            };
-                        @endphp
-                        <a href="{{ $rutaTabla }}"
-                           class="group inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1.5 rounded-full hover:bg-teal-600 hover:text-white hover:border-teal-600 hover:shadow-md hover:-translate-y-0.5 transition">
-                            {{ ucfirst($tabla) }}
-                            @include('admin.partials.icono', ['icono' => 'flecha', 'clase' => 'w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform'])
-                        </a>
-                    @endforeach
-                </div>
+                <p class="font-semibold text-gray-900 text-sm">Historia Clínica</p>
             </div>
-        @endforeach
+            <p class="text-xs text-gray-400 mb-3">Ver todas las historias médicas registradas</p>
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1.5 rounded-full group-hover:bg-teal-600 group-hover:text-white group-hover:border-teal-600 transition">
+                Abrir listado
+                @include('admin.partials.icono', ['icono' => 'flecha', 'clase' => 'w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform'])
+            </span>
+        </a>
     </div>
 
 @endsection

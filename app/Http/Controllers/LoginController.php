@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin\Medico;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 
@@ -39,6 +40,22 @@ class LoginController extends Controller
 
         // Buscamos el usuario por cédula (la PK de la tabla).
         $usuario = Usuario::find($credenciales['cedula']);
+
+        // Si no existe como usuario de la plataforma, puede tratarse
+        // de un MÉDICO: su cuenta vive en la tabla "medico" (tiene su
+        // propia contraseña) y accede a su propio panel.
+        if (!$usuario) {
+            $medico = Medico::find($credenciales['cedula']);
+
+            if ($medico && $medico->estado === 'activo'
+                && password_verify($credenciales['contrasena'], $medico->contrasena)) {
+                $_SESSION['medico_cedula']   = $medico->cedula;
+                $_SESSION['medico_nombres']  = $medico->nombres;
+                $_SESSION['tipo_usuario_id'] = 3;
+
+                return redirect()->route('medico.inicio');
+            }
+        }
 
         // Si no existe el usuario, o la contraseña no coincide con
         // el hash guardado (bcrypt), la sesión no se abre.
