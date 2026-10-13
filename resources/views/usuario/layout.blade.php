@@ -87,10 +87,10 @@
                     ['icono' => 'dashboard',      'texto' => 'Inicio',             'ruta' => route('usuario.inicio'), 'clave' => 'inicio',   'tablas' => null],
                     ['icono' => 'citas',          'texto' => 'Agendar cita',        'ruta' => route('usuario.citas.create'), 'clave' => 'agendar',     'tablas' => null],
                     ['icono' => 'citas',          'texto' => 'Mis citas',           'ruta' => route('usuario.citas.index'),  'clave' => 'mis_citas',   'tablas' => null],
-                    ['icono' => 'historia',       'texto' => 'Historia clínica',    'ruta' => '#', 'clave' => 'historia',    'tablas' => null],
-                    ['icono' => 'afiliaciones',   'texto' => 'Mi afiliación',       'ruta' => '#', 'clave' => 'afiliacion',  'tablas' => ['beneficiarios', 'eps', 'estado']],
+                    ['icono' => 'historia',       'texto' => 'Historia clínica',    'ruta' => route('usuario.historia.index'), 'clave' => 'historia',    'tablas' => null],
+                    ['icono' => 'afiliaciones',   'texto' => 'Mi afiliación',       'ruta' => route('usuario.afiliacion.index'), 'clave' => 'afiliacion',  'tablas' => null],
                     ['icono' => 'farmacia',       'texto' => 'Mis medicamentos',    'ruta' => route('usuario.medicamentos.index'), 'clave' => 'medicinas', 'tablas' => null],
-                    ['icono' => 'configuracion',  'texto' => 'Mi perfil',           'ruta' => '#', 'clave' => 'perfil',      'tablas' => null],
+                    ['icono' => 'configuracion',  'texto' => 'Mi perfil',           'ruta' => route('usuario.perfil'), 'clave' => 'perfil',      'tablas' => null],
                 ];
             @endphp
 

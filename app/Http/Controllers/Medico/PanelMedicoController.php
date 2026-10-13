@@ -23,22 +23,40 @@ class PanelMedicoController extends Controller
 
         $medico = Medico::with('especialidad')->find($cedulaMedico);
 
-        // Todas las citas asignadas a este médico (las programadas y las pasadas)
-        $citas = CitaMedica::with(['paciente', 'consultorio', 'tipoCita', 'estadoCita'])
+        $hoy = now()->toDateString();
+
+        // Citas próximas (hoy en adelante) y anteriores (ya pasadas)
+        $citasProximas = CitaMedica::with(['paciente', 'consultorio', 'tipoCita', 'estadoCita'])
             ->where('cedula_medico', $cedulaMedico)
-            ->orderBy('fecha', 'desc')
+            ->where('activo', true)
+            ->whereDate('fecha', '>=', $hoy)
+            ->orderBy('fecha')
             ->orderBy('hora_inicio')
             ->get();
 
+        $citasAnteriores = CitaMedica::with(['paciente', 'consultorio', 'tipoCita', 'estadoCita'])
+            ->where('cedula_medico', $cedulaMedico)
+            ->where('activo', true)
+            ->whereDate('fecha', '<', $hoy)
+            ->orderBy('fecha', 'desc')
+            ->orderBy('hora_inicio', 'desc')
+            ->limit(10)
+            ->get();
+
+        $citasHoy = CitaMedica::where('cedula_medico', $cedulaMedico)
+            ->where('activo', true)
+            ->whereDate('fecha', $hoy)
+            ->count();
+
         // Resumen para las tarjetas superiores
         $resumen = [
-            ['icono' => 'citas',    'numero' => $citas->count(),                                       'texto' => 'Citas asignadas'],
-            ['icono' => 'citas',    'numero' => $citas->where('fecha', '>=', now()->toDateString())->count(), 'texto' => 'Próximas citas'],
+            ['icono' => 'citas',    'numero' => $citasHoy,             'texto' => 'Citas de hoy'],
+            ['icono' => 'citas',    'numero' => $citasProximas->count(), 'texto' => 'Próximas citas'],
             ['icono' => 'historia', 'numero' => HistoriaClinica::where('cedula_medico', $cedulaMedico)->count(), 'texto' => 'Historias creadas'],
         ];
 
         $seccionActiva = 'inicio';
 
-        return view('medico.inicio', compact('medico', 'citas', 'resumen', 'seccionActiva'));
+        return view('medico.inicio', compact('medico', 'citasProximas', 'citasAnteriores', 'citasHoy', 'resumen', 'seccionActiva'));
     }
 }

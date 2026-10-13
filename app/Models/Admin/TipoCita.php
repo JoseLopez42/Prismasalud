@@ -9,11 +9,12 @@ class TipoCita extends Model
     protected $table = 'tipo_cita';
 
     protected $fillable = [
-        'nombre', 'descripcion', 'activo',
+        'nombre', 'descripcion', 'duracion_minutos', 'activo',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
+        'duracion_minutos' => 'integer',
     ];
 
     // Un tipo de cita puede estar en muchas citas

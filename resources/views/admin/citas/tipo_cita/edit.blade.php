@@ -71,6 +71,13 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Duración (minutos) *</label>
+                        <input type="number" name="duracion_minutos" value="{{ old('duracion_minutos', $tipo->duracion_minutos ?? 30) }}" min="5" max="120" step="5" required
+                               class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+                               placeholder="Ej: 30">
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción <span class="text-gray-400 font-normal">(opcional)</span></label>
                         <textarea name="descripcion" rows="3"
                                   class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"

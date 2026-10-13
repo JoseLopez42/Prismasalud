@@ -10,7 +10,7 @@ class Prescripcion extends Model
     protected $table = 'prescripcion';
 
     protected $fillable = [
-        'id_cita', 'cedula_paciente', 'cedula_medico',
+        'id_cita', 'cedula_paciente', 'cedula_medico', 'id_medicamento',
         'medicamento', 'dosis', 'frecuencia', 'duracion',
         'indicaciones', 'fecha', 'activo',
     ];
@@ -36,5 +36,11 @@ class Prescripcion extends Model
     public function cita()
     {
         return $this->belongsTo(CitaMedica::class, 'id_cita');
+    }
+
+    // Medicamento del catálogo que se formuló
+    public function medicamentoCatalogo()
+    {
+        return $this->belongsTo(Medicamento::class, 'id_medicamento', 'codigo');
     }
 }

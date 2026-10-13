@@ -144,13 +144,14 @@ class ConsultaMedicaController extends Controller
         $cita = $this->citaDelMedico($id);
 
         $datos = $request->validate([
-            'medicamento'  => 'required|string|max:150',
+            'id_medicamento' => 'required|exists:medicamento,codigo',
             'dosis'        => 'nullable|string|max:100',
             'frecuencia'   => 'nullable|string|max:100',
             'duracion'     => 'nullable|string|max:100',
             'indicaciones' => 'nullable|string',
         ]);
 
+        $datos['medicamento']     = Medicamento::where('codigo', $datos['id_medicamento'])->value('nombre');
         $datos['cedula_paciente'] = $cita->cedula_usuario;
         $datos['cedula_medico']   = $this->cedulaMedico();
         $datos['id_cita']         = $cita->id;
@@ -175,6 +176,28 @@ class ConsultaMedicaController extends Controller
         }
 
         return back()->with('exito', 'Cita marcada como atendida.');
+    }
+
+    // Actualiza un medicamento formulado (solo su autor)
+    public function updatePrescripcion(Request $request, $id)
+    {
+        $prescripcion = Prescripcion::findOrFail($id);
+
+        abort_unless((int) $prescripcion->cedula_medico === $this->cedulaMedico(), 403);
+
+        $datos = $request->validate([
+            'id_medicamento' => 'required|exists:medicamento,codigo',
+            'dosis'        => 'nullable|string|max:100',
+            'frecuencia'   => 'nullable|string|max:100',
+            'duracion'     => 'nullable|string|max:100',
+            'indicaciones' => 'nullable|string',
+        ]);
+
+        $datos['medicamento'] = Medicamento::where('codigo', $datos['id_medicamento'])->value('nombre');
+
+        $prescripcion->update($datos);
+
+        return back()->with('exito', 'Medicamento actualizado correctamente.');
     }
 
     // ---------- Ayudas ----------

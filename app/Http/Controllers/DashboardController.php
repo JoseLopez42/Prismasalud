@@ -6,6 +6,9 @@ use App\Models\Usuario;
 use App\Models\Licencia;
 use App\Models\Plan;
 use App\Models\Transaccion;
+use App\Models\Admin\CitaMedica;
+use App\Models\Admin\HistoriaClinica;
+use App\Models\Admin\Medico;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -18,18 +21,52 @@ class DashboardController extends Controller
 
         $usuarioActual = Usuario::find($_SESSION['usuario_cedula']);
 
+        $hoy = now()->toDateString();
+
+        // Estadísticas reales (cada tarjeta enlaza a su módulo)
         $estadisticas = [
-            ['icono' => 'citas',       'numero' => '128',   'texto' => 'Citas de hoy'],
-            ['icono' => 'afiliados',   'numero' => '3,542', 'texto' => 'Afiliados activos'],
-            ['icono' => 'user-circle', 'numero' => '35',    'texto' => 'Médicos activos'],
-            ['icono' => 'medicamentos','numero' => '212',   'texto' => 'Entregas de medicamentos'],
+            [
+                'icono' => 'citas',
+                'numero' => CitaMedica::whereDate('fecha', $hoy)->where('activo', true)->count(),
+                'texto' => 'Citas de hoy',
+                'ruta'  => route('cita.index'),
+            ],
+            [
+                'icono' => 'usuarios',
+                'numero' => Usuario::where('tipo_usuario_id', 2)->where('activo', true)->count(),
+                'texto' => 'Pacientes activos',
+                'ruta'  => route('usuarios.index'),
+            ],
+            [
+                'icono' => 'medicos',
+                'numero' => Medico::where('estado', 'activo')->count(),
+                'texto' => 'Médicos activos',
+                'ruta'  => route('medico.index'),
+            ],
+            [
+                'icono' => 'historia',
+                'numero' => HistoriaClinica::count(),
+                'texto' => 'Historias clínicas',
+                'ruta'  => route('historia.index'),
+            ],
         ];
+
+        // Panel de citas: próximas citas activas (hoy en adelante)
+        $citasProximas = CitaMedica::with(['paciente', 'medico', 'consultorio', 'tipoCita', 'estadoCita'])
+            ->where('activo', true)
+            ->whereDate('fecha', '>=', $hoy)
+            ->orderBy('fecha')
+            ->orderBy('hora_inicio')
+            ->limit(8)
+            ->get();
+
+        $citasHoy = CitaMedica::whereDate('fecha', $hoy)->where('activo', true)->count();
 
         // Licencia de la IPS de ESTE Administrador (no la ultima creada
         // en todo el sistema, sino la que pertenece a su propia cuenta).
         $licenciaActual = $usuarioActual->licencia;
 
-        return view('admin.dashboard', compact('usuarioActual', 'estadisticas', 'licenciaActual'))
+        return view('admin.dashboard', compact('usuarioActual', 'estadisticas', 'citasProximas', 'citasHoy', 'licenciaActual'))
             ->with('seccionActiva', 'dashboard');
     }
 

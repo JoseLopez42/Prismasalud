@@ -129,6 +129,43 @@ class ProcedimientoController extends Controller
             ->with('exito', 'Detalle de procedimiento registrado correctamente.');
     }
 
+    // Actualiza un procedimiento existente (solo su autor)
+    public function updateProcedimiento(Request $request, $id)
+    {
+        $procedimiento = Procedimiento::findOrFail($id);
+
+        abort_unless((int) $procedimiento->cedula_medico === $this->cedulaMedico(), 403);
+
+        $datos = $request->validate([
+            'id_tipo_procedimiento' => 'nullable|exists:tipo_procedimiento,id',
+            'fecha'                 => 'required|date',
+            'descripcion'           => 'required|string|max:255',
+            'observaciones'         => 'nullable|string',
+        ]);
+
+        $procedimiento->update($datos);
+
+        return back()->with('exito', 'Procedimiento actualizado correctamente.');
+    }
+
+    // Actualiza un detalle de procedimiento existente (solo el autor del procedimiento)
+    public function updateDetalleProcedimiento(Request $request, $id)
+    {
+        $detalle = DetalleProcedimiento::with('procedimiento')->findOrFail($id);
+
+        abort_unless((int) $detalle->procedimiento->cedula_medico === $this->cedulaMedico(), 403);
+
+        $datos = $request->validate([
+            'descripcion' => 'required|string|max:255',
+            'cantidad'    => 'required|integer|min:1',
+            'resultado'   => 'nullable|string',
+        ]);
+
+        $detalle->update($datos);
+
+        return back()->with('exito', 'Detalle de procedimiento actualizado correctamente.');
+    }
+
     // ---------- Ayudas ----------
 
     private function cedulaMedico(): int

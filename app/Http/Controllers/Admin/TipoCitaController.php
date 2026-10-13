@@ -27,9 +27,12 @@ class TipoCitaController extends Controller
     public function store(Request $request)
     {
         $datos = $request->validate([
-            'nombre'       => 'required|string|max:100|unique:tipo_cita,nombre',
-            'descripcion'  => 'nullable|string|max:255',
+            'nombre'            => 'required|string|max:100|unique:tipo_cita,nombre',
+            'descripcion'       => 'nullable|string|max:255',
+            'duracion_minutos'  => 'required|integer|min:5|max:120',
         ]);
+
+        $datos['activo'] = true;
 
         TipoCita::create($datos);
 
@@ -50,8 +53,9 @@ class TipoCitaController extends Controller
         $tipo = TipoCita::findOrFail($id);
 
         $datos = $request->validate([
-            'nombre'       => 'required|string|max:100|unique:tipo_cita,nombre,' . $id . ',id',
-            'descripcion'  => 'nullable|string|max:255',
+            'nombre'            => 'required|string|max:100|unique:tipo_cita,nombre,' . $id . ',id',
+            'descripcion'       => 'nullable|string|max:255',
+            'duracion_minutos'  => 'required|integer|min:5|max:120',
         ]);
 
         $tipo->update($datos);

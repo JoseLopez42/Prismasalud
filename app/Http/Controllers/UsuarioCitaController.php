@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin\CitaMedica;
-use App\Models\Admin\Consultorio;
+use App\Models\Admin\Especialidad;
 use App\Models\Admin\EstadoCita;
 use App\Models\Admin\HorarioMedico;
 use App\Models\Admin\Medico;
@@ -26,18 +26,85 @@ class UsuarioCitaController extends Controller
         return view('usuario.citas.index', compact('citas', 'seccionActiva'));
     }
 
-    // Formulario para agendar una cita
+    // Formulario para agendar una cita (asistente por pasos)
     public function crearCita()
     {
         $medicos = Medico::with('especialidad')->where('estado', 'activo')->orderBy('apellidos')->get();
         $tiposCita = TipoCita::where('activo', true)->orderBy('nombre')->get();
+        $especialidades = Especialidad::where('activo', true)->orderBy('nombre')->get();
 
         $seccionActiva = 'agendar';
 
-        return view('usuario.citas.create', compact('medicos', 'tiposCita', 'seccionActiva'));
+        return view('usuario.citas.create', compact('medicos', 'tiposCita', 'especialidades', 'seccionActiva'));
     }
 
-    // Guarda la cita del paciente y la asigna directamente a un médico
+    /**
+     * Cupos (horas) disponibles de un médico para una fecha y tipo de cita.
+     * Se calculan a partir de su horario de atención (horario_medico),
+     * restando los cupos ya ocupados por otras citas activas.
+     */
+    public function cupos(Request $request)
+    {
+        $datos = $request->validate([
+            'cedula_medico' => 'required|exists:medico,cedula',
+            'id_tipo_cita'  => 'required|exists:tipo_cita,id',
+            'fecha'         => 'required|date|after_or_equal:today',
+        ]);
+
+        $duracion = $this->duracionTipoCita((int) $datos['id_tipo_cita']);
+
+        $horarios = HorarioMedico::with('consultorio')
+            ->where('cedula_medico', $datos['cedula_medico'])
+            ->where('fecha', $datos['fecha'])
+            ->where('activo', true)
+            ->orderBy('hora_inicio')
+            ->get();
+
+        if ($horarios->isEmpty()) {
+            return response()->json([
+                'cupos'       => [],
+                'consultorio' => null,
+                'duracion'    => $duracion,
+                'mensaje'     => 'El médico no tiene horario de atención para esa fecha.',
+            ]);
+        }
+
+        // Citas activas del médico ese día: sus horas ya están ocupadas.
+        $ocupadas = CitaMedica::where('cedula_medico', $datos['cedula_medico'])
+            ->where('fecha', $datos['fecha'])
+            ->where('activo', true)
+            ->get(['hora_inicio', 'hora_fin']);
+
+        $cupos = [];
+        $consultorio = null;
+
+        foreach ($horarios as $horario) {
+            $consultorio = $consultorio ?: ($horario->consultorio->nombre ?? null);
+
+            $inicio = $this->aMinutos($horario->hora_inicio);
+            $fin    = $this->aMinutos($horario->hora_fin);
+
+            for ($m = $inicio; $m + $duracion <= $fin; $m += $duracion) {
+                if ($this->slotOcupado($m, $m + $duracion, $ocupadas)) {
+                    continue;
+                }
+
+                $cupos[] = [
+                    'hora' => $this->aHora($m),
+                    'fin'  => $this->aHora($m + $duracion),
+                ];
+            }
+        }
+
+        return response()->json([
+            'cupos'       => $cupos,
+            'consultorio' => $consultorio,
+            'duracion'    => $duracion,
+            'mensaje'     => empty($cupos) ? 'No quedan cupos libres para esa fecha.' : null,
+        ]);
+    }
+
+    // Guarda la cita del paciente en el cupo seleccionado
     public function guardarCita(Request $request)
     {
         $datos = $request->validate([
@@ -45,24 +112,27 @@ class UsuarioCitaController extends Controller
             'id_tipo_cita'  => 'required|exists:tipo_cita,id',
             'fecha'         => 'required|date|after_or_equal:today',
             'hora_inicio'   => 'required|date_format:H:i',
-            'hora_fin'      => 'required|date_format:H:i|after:hora_inicio',
             'motivo'        => 'nullable|string|max:255',
         ]);
 
-        $cedulaUsuario = $this->cedulaUsuario();
+        $duracion = $this->duracionTipoCita((int) $datos['id_tipo_cita']);
 
-        // El consultorio se asigna automáticamente: primero el que tenga
-        // el médico agendado para esa fecha, si no, el primero disponible.
+        $inicioMin = $this->aMinutos($datos['hora_inicio']);
+        $finMin    = $inicioMin + $duracion;
+
+        // El cupo debe caber dentro de un horario activo del médico ese día.
         $horario = HorarioMedico::where('cedula_medico', $datos['cedula_medico'])
             ->where('fecha', $datos['fecha'])
             ->where('activo', true)
-            ->first();
+            ->get()
+            ->first(function ($h) use ($inicioMin, $finMin) {
+                return $this->aMinutos($h->hora_inicio) <= $inicioMin
+                    && $this->aMinutos($h->hora_fin) >= $finMin;
+            });
 
-        $idConsultorio = $horario->id_consultorio ?? Consultorio::where('activo', true)->orderBy('id')->value('id');
-
-        if (! $idConsultorio) {
+        if (! $horario) {
             return back()->withInput()->withErrors([
-                'cedula_medico' => 'No hay consultorios disponibles en este momento. Contacta a la IPS.',
+                'hora_inicio' => 'Ese horario no está disponible para el médico seleccionado. Elige otro cupo.',
             ]);
         }
 
@@ -72,18 +142,19 @@ class UsuarioCitaController extends Controller
 
         if (! $idEstado) {
             return back()->withInput()->withErrors([
-                'cedula_medico' => 'No hay estados de cita configurados. Contacta a la IPS.',
+                'hora_inicio' => 'No hay estados de cita configurados. Contacta a la IPS.',
             ]);
         }
 
-        $datos['cedula_usuario']  = $cedulaUsuario;
-        $datos['id_consultorio']  = $idConsultorio;
-        $datos['id_estado_cita']  = $idEstado;
-        $datos['activo']          = true;
+        $datos['cedula_usuario'] = $this->cedulaUsuario();
+        $datos['hora_fin']       = $this->aHora($finMin);
+        $datos['id_consultorio'] = $horario->id_consultorio;
+        $datos['id_estado_cita'] = $idEstado;
+        $datos['activo']         = true;
 
         if ($this->hayConflicto($datos)) {
             return back()->withInput()->withErrors([
-                'hora_inicio' => 'Ya tienes una cita activa que se cruza con esa fecha y hora, o el médico ya está ocupado en ese horario.',
+                'hora_inicio' => 'Ese cupo acaba de ocuparse. Vuelve a elegir un horario disponible.',
             ]);
         }
 
@@ -103,6 +174,43 @@ class UsuarioCitaController extends Controller
         }
 
         return (int) $_SESSION['usuario_cedula'];
+    }
+
+    // Duración (en minutos) del tipo de cita; 30 por defecto.
+    private function duracionTipoCita(int $idTipoCita): int
+    {
+        $duracion = TipoCita::where('id', $idTipoCita)->value('duracion_minutos');
+
+        return max(5, (int) ($duracion ?: 30));
+    }
+
+    // Convierte una hora "HH:MM" o "HH:MM:SS" a minutos desde medianoche.
+    private function aMinutos(?string $hora): int
+    {
+        [$h, $m] = array_map('intval', explode(':', substr((string) $hora, 0, 5)));
+
+        return $h * 60 + $m;
+    }
+
+    // Convierte minutos desde medianoche a "HH:MM".
+    private function aHora(int $minutos): string
+    {
+        return sprintf('%02d:%02d', intdiv($minutos, 60), $minutos % 60);
+    }
+
+    // ¿El rango [inicio, fin) se cruza con alguna cita ya ocupada?
+    private function slotOcupado(int $inicio, int $fin, $citas): bool
+    {
+        foreach ($citas as $cita) {
+            $cInicio = $this->aMinutos($cita->hora_inicio);
+            $cFin    = $this->aMinutos($cita->hora_fin);
+
+            if ($inicio < $cFin && $fin > $cInicio) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

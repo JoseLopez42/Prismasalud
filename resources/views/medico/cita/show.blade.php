@@ -157,6 +157,43 @@
                                 @endforeach
                             </div>
                         @endif
+
+                        @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $historia->cedula_medico)
+                            <details class="mt-3" @if (old('_edit') == $historia->id && $errors->any()) open @endif>
+                                <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar historia clínica</summary>
+                                <form method="POST" action="{{ route('medico.historia.update', $historia->id) }}" class="space-y-3 mt-3">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="_edit" value="{{ $historia->id }}">
+                                    <input type="hidden" name="_tab" value="historia">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+                                        <input type="date" name="fecha" value="{{ old('fecha', $historia->fecha->format('Y-m-d')) }}" required
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Motivo de consulta</label>
+                                        <textarea name="motivo_consulta" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('motivo_consulta', $historia->motivo_consulta) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Antecedentes</label>
+                                        <textarea name="antecedentes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('antecedentes', $historia->antecedentes) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Examen físico</label>
+                                        <textarea name="examen_fisico" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('examen_fisico', $historia->examen_fisico) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+                                        <textarea name="observaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('observaciones', $historia->observaciones) }}</textarea>
+                                    </div>
+                                    <button type="submit"
+                                            class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                        Actualizar historia
+                                    </button>
+                                </form>
+                            </details>
+                        @endif
                     </div>
                 @empty
                     <p class="text-sm text-gray-400 text-center py-8">Aún no has registrado la historia clínica de esta cita.</p>
@@ -253,6 +290,46 @@
                         @if ($procedimiento->observaciones)
                             <p class="text-xs text-gray-600 mt-2">{{ $procedimiento->observaciones }}</p>
                         @endif
+
+                        @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $procedimiento->cedula_medico)
+                            <details class="mt-3" @if (old('_edit') == $procedimiento->id && $errors->any()) open @endif>
+                                <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar procedimiento</summary>
+                                <form method="POST" action="{{ route('medico.procedimiento.update', $procedimiento->id) }}" class="space-y-3 mt-3">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="_edit" value="{{ $procedimiento->id }}">
+                                    <input type="hidden" name="_tab" value="procedimiento">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Tipo de procedimiento</label>
+                                        <select name="id_tipo_procedimiento"
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                            <option value="">Sin tipo</option>
+                                            @foreach ($tipos as $tipo)
+                                                <option value="{{ $tipo->id }}" {{ old('id_tipo_procedimiento', $procedimiento->id_tipo_procedimiento) == $tipo->id ? 'selected' : '' }}>{{ $tipo->nombre }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Descripción *</label>
+                                        <input type="text" name="descripcion" value="{{ old('descripcion', $procedimiento->descripcion) }}" required maxlength="255"
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+                                        <textarea name="observaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('observaciones', $procedimiento->observaciones) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+                                        <input type="date" name="fecha" value="{{ old('fecha', $procedimiento->fecha->format('Y-m-d')) }}" required
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    </div>
+                                    <button type="submit"
+                                            class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                        Actualizar procedimiento
+                                    </button>
+                                </form>
+                            </details>
+                        @endif
                     </div>
                 @empty
                     <p class="text-sm text-gray-400 text-center py-8">Aún no has registrado procedimientos en esta cita.</p>
@@ -271,15 +348,18 @@
                     <input type="hidden" name="_tab" value="medicamento">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Medicamento *</label>
-                        <input type="text" name="medicamento" list="lista-medicamentos" required maxlength="150"
-                               value="{{ old('medicamento') }}" placeholder="Escribe o selecciona un medicamento"
-                               autocomplete="off"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                        <datalist id="lista-medicamentos">
+                        <select name="id_medicamento" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <option value="">Selecciona un medicamento del catálogo</option>
                             @foreach ($medicamentos as $medicamento)
-                                <option value="{{ $medicamento->nombre }}">{{ $medicamento->presentacion }}</option>
+                                <option value="{{ $medicamento->codigo }}" {{ old('id_medicamento') == $medicamento->codigo ? 'selected' : '' }}>
+                                    {{ $medicamento->nombre }}{{ $medicamento->presentacion ? ' — ' . $medicamento->presentacion : '' }}
+                                </option>
                             @endforeach
-                        </datalist>
+                        </select>
+                        @if ($medicamentos->isEmpty())
+                            <p class="text-xs text-amber-600 mt-1">No hay medicamentos activos en el catálogo.</p>
+                        @endif
                     </div>
                     <div class="grid sm:grid-cols-3 gap-4">
                         <div>
@@ -324,6 +404,55 @@
                             @if ($prescripcion->duracion)<p><strong>Duración:</strong> {{ $prescripcion->duracion }}</p>@endif
                             @if ($prescripcion->indicaciones)<p><strong>Indicaciones:</strong> {{ $prescripcion->indicaciones }}</p>@endif
                         </div>
+
+                        @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $prescripcion->cedula_medico)
+                            <details class="mt-3" @if (old('_edit') == $prescripcion->id && $errors->any()) open @endif>
+                                <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar medicamento</summary>
+                                <form method="POST" action="{{ route('medico.prescripcion.update', $prescripcion->id) }}" class="space-y-3 mt-3">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="_edit" value="{{ $prescripcion->id }}">
+                                    <input type="hidden" name="_tab" value="medicamento">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Medicamento *</label>
+                                        <select name="id_medicamento" required
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                            <option value="">Selecciona un medicamento</option>
+                                            @foreach ($medicamentos as $medicamento)
+                                                <option value="{{ $medicamento->codigo }}" {{ old('id_medicamento', $prescripcion->id_medicamento) == $medicamento->codigo ? 'selected' : '' }}>
+                                                    {{ $medicamento->nombre }}{{ $medicamento->presentacion ? ' — ' . $medicamento->presentacion : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="grid sm:grid-cols-3 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Dosis</label>
+                                            <input type="text" name="dosis" value="{{ old('dosis', $prescripcion->dosis) }}" maxlength="100"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Frecuencia</label>
+                                            <input type="text" name="frecuencia" value="{{ old('frecuencia', $prescripcion->frecuencia) }}" maxlength="100"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Duración</label>
+                                            <input type="text" name="duracion" value="{{ old('duracion', $prescripcion->duracion) }}" maxlength="100"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Indicaciones</label>
+                                        <textarea name="indicaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('indicaciones', $prescripcion->indicaciones) }}</textarea>
+                                    </div>
+                                    <button type="submit"
+                                            class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                        Actualizar medicamento
+                                    </button>
+                                </form>
+                            </details>
+                        @endif
                     </div>
                 @empty
                     <p class="text-sm text-gray-400 text-center py-8">Aún no has formulado medicamentos en esta cita.</p>

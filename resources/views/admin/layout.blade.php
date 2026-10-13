@@ -139,7 +139,7 @@
                     ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => route('medico.index'), 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
                     ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => route('cita.index'), 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
                     ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => route('historia.index'), 'clave' => 'historia',       'tablas' => null],
-                    ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => '#', 'clave' => 'farmacia',       'tablas' => ['medicamentos', 'entrega_medicamento', 'estado_entrega', 'farmacia']],
+                    ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => route('medicamento.index'), 'clave' => 'farmacia',       'tablas' => ['medicamentos']],
                     ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
                     ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
                 ];
@@ -195,6 +195,7 @@
                                             'cita' => route('cita.index'),
                                             'tipo_cita' => route('tipo_cita.index'),
                                             'estado_cita' => route('estado_cita.index'),
+                                            'medicamento', 'medicamentos' => route('medicamento.index'),
                                             default => '#',
                                         };
                                     @endphp
@@ -229,6 +230,7 @@
                                             'cita' => route('cita.index'),
                                             'tipo_cita' => route('tipo_cita.index'),
                                             'estado_cita' => route('estado_cita.index'),
+                                            'medicamento', 'medicamentos' => route('medicamento.index'),
                                             default => '#',
                                         };
                                     @endphp

@@ -120,7 +120,67 @@ class HistoriaMedicaController extends Controller
             ->with('exito', 'Enfermedad registrada correctamente.');
     }
 
+    // Actualiza una historia clínica existente (solo su autor)
+    public function updateHistoria(Request $request, $id)
+    {
+        $historia = HistoriaClinica::findOrFail($id);
+        $this->autorizarAutor($historia->cedula_medico);
+
+        $datos = $request->validate([
+            'fecha'           => 'required|date',
+            'motivo_consulta' => 'nullable|string',
+            'antecedentes'    => 'nullable|string',
+            'examen_fisico'   => 'nullable|string',
+            'observaciones'   => 'nullable|string',
+        ]);
+
+        $historia->update($datos);
+
+        return back()->with('exito', 'Historia clínica actualizada correctamente.');
+    }
+
+    // Actualiza un diagnóstico existente (solo su autor)
+    public function updateDiagnostico(Request $request, $id)
+    {
+        $diagnostico = Diagnostico::findOrFail($id);
+        $this->autorizarAutor($diagnostico->cedula_medico);
+
+        $datos = $request->validate([
+            'id_historia_clinica' => 'nullable|exists:historia_clinica,id',
+            'descripcion'         => 'required|string|max:255',
+            'tipo'                => 'nullable|string|max:50',
+            'fecha'               => 'required|date',
+        ]);
+
+        $diagnostico->update($datos);
+
+        return back()->with('exito', 'Diagnóstico actualizado correctamente.');
+    }
+
+    // Actualiza una enfermedad existente (solo su autor)
+    public function updateEnfermedad(Request $request, $id)
+    {
+        $enfermedad = Enfermedad::findOrFail($id);
+        $this->autorizarAutor($enfermedad->cedula_medico);
+
+        $datos = $request->validate([
+            'id_historia_clinica' => 'nullable|exists:historia_clinica,id',
+            'nombre'              => 'required|string|max:150',
+            'descripcion'         => 'nullable|string',
+            'fecha'               => 'required|date',
+        ]);
+
+        $enfermedad->update($datos);
+
+        return back()->with('exito', 'Enfermedad actualizada correctamente.');
+    }
+
     // ---------- Ayudas ----------
+
+    private function autorizarAutor($cedulaMedico): void
+    {
+        abort_unless((int) $cedulaMedico === $this->cedulaMedico(), 403);
+    }
 
     private function cedulaMedico(): int
     {

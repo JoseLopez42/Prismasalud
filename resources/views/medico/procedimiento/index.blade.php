@@ -158,6 +158,46 @@
                                 <p class="text-xs text-gray-400 mt-1">{{ $procedimiento->detalles->count() }} detalle(s)</p>
                             @endif
                             <p class="text-xs text-gray-400 mt-1">Dr(a). {{ $procedimiento->medico->nombres ?? '' }} {{ $procedimiento->medico->apellidos ?? '' }}</p>
+
+                            @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $procedimiento->cedula_medico)
+                                <details class="mt-3" @if (old('_edit') == $procedimiento->id && $errors->any()) open @endif>
+                                    <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar procedimiento</summary>
+                                    <form method="POST" action="{{ route('medico.procedimiento.update', $procedimiento->id) }}" class="space-y-3 mt-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="_edit" value="{{ $procedimiento->id }}">
+                                        <input type="hidden" name="_tab" value="procedimiento">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+                                            <input type="date" name="fecha" value="{{ old('fecha', $procedimiento->fecha->format('Y-m-d')) }}" required
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Tipo de procedimiento</label>
+                                            <select name="id_tipo_procedimiento"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                                <option value="">Sin tipo</option>
+                                                @foreach ($tipos as $tipo)
+                                                    <option value="{{ $tipo->id }}" {{ old('id_tipo_procedimiento', $procedimiento->id_tipo_procedimiento) == $tipo->id ? 'selected' : '' }}>{{ $tipo->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Descripción *</label>
+                                            <input type="text" name="descripcion" value="{{ old('descripcion', $procedimiento->descripcion) }}" required maxlength="255"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+                                            <textarea name="observaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('observaciones', $procedimiento->observaciones) }}</textarea>
+                                        </div>
+                                        <button type="submit"
+                                                class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                            Actualizar procedimiento
+                                        </button>
+                                    </form>
+                                </details>
+                            @endif
                         </div>
                     @empty
                         <p class="text-sm text-gray-400 text-center py-8">Este paciente no tiene procedimientos registrados.</p>
@@ -272,6 +312,36 @@
                             <p class="text-xs text-gray-500">Procedimiento: {{ \Illuminate\Support\Str::limit($detalle->procedimiento->descripcion ?? '—', 40) }}</p>
                             @if ($detalle->resultado)
                                 <p class="text-xs text-gray-600 mt-1"><strong>Resultado:</strong> {{ $detalle->resultado }}</p>
+                            @endif
+
+                            @if ($detalle->procedimiento && (int) ($_SESSION['medico_cedula'] ?? 0) === (int) $detalle->procedimiento->cedula_medico)
+                                <details class="mt-3" @if (old('_edit') == $detalle->id && $errors->any()) open @endif>
+                                    <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar detalle</summary>
+                                    <form method="POST" action="{{ route('medico.detalle_procedimiento.update', $detalle->id) }}" class="space-y-3 mt-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="_edit" value="{{ $detalle->id }}">
+                                        <input type="hidden" name="_tab" value="detalle">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Descripción *</label>
+                                            <input type="text" name="descripcion" value="{{ old('descripcion', $detalle->descripcion) }}" required maxlength="255"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Cantidad *</label>
+                                            <input type="number" name="cantidad" value="{{ old('cantidad', $detalle->cantidad) }}" min="1" required
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Resultado</label>
+                                            <textarea name="resultado" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('resultado', $detalle->resultado) }}</textarea>
+                                        </div>
+                                        <button type="submit"
+                                                class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                            Actualizar detalle
+                                        </button>
+                                    </form>
+                                </details>
                             @endif
                         </div>
                     @empty

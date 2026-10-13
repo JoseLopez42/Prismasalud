@@ -155,6 +155,43 @@
                                 @if ($historia->examen_fisico)<p><strong>Examen físico:</strong> {{ $historia->examen_fisico }}</p>@endif
                                 @if ($historia->observaciones)<p><strong>Observaciones:</strong> {{ $historia->observaciones }}</p>@endif
                             </div>
+
+                            @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $historia->cedula_medico)
+                                <details class="mt-3" @if (old('_edit') == $historia->id && $errors->any()) open @endif>
+                                    <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar historia clínica</summary>
+                                    <form method="POST" action="{{ route('medico.historia.update', $historia->id) }}" class="space-y-3 mt-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="_edit" value="{{ $historia->id }}">
+                                        <input type="hidden" name="_tab" value="historia">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+                                            <input type="date" name="fecha" value="{{ old('fecha', $historia->fecha->format('Y-m-d')) }}" required
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Motivo de consulta</label>
+                                            <textarea name="motivo_consulta" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('motivo_consulta', $historia->motivo_consulta) }}</textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Antecedentes</label>
+                                            <textarea name="antecedentes" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('antecedentes', $historia->antecedentes) }}</textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Examen físico</label>
+                                            <textarea name="examen_fisico" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('examen_fisico', $historia->examen_fisico) }}</textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>
+                                            <textarea name="observaciones" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('observaciones', $historia->observaciones) }}</textarea>
+                                        </div>
+                                        <button type="submit"
+                                                class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                            Actualizar historia
+                                        </button>
+                                    </form>
+                                </details>
+                            @endif
                         </div>
                     @empty
                         <p class="text-sm text-gray-400 text-center py-8">Este paciente no tiene historias clínicas registradas.</p>
@@ -226,6 +263,54 @@
                                 <span class="inline-block text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded-full">{{ $diagnostico->tipo }}</span>
                             @endif
                             <p class="text-xs text-gray-400 mt-1">Dr(a). {{ $diagnostico->medico->nombres ?? '' }} {{ $diagnostico->medico->apellidos ?? '' }}</p>
+
+                            @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $diagnostico->cedula_medico)
+                                <details class="mt-3" @if (old('_edit') == $diagnostico->id && $errors->any()) open @endif>
+                                    <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar diagnóstico</summary>
+                                    <form method="POST" action="{{ route('medico.diagnostico.update', $diagnostico->id) }}" class="space-y-3 mt-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="_edit" value="{{ $diagnostico->id }}">
+                                        <input type="hidden" name="_tab" value="diagnostico">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+                                            <input type="date" name="fecha" value="{{ old('fecha', $diagnostico->fecha->format('Y-m-d')) }}" required
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Descripción *</label>
+                                            <input type="text" name="descripcion" value="{{ old('descripcion', $diagnostico->descripcion) }}" required maxlength="255"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Tipo</label>
+                                            <select name="tipo"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                                <option value="">Selecciona...</option>
+                                                @foreach (['Presuntivo', 'Confirmado', 'Definitivo'] as $tipoOpcion)
+                                                    <option value="{{ $tipoOpcion }}" {{ old('tipo', $diagnostico->tipo) === $tipoOpcion ? 'selected' : '' }}>{{ $tipoOpcion }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Historia clínica <span class="text-gray-400 font-normal">(opcional)</span></label>
+                                            <select name="id_historia_clinica"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                                <option value="">Sin asociar</option>
+                                                @foreach ($historias as $historia)
+                                                    <option value="{{ $historia->id }}" {{ old('id_historia_clinica', $diagnostico->id_historia_clinica) == $historia->id ? 'selected' : '' }}>
+                                                        {{ $historia->fecha->format('d/m/Y') }} — {{ \Illuminate\Support\Str::limit($historia->motivo_consulta ?: 'Sin motivo', 40) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <button type="submit"
+                                                class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                            Actualizar diagnóstico
+                                        </button>
+                                    </form>
+                                </details>
+                            @endif
                         </div>
                     @empty
                         <p class="text-sm text-gray-400 text-center py-8">Este paciente no tiene diagnósticos registrados.</p>
@@ -291,6 +376,48 @@
                                 <p class="text-xs text-gray-600">{{ $enfermedad->descripcion }}</p>
                             @endif
                             <p class="text-xs text-gray-400 mt-1">Dr(a). {{ $enfermedad->medico->nombres ?? '' }} {{ $enfermedad->medico->apellidos ?? '' }}</p>
+
+                            @if ((int) ($_SESSION['medico_cedula'] ?? 0) === (int) $enfermedad->cedula_medico)
+                                <details class="mt-3" @if (old('_edit') == $enfermedad->id && $errors->any()) open @endif>
+                                    <summary class="cursor-pointer select-none text-xs font-semibold text-teal-700 hover:text-teal-900">Editar enfermedad</summary>
+                                    <form method="POST" action="{{ route('medico.enfermedad.update', $enfermedad->id) }}" class="space-y-3 mt-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="_edit" value="{{ $enfermedad->id }}">
+                                        <input type="hidden" name="_tab" value="enfermedad">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Fecha *</label>
+                                            <input type="date" name="fecha" value="{{ old('fecha', $enfermedad->fecha->format('Y-m-d')) }}" required
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Nombre de la enfermedad *</label>
+                                            <input type="text" name="nombre" value="{{ old('nombre', $enfermedad->nombre) }}" required maxlength="150"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Descripción</label>
+                                            <textarea name="descripcion" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('descripcion', $enfermedad->descripcion) }}</textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Historia clínica <span class="text-gray-400 font-normal">(opcional)</span></label>
+                                            <select name="id_historia_clinica"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                                <option value="">Sin asociar</option>
+                                                @foreach ($historias as $historia)
+                                                    <option value="{{ $historia->id }}" {{ old('id_historia_clinica', $enfermedad->id_historia_clinica) == $historia->id ? 'selected' : '' }}>
+                                                        {{ $historia->fecha->format('d/m/Y') }} — {{ \Illuminate\Support\Str::limit($historia->motivo_consulta ?: 'Sin motivo', 40) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <button type="submit"
+                                                class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-teal-700 transition">
+                                            Actualizar enfermedad
+                                        </button>
+                                    </form>
+                                </details>
+                            @endif
                         </div>
                     @empty
                         <p class="text-sm text-gray-400 text-center py-8">Este paciente no tiene enfermedades registradas.</p>

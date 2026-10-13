@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\TipoCitaController;
 use App\Http\Controllers\Admin\EstadoCitaController;
 use App\Http\Controllers\Admin\CitaMedicaController;
 use App\Http\Controllers\Admin\HistoriaClinicaController;
+use App\Http\Controllers\Admin\MedicamentoController;
 use App\Http\Controllers\Medico\PanelMedicoController;
 use App\Http\Controllers\Medico\HistoriaMedicaController;
 use App\Http\Controllers\Medico\ProcedimientoController;
@@ -230,6 +231,18 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
     // Historia Clínica: el administrador visualiza TODAS las historias
     // médicas creadas por los médicos (búsqueda por cédula del paciente).
     Route::get('/historia', [HistoriaClinicaController::class, 'index'])->name('historia.index');
+
+    // Farmacia y Medicamentos: /admin/farmacia/medicamentos
+    Route::prefix('farmacia')->group(function () {
+        // Medicamentos: catálogo. La llave primaria es el código del
+        // medicamento (string), por eso las rutas usan {codigo}.
+        Route::get('/medicamentos', [MedicamentoController::class, 'index'])->name('medicamento.index');
+        Route::get('/medicamentos/crear', [MedicamentoController::class, 'create'])->name('medicamento.create');
+        Route::post('/medicamentos', [MedicamentoController::class, 'store'])->name('medicamento.store');
+        Route::get('/medicamentos/{codigo}/editar', [MedicamentoController::class, 'edit'])->name('medicamento.edit');
+        Route::put('/medicamentos/{codigo}', [MedicamentoController::class, 'update'])->name('medicamento.update');
+        Route::patch('/medicamentos/{codigo}/estado', [MedicamentoController::class, 'cambiarEstado'])->name('medicamento.estado');
+    });
 });
 
 // Rutas de login (públicas, cualquiera puede acceder al formulario)
@@ -244,10 +257,16 @@ Route::prefix('usuario')->middleware('esusuario')->group(function () {
     // Citas del paciente: agendar y consultar sus propias citas
     Route::get('/citas', [UsuarioCitaController::class, 'misCitas'])->name('usuario.citas.index');
     Route::get('/citas/crear', [UsuarioCitaController::class, 'crearCita'])->name('usuario.citas.create');
+    Route::get('/citas/cupos', [UsuarioCitaController::class, 'cupos'])->name('usuario.citas.cupos');
     Route::post('/citas', [UsuarioCitaController::class, 'guardarCita'])->name('usuario.citas.store');
 
     // Medicamentos formulados al paciente
     Route::get('/medicamentos', [PanelUsuarioController::class, 'misMedicamentos'])->name('usuario.medicamentos.index');
+
+    // Historia clínica, afiliación y perfil del paciente
+    Route::get('/historia', [PanelUsuarioController::class, 'miHistoria'])->name('usuario.historia.index');
+    Route::get('/afiliacion', [PanelUsuarioController::class, 'miAfiliacion'])->name('usuario.afiliacion.index');
+    Route::get('/perfil', [PanelUsuarioController::class, 'miPerfil'])->name('usuario.perfil');
 });
 
 // Panel del Médico. Su cuenta vive en la tabla "medico" (cédula +
@@ -278,6 +297,14 @@ Route::prefix('medico')->middleware('esmedico')->group(function () {
     Route::post('/procedimiento', [ProcedimientoController::class, 'storeProcedimiento'])->name('medico.procedimiento.store');
     Route::post('/tipo-procedimiento', [ProcedimientoController::class, 'storeTipoProcedimiento'])->name('medico.tipo_procedimiento.store');
     Route::post('/detalle-procedimiento', [ProcedimientoController::class, 'storeDetalleProcedimiento'])->name('medico.detalle_procedimiento.store');
+
+    // Edición de registros clínicos (el médico solo edita los suyos; no se elimina nada).
+    Route::put('/historia/{id}', [HistoriaMedicaController::class, 'updateHistoria'])->name('medico.historia.update');
+    Route::put('/diagnostico/{id}', [HistoriaMedicaController::class, 'updateDiagnostico'])->name('medico.diagnostico.update');
+    Route::put('/enfermedad/{id}', [HistoriaMedicaController::class, 'updateEnfermedad'])->name('medico.enfermedad.update');
+    Route::put('/procedimiento/{id}', [ProcedimientoController::class, 'updateProcedimiento'])->name('medico.procedimiento.update');
+    Route::put('/detalle-procedimiento/{id}', [ProcedimientoController::class, 'updateDetalleProcedimiento'])->name('medico.detalle_procedimiento.update');
+    Route::put('/prescripcion/{id}', [ConsultaMedicaController::class, 'updatePrescripcion'])->name('medico.prescripcion.update');
 });
 
 // Login del Superadministrador (dueños de PrismaSalud): URL aparte, NO es el login de IPS.
