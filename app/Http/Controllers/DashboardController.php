@@ -42,6 +42,12 @@ class DashboardController extends Controller
         $usuarioActual = Usuario::find($_SESSION['usuario_cedula']);
         $licenciaActual = $usuarioActual->licencia;
 
+        // Si aún no está activada (inactiva), mostrar como pendiente.
+        $licenciaPendiente = $licenciaActual ? null : Licencia::where('usuario_cedula', $usuarioActual->cedula)
+            ->where('estado', 'inactiva')
+            ->latest()
+            ->first();
+
         $planInfo = $licenciaActual
             ? Plan::porSlug($licenciaActual->plan)
             : null;
@@ -50,9 +56,9 @@ class DashboardController extends Controller
             ? Transaccion::where('licencia_id', $licenciaActual->id)
                 ->orderByDesc('created_at')
                 ->get()
-            : collect();
+            : ($licenciaPendiente ? Transaccion::where('licencia_id', $licenciaPendiente->id)->orderByDesc('created_at')->get() : collect());
 
-        return view('admin.mi-plan', compact('licenciaActual', 'planInfo', 'historialPagos'))
+        return view('admin.mi-plan', compact('licenciaActual', 'licenciaPendiente', 'planInfo', 'historialPagos'))
             ->with('seccionActiva', 'plan');
     }
 

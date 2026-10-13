@@ -66,7 +66,7 @@
             ['icono' => 'usuarios',     'titulo' => 'Usuarios y Roles',        'cantidad' => 3, 'tablas' => ['usuarios', 'roles', 'tipos de documento']],
             ['icono' => 'ubicaciones',  'titulo' => 'Ubicaciones',             'cantidad' => 3, 'tablas' => ['departamento', 'ciudad', 'sede']],
             ['icono' => 'eps',          'titulo' => 'EPS',                    'cantidad' => 2, 'tablas' => ['eps', 'regimen']],
-            ['icono' => 'afiliaciones', 'titulo' => 'Afiliaciones',           'cantidad' => 4, 'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
+            ['icono' => 'afiliaciones', 'titulo' => 'Afiliaciones',           'cantidad' => 3, 'tablas' => ['afiliacion', 'beneficiarios', 'estado']],
             ['icono' => 'citas',        'titulo' => 'Citas Médicas',          'cantidad' => 6, 'tablas' => ['cita', 'tipo_cita', 'estado_cita', 'Enfermedad', 'Tipo Enfermedad', 'Historia Clínica(solo admin)']],
             ['icono' => 'historia',     'titulo' => 'Historia Clínica',        'cantidad' => 3, 'tablas' => ['historia_clinica', 'diagnostico', 'enfermedad']],
             ['icono' => 'procedimientos','titulo' => 'Procedimientos',         'cantidad' => 3, 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
@@ -100,6 +100,9 @@
                                 'rol', 'roles' => route('roles.index'),
                                 'eps' => route('eps.index'),
                                 'regimen' => route('regimen.index'),
+                                'afiliacion', 'afiliaciones' => route('afiliaciones.index'),
+                                'beneficiario', 'beneficiarios' => route('beneficiarios.index'),
+                                'estado', 'estados' => route('estados.index'),
                                 default => '#',
                             };
                         @endphp

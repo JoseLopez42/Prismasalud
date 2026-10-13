@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    @if (!$licenciaActual)
+    @if (!$licenciaActual && !$licenciaPendiente)
         <div class="bg-white border border-gray-200 rounded-xl p-8 text-center">
             <p class="text-gray-500 mb-4">Tu cuenta no tiene un plan de PrismaSalud asociado todavía.</p>
             <a href="{{ route('admin.planes') }}"
@@ -27,6 +27,21 @@
                style="background: linear-gradient(120deg, #0C7B93, #12A594);">
                 Ver planes y comprar
             </a>
+        </div>
+    @elseif ($licenciaPendiente)
+        <div class="bg-white border border-yellow-200 rounded-xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-lg font-extrabold text-gray-900">Plan comprado, pendiente de activación</h2>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-yellow-50 text-yellow-700">Pendiente</span>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">Tu compra fue registrada y quedó inactiva. El superadministrador la activará y entonces podrás ver el número de tu licencia y usar el sistema.</p>
+            <div class="grid sm:grid-cols-2 gap-3 text-sm">
+                <div><p class="text-xs text-gray-400">IPS / Clínica</p><p class="font-semibold text-gray-800">{{ $licenciaPendiente->nombre_ips }}</p></div>
+                <div><p class="text-xs text-gray-400">NIT</p><p class="font-semibold text-gray-800">{{ $licenciaPendiente->nit }}</p></div>
+                <div><p class="text-xs text-gray-400">Plan</p><p class="font-semibold text-gray-800">{{ $licenciaPendiente->nombrePlan() }}</p></div>
+                <div><p class="text-xs text-gray-400">Vence</p><p class="font-semibold text-gray-800">{{ $licenciaPendiente->fecha_fin?->format('d/m/Y') }}</p></div>
+            </div>
+            <p class="mt-4 text-xs text-gray-400">Número de licencia: aún no asignado (se asignará al activar).</p>
         </div>
     @else
         @php

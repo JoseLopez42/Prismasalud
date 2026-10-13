@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Licencia;
 use App\Models\Plan;
+use App\Models\Usuario;
+use App\Mail\LicenciaActivadaMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Empresas (IPS/EPS) que compraron una licencia.
@@ -15,6 +18,11 @@ class SuperAdminEmpresaController extends Controller
 {
     public function index(Request $request)
     {
+        // Validar automáticamente las fechas: marcar como vencidas las que ya pasaron.
+        Licencia::where('estado', 'activa')
+            ->whereDate('fecha_fin', '<', now()->toDateString())
+            ->update(['estado' => 'vencida']);
+
         [$busqueda, $estado] = $this->filtros($request);
 
         $empresas = $this->consulta($busqueda, $estado)->paginate(10)->withQueryString();
@@ -102,10 +110,40 @@ class SuperAdminEmpresaController extends Controller
             ->with('exito', 'Los datos de "' . $licencia->nombre_ips . '" se guardaron.');
     }
 
-    // Suspender / reactivar (no se borra nada)
+    // Suspender / reactivar / activar (no se borra nada)
     public function cambiarEstado($id)
     {
         $licencia = Licencia::findOrFail($id);
+
+        // Activar una licencia comprada que aun esta inactiva (en espera de superadmin)
+        if ($licencia->estado === 'inactiva') {
+            $licencia->update(['estado' => 'activa']);
+            $admin = null;
+            if ($licencia->usuario_cedula) {
+                Usuario::where('cedula', $licencia->usuario_cedula)->update(['licencia_id' => $licencia->id]);
+                $admin = Usuario::find($licencia->usuario_cedula);
+            }
+
+            // Enviar correo a la empresa y al administrador notificando la activacion.
+            $destinatarios = array_values(array_filter(array_unique([
+                $licencia->correo_ips,
+                $admin?->correo,
+            ])));
+
+            if ($destinatarios) {
+                try {
+                    Mail::to($destinatarios)->send(new LicenciaActivadaMail($licencia, $admin?->nombres ?? ''));
+                    $aviso = ' y se envio un correo a la empresa y al administrador.';
+                } catch (\Throwable $e) {
+                    $aviso = ' (no se pudo enviar el correo: ' . $e->getMessage() . ')';
+                }
+            } else {
+                $aviso = ' (sin correo para notificar).';
+            }
+
+            return back()->with('exito', 'La licencia de "' . $licencia->nombre_ips . '" quedo activa' . $aviso);
+        }
+
         $suspender = $licencia->estado !== 'suspendida';
 
         $licencia->update(['estado' => $suspender ? 'suspendida' : 'activa']);
@@ -142,6 +180,7 @@ class SuperAdminEmpresaController extends Controller
             'por_vencer' => $consulta->where('estado', '!=', 'suspendida')->whereDate('fecha_fin', '>=', $hoy)->whereDate('fecha_fin', '<=', $limite),
             'vencida' => $consulta->whereDate('fecha_fin', '<', $hoy),
             'suspendida' => $consulta->where('estado', 'suspendida'),
+            'pendiente' => $consulta->where('estado', 'inactiva'),
             default => null,
         };
 
@@ -159,6 +198,7 @@ class SuperAdminEmpresaController extends Controller
 
     private function etiquetaEstado(Licencia $l): string
     {
+        if ($l->estado === 'inactiva') return 'Pendiente';
         if ($l->estado === 'suspendida') return 'Suspendida';
         if ($l->estaVencida()) return 'Vencida';
         if ($l->estaPorVencer()) return 'Por vencer';
@@ -177,7 +217,7 @@ class SuperAdminEmpresaController extends Controller
             'plan_id' => ['required', 'exists:planes,id'],
             'fecha_inicio' => ['required', 'date'],
             'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
-            'estado' => ['required', 'in:activa,prueba,suspendida'],
+            'estado' => ['required', 'in:activa,prueba,suspendida,inactiva,vencida'],
             'notas' => ['nullable', 'string', 'max:1000'],
         ], [
             'nombre_ips.required' => 'Escribe el nombre de la empresa.',

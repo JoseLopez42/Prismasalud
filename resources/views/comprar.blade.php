@@ -135,7 +135,11 @@
             <span class="inline-block text-xs font-extrabold uppercase tracking-[.18em]" style="color:var(--teal);">Finaliza tu compra</span>
             <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">Activa el plan {{ $plan['nombre'] }}</h1>
             @if ($usuarioLogueado)
-                <p class="text-gray-500 mt-2">Hola {{ $usuarioLogueado->nombres }}, solo necesitamos los datos de tu IPS y el pago para activar tu plan.</p>
+                @if (!empty($esRenovacion))
+                    <p class="text-gray-500 mt-2">Hola {{ $usuarioLogueado->nombres }}, tus datos de la IPS ya están registrados: solo necesitamos el método de pago para renovar tu plan.</p>
+                @else
+                    <p class="text-gray-500 mt-2">Hola {{ $usuarioLogueado->nombres }}, solo necesitamos los datos de tu IPS y el pago para activar tu plan.</p>
+                @endif
             @else
                 <p class="text-gray-500 mt-2">Llena tus datos y los de tu IPS para dejar tu cuenta lista en minutos.</p>
             @endif
@@ -157,6 +161,7 @@
             <form method="POST" action="{{ route('comprar.procesar', ['plan' => $plan['id']]) }}" class="space-y-6" id="form-comprar" novalidate data-validar>
                 @csrf
 
+                @if (empty($esRenovacion))
                 <!-- Paso 1: Datos de la IPS -->
                 <div class="paso">
                     <div class="flex items-center gap-3 mb-5">
@@ -178,7 +183,7 @@
                             <label for="tipo_entidad">Tipo de entidad</label>
                             <select id="tipo_entidad" name="tipo_entidad" data-v data-requerido="Selecciona el tipo de entidad.">
                                 <option value="">Selecciona una opción</option>
-                                @foreach (['IPS' => 'IPS', 'Clinica' => 'Clínica', 'Consultorio' => 'Consultorio', 'EPS' => 'EPS', 'Otro' => 'Otro'] as $valor => $texto)
+                                @foreach (['IPS' => 'IPS', 'Clinica' => 'Clínica', 'EPS' => 'EPS'] as $valor => $texto)
                                     <option value="{{ $valor }}" @selected(old('tipo_entidad') === $valor)>{{ $texto }}</option>
                                 @endforeach
                             </select>
@@ -201,12 +206,19 @@
                         </div>
                         <div class="campo">
                             <label for="departamento">Departamento</label>
-                            <input type="text" id="departamento" name="departamento" value="{{ old('departamento') }}" placeholder="Tolima" maxlength="80" data-v data-requerido="Escribe el departamento." data-min="3" data-max="80" data-patron="^[\p{L}][\p{L}\s'.\-]*$" data-patron-flags="u" data-patron-msg="Solo puede tener letras.">
+                            <select id="departamento" name="departamento" data-v data-requerido="Selecciona el departamento.">
+                                <option value="">Selecciona un departamento</option>
+                                @foreach ($departamentos as $departamento)
+                                    <option value="{{ $departamento->nombre_departamento }}" @selected(old('departamento') === $departamento->nombre_departamento)>{{ $departamento->nombre_departamento }}</option>
+                                @endforeach
+                            </select>
                             <p data-error-for="departamento" class="msg-error {{ $errors->has('departamento') ? '' : 'hidden' }}" role="alert">{{ $errors->first('departamento') }}</p>
                         </div>
                         <div class="campo">
                             <label for="ciudad">Ciudad</label>
-                            <input type="text" id="ciudad" name="ciudad" value="{{ old('ciudad') }}" placeholder="Ibagué" maxlength="80" data-v data-requerido="Escribe la ciudad." data-min="3" data-max="80" data-patron="^[\p{L}][\p{L}\s'.\-]*$" data-patron-flags="u" data-patron-msg="Solo puede tener letras.">
+                            <select id="ciudad" name="ciudad" data-v data-requerido="Selecciona la ciudad." data-old="{{ old('ciudad') }}">
+                                <option value="">Selecciona un departamento primero</option>
+                            </select>
                             <p data-error-for="ciudad" class="msg-error {{ $errors->has('ciudad') ? '' : 'hidden' }}" role="alert">{{ $errors->first('ciudad') }}</p>
                         </div>
                         <div class="campo sm:col-span-2">
@@ -216,6 +228,36 @@
                         </div>
                     </div>
                 </div>
+                @else
+                <!-- Datos de la IPS ya registrados (renovación): no se vuelven a pedir -->
+                <div class="paso">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="paso-numero">1</span>
+                        <h2 class="font-extrabold text-gray-900">Datos de tu IPS (ya registrados)</h2>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                        <div><p class="text-xs text-gray-400">IPS / Clínica</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->nombre_ips }}</p></div>
+                        <div><p class="text-xs text-gray-400">NIT</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->nit }}</p></div>
+                        <div><p class="text-xs text-gray-400">Tipo de entidad</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->tipo_entidad }}</p></div>
+                        <div><p class="text-xs text-gray-400">Representante legal</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->representante_legal }}</p></div>
+                        <div><p class="text-xs text-gray-400">Correo de la IPS</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->correo_ips }}</p></div>
+                        <div><p class="text-xs text-gray-400">Teléfono de la IPS</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->telefono_ips }}</p></div>
+                        <div><p class="text-xs text-gray-400">Ubicación</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->ciudad }}, {{ $licenciaExistente->departamento }}</p></div>
+                        <div><p class="text-xs text-gray-400">Dirección</p><p class="font-semibold text-gray-800">{{ $licenciaExistente->direccion }}</p></div>
+                    </div>
+                    <p class="mt-4 text-xs text-gray-400">Estos datos se reutilizan de tu registro actual. Solo cambia el plan y el método de pago.</p>
+                    <!-- Campos ocultos para reenviar los datos existentes (no se vuelven a validar en el front) -->
+                    <input type="hidden" name="nombre_ips" value="{{ $licenciaExistente->nombre_ips }}">
+                    <input type="hidden" name="nit" value="{{ $licenciaExistente->nit }}">
+                    <input type="hidden" name="tipo_entidad" value="{{ $licenciaExistente->tipo_entidad }}">
+                    <input type="hidden" name="representante_legal" value="{{ $licenciaExistente->representante_legal }}">
+                    <input type="hidden" name="correo_ips" value="{{ $licenciaExistente->correo_ips }}">
+                    <input type="hidden" name="telefono_ips" value="{{ $licenciaExistente->telefono_ips }}">
+                    <input type="hidden" name="departamento" value="{{ $licenciaExistente->departamento }}">
+                    <input type="hidden" name="ciudad" value="{{ $licenciaExistente->ciudad }}">
+                    <input type="hidden" name="direccion" value="{{ $licenciaExistente->direccion }}">
+                </div>
+                @endif
 
                 @if (!$usuarioLogueado)
                     <!-- Paso 2: Datos de tu cuenta (solo si NO hay sesion activa) -->
@@ -252,12 +294,12 @@
                             </div>
                             <div class="campo">
                                 <label for="contrasena">Contraseña</label>
-                                <input type="password" id="contrasena" name="contrasena" autocomplete="current-password" data-v data-requerido="Escribe tu contraseña." data-revalida="#contrasena_confirmation">
+                                <input type="password" id="contrasena" name="contrasena" autocomplete="new-password" data-v data-requerido="Escribe tu contraseña." data-min="6" data-max="100" data-revalida="#contrasena_confirmation">
                                 <p data-error-for="contrasena" class="msg-error {{ $errors->has('contrasena') ? '' : 'hidden' }}" role="alert">{{ $errors->first('contrasena') }}</p>
                             </div>
                             <div class="campo">
                                 <label for="contrasena_confirmation">Confirmar contraseña</label>
-                                <input type="password" id="contrasena_confirmation" name="contrasena_confirmation" autocomplete="current-password" data-v data-requerido="Confirma tu contraseña." data-igual="#contrasena" data-igual-msg="Las dos contraseñas no coinciden.">
+                                <input type="password" id="contrasena_confirmation" name="contrasena_confirmation" autocomplete="new-password" data-v data-requerido="Confirma tu contraseña." data-min="6" data-max="100" data-igual="#contrasena" data-igual-msg="Las dos contraseñas no coinciden.">
                                 <p data-error-for="contrasena_confirmation" class="msg-error {{ $errors->has('contrasena_confirmation') ? '' : 'hidden' }}" role="alert">{{ $errors->first('contrasena_confirmation') }}</p>
                             </div>
                         </div>
@@ -277,6 +319,28 @@
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="campo sm:col-span-2">
+                            <label for="metodo_pago">Método de pago</label>
+                            <select id="metodo_pago" name="metodo_pago" data-v data-requerido="Selecciona un método de pago.">
+                                <option value="">Selecciona un método de pago</option>
+                                @foreach ([
+                                    'tarjeta_credito' => 'Tarjeta de crédito',
+                                    'tarjeta_debito'  => 'Tarjeta débito',
+                                    'pse'             => 'PSE (cuenta bancaria)',
+                                    'nequi'           => 'Nequi',
+                                    'daviplata'       => 'Daviplata',
+                                    'transferencia'   => 'Transferencia bancaria',
+                                    'efecty'          => 'Efecty (pago en efectivo)',
+                                ] as $valor => $texto)
+                                    <option value="{{ $valor }}" @selected(old('metodo_pago', 'tarjeta_credito') === $valor)>{{ $texto }}</option>
+                                @endforeach
+                            </select>
+                            <p data-error-for="metodo_pago" class="msg-error {{ $errors->has('metodo_pago') ? '' : 'hidden' }}" role="alert">{{ $errors->first('metodo_pago') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Bloque tarjeta (solo para métodos de tarjeta) -->
+                    <div id="bloque-tarjeta" class="grid sm:grid-cols-2 gap-4 mt-4">
                         <div class="campo sm:col-span-2">
                             <label for="nombre_tarjeta">Nombre en la tarjeta</label>
                             <input type="text" id="nombre_tarjeta" name="nombre_tarjeta" value="{{ old('nombre_tarjeta') }}" maxlength="100" autocomplete="cc-name" data-v data-requerido="Escribe el nombre que aparece en la tarjeta." data-min="3" data-max="100" data-patron="^[\p{L}][\p{L}\s'.\-]*$" data-patron-flags="u" data-patron-msg="Solo puede tener letras.">
@@ -298,10 +362,26 @@
                             <p data-error-for="cvv" class="msg-error {{ $errors->has('cvv') ? '' : 'hidden' }}" role="alert">{{ $errors->first('cvv') }}</p>
                         </div>
                     </div>
+
+                    <!-- Bloque de referencia (métodos distintos a tarjeta) -->
+                    <div id="bloque-referencia" class="grid sm:grid-cols-2 gap-4 mt-4 hidden">
+                        <div class="campo sm:col-span-2">
+                            <label for="referencia">Referencia / código de confirmación</label>
+                            <input type="text" id="referencia" name="referencia" value="{{ old('referencia') }}" maxlength="100" data-v data-requerido="Escribe la referencia o código de confirmación del método elegido." data-min="3" data-max="100">
+                            <p class="text-xs text-gray-400 mt-1">Ejemplo: número de cuenta, celular asociado o código de aprobación.</p>
+                            <p data-error-for="referencia" class="msg-error {{ $errors->has('referencia') ? '' : 'hidden' }}" role="alert">{{ $errors->first('referencia') }}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-comprar" id="btn-comprar">
-                    Confirmar pago y activar mi cuenta
+                    @if (!empty($esRenovacion))
+                        Confirmar pago y renovar mi plan
+                    @elseif ($usuarioLogueado)
+                        Confirmar pago y activar mi cuenta
+                    @else
+                        Confirmar pago y activar mi cuenta
+                    @endif
                 </button>
             </form>
 
@@ -342,6 +422,66 @@
         var campos = Array.prototype.slice.call(form.querySelectorAll('[data-v]'));
         var tocados = {};
 
+        // Selects dinámicos de Departamento -> Ciudad (datos de la base de datos).
+        var deptoSelect = document.getElementById('departamento');
+        var ciudadSelect = document.getElementById('ciudad');
+        var ciudadesMap = @json($ciudadesPorDepartamento);
+        var oldCiudad = @json(old('ciudad'));
+        function llenarCiudades(init) {
+            if (!deptoSelect || !ciudadSelect) return;
+            var depto = deptoSelect.value;
+            var seleccionada = init ? (oldCiudad || '') : (ciudadSelect.value || '');
+            ciudadSelect.innerHTML = '';
+            var placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = (depto && ciudadesMap[depto] && ciudadesMap[depto].length)
+                ? 'Selecciona la ciudad' : 'Selecciona un departamento primero';
+            ciudadSelect.appendChild(placeholder);
+            if (depto && ciudadesMap[depto]) {
+                ciudadesMap[depto].forEach(function (c) {
+                    var opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (init && c === seleccionada) opt.selected = true;
+                    ciudadSelect.appendChild(opt);
+                });
+                if (!init) {
+                    var idx = ciudadesMap[depto].indexOf(seleccionada);
+                    if (idx !== -1) ciudadSelect.value = seleccionada;
+                }
+            }
+        }
+        if (deptoSelect) {
+            deptoSelect.addEventListener('change', function () {
+                ciudadSelect.value = '';
+                llenarCiudades(false);
+                if (tocados['ciudad']) validar(ciudadSelect);
+            });
+        }
+        llenarCiudades(true);
+
+        // Muestra/oculta los campos de tarjeta vs. referencia según el método de pago elegido.
+        var metodoPago = form.querySelector('[name="metodo_pago"]');
+        function alternarMetodoPago() {
+            if (!metodoPago) return;
+            var v = metodoPago.value;
+            var esTarjeta = (v === 'tarjeta_credito' || v === 'tarjeta_debito');
+            var bloqueTarjeta = document.getElementById('bloque-tarjeta');
+            var bloqueRef = document.getElementById('bloque-referencia');
+            if (bloqueTarjeta) {
+                bloqueTarjeta.classList.toggle('hidden', !esTarjeta);
+                bloqueTarjeta.querySelectorAll('input').forEach(function (i) { i.disabled = !esTarjeta; });
+            }
+            if (bloqueRef) {
+                bloqueRef.classList.toggle('hidden', esTarjeta);
+                bloqueRef.querySelectorAll('input').forEach(function (i) { i.disabled = esTarjeta; });
+            }
+        }
+        if (metodoPago) {
+            metodoPago.addEventListener('change', alternarMetodoPago);
+            alternarMetodoPago();
+        }
+
         function buscar(selector) { return form.querySelector(selector); }
         function soloDigitos(t) { return t.replace(/\D/g, ''); }
 
@@ -349,6 +489,9 @@
         function errorDe(c) {
             var crudo = c.value;
             var t = c.type === 'password' ? crudo : crudo.trim();
+
+            // Los campos deshabilitados (del bloque de pago no activo) no se validan.
+            if (c.disabled) return '';
 
             if (t === '') {
                 return c.getAttribute('data-requerido') || '';
