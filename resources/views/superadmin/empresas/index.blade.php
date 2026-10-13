@@ -31,7 +31,7 @@
                class="flex-1 min-w-[200px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
         <select name="estado" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
             <option value="">Todos los estados</option>
-            @foreach (['activa' => 'Activas', 'por_vencer' => 'Por vencer', 'vencida' => 'Vencidas', 'suspendida' => 'Suspendidas'] as $clave => $texto)
+            @foreach (['activa' => 'Activas', 'pendiente' => 'Pendientes', 'por_vencer' => 'Por vencer', 'vencida' => 'Vencidas', 'suspendida' => 'Suspendidas'] as $clave => $texto)
                 <option value="{{ $clave }}" @selected($estado === $clave)>{{ $texto }}</option>
             @endforeach
         </select>
@@ -93,17 +93,28 @@
                                     </a>
                                 </td>
                                 <td class="px-5 py-3">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="grid grid-cols-[5.5rem_6.5rem] justify-end gap-2 items-center ml-auto">
                                         <a href="{{ route('superadmin.empresas.edit', $licencia->id) }}"
-                                           class="rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 transition">Editar</a>
-                                        <form method="POST" action="{{ route('superadmin.empresas.estado', $licencia->id) }}"
-                                              onsubmit="return confirm('{{ $licencia->estado === 'suspendida' ? '¿Reactivar esta empresa?' : '¿Suspender esta empresa?' }}');">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="rounded-lg text-xs font-bold px-3 py-1.5 transition {{ $licencia->estado === 'suspendida' ? 'bg-teal-50 text-teal-700 hover:bg-teal-100' : 'bg-red-50 text-red-600 hover:bg-red-100' }}">
-                                                {{ $licencia->estado === 'suspendida' ? 'Reactivar' : 'Suspender' }}
-                                            </button>
-                                        </form>
+                                           class="rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 transition text-center w-full">Editar</a>
+                                        @if ($licencia->estado === 'inactiva')
+                                            <form method="POST" action="{{ route('superadmin.empresas.estado', $licencia->id) }}"
+                                                  onsubmit="return confirm('¿Activar esta licencia?');">
+                                                @csrf @method('PATCH')
+                                                <button type="submit"
+                                                        class="rounded-lg text-xs font-bold px-3 py-1.5 transition bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-center w-full">
+                                                    Activar
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('superadmin.empresas.estado', $licencia->id) }}"
+                                                  onsubmit="return confirm('{{ $licencia->estado === 'suspendida' ? '¿Reactivar esta empresa?' : '¿Suspender esta empresa?' }}');">
+                                                @csrf @method('PATCH')
+                                                <button type="submit"
+                                                        class="rounded-lg text-xs font-bold px-3 py-1.5 transition {{ $licencia->estado === 'suspendida' ? 'bg-teal-50 text-teal-700 hover:bg-teal-100' : 'bg-red-50 text-red-600 hover:bg-red-100' }} text-center w-full">
+                                                    {{ $licencia->estado === 'suspendida' ? 'Reactivar' : 'Suspender' }}
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

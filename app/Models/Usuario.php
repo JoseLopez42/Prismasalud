@@ -30,6 +30,7 @@ class Usuario extends Model
         'nit_eps',
         'activo',
         'licencia_id',
+        'debe_crear_contrasena',
     ];
 
     protected $hidden = [

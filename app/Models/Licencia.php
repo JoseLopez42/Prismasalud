@@ -12,6 +12,7 @@ class Licencia extends Model
         'tipo_entidad', 'representante_legal', 'correo_ips', 'telefono_ips',
         'departamento', 'ciudad', 'direccion',
         'plan', 'plan_id', 'fecha_inicio', 'fecha_fin', 'estado', 'notas',
+        'usuario_cedula',
     ];
 
     protected $casts = [
@@ -25,12 +26,17 @@ class Licencia extends Model
         return $this->hasMany(Usuario::class, 'licencia_id');
     }
 
+    // El administrador (usuario) que compró esta licencia
+    public function usuario()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_cedula', 'cedula');
+    }
+
     // El plan (de la tabla planes) contratado por esta licencia
     public function planModelo()
     {
         return $this->belongsTo(Plan::class, 'plan_id');
     }
-
     // Historial de pagos/transacciones de esta licencia
     public function transacciones()
     {

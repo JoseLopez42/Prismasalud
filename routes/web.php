@@ -27,11 +27,15 @@ use App\Http\Controllers\Medico\PanelMedicoController;
 use App\Http\Controllers\Medico\HistoriaMedicaController;
 use App\Http\Controllers\Medico\ProcedimientoController;
 use App\Http\Controllers\Medico\ConsultaMedicaController;
+use App\Http\Controllers\Admin\AfiliacionController;
+use App\Http\Controllers\Admin\BeneficiarioController;
+use App\Http\Controllers\Admin\EstadoController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminLoginController;
 use App\Http\Controllers\SuperAdminRecuperarController;
 use App\Http\Controllers\CompraController;
 use App\Models\Plan;
+use App\Http\Controllers\PrimerIngresoController;
 
 Route::get('/', function () {
     return view('index');
@@ -70,7 +74,7 @@ Route::get('/planes/{plan}', function (string $plan) {
 
 // Compra de un plan (publico): formulario + procesamiento.
 // throttle:5,1 -> maximo 5 intentos por minuto, para evitar spam de licencias falsas.
-Route::middleware('throttle:5,1')->group(function () {
+Route::middleware('throttle:20,1')->group(function () {
     Route::get('/comprar/{plan}', [CompraController::class, 'mostrarFormulario'])->where('plan', '[a-z0-9-]+')->name('comprar.form');
     Route::post('/comprar/{plan}', [CompraController::class, 'procesar'])->where('plan', '[a-z0-9-]+')->name('comprar.procesar');
 });
@@ -243,11 +247,46 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
         Route::put('/medicamentos/{codigo}', [MedicamentoController::class, 'update'])->name('medicamento.update');
         Route::patch('/medicamentos/{codigo}/estado', [MedicamentoController::class, 'cambiarEstado'])->name('medicamento.estado');
     });
+
+    // Afiliaciones: http://127.0.0.1:8000/admin/afiliaciones/...
+    Route::prefix('afiliaciones')->group(function () {
+
+        // Afiliación: /admin/afiliaciones
+        Route::get('/', [AfiliacionController::class, 'index'])->name('afiliaciones.index');
+        Route::get('/crear', [AfiliacionController::class, 'create'])->name('afiliaciones.create');
+        Route::post('/', [AfiliacionController::class, 'store'])->name('afiliaciones.store');
+        Route::get('/{id}/editar', [AfiliacionController::class, 'edit'])->name('afiliaciones.edit');
+        Route::get('/{id}/detalle', [AfiliacionController::class, 'detalle'])->name('afiliaciones.detalle');
+        Route::get('/detalle-nucleo', [AfiliacionController::class, 'detalleLista'])->name('afiliaciones.detalle.lista');
+        Route::put('/{id}', [AfiliacionController::class, 'update'])->name('afiliaciones.update');
+        Route::patch('/{id}/estado', [AfiliacionController::class, 'cambiarEstado'])->name('afiliaciones.estado');
+
+        // Beneficiarios: /admin/afiliaciones/beneficiarios
+        Route::get('/beneficiarios', [BeneficiarioController::class, 'index'])->name('beneficiarios.index');
+        Route::get('/beneficiarios/crear', [BeneficiarioController::class, 'create'])->name('beneficiarios.create');
+        Route::post('/beneficiarios', [BeneficiarioController::class, 'store'])->name('beneficiarios.store');
+        Route::get('/beneficiarios/creado', [BeneficiarioController::class, 'creado'])->name('beneficiarios.creado');
+        Route::get('/beneficiarios/{cc}/editar', [BeneficiarioController::class, 'edit'])->name('beneficiarios.edit');
+        Route::put('/beneficiarios/{cc}', [BeneficiarioController::class, 'update'])->name('beneficiarios.update');
+        Route::patch('/beneficiarios/{cc}/estado', [BeneficiarioController::class, 'cambiarEstado'])->name('beneficiarios.estado');
+
+        // Estados: /admin/afiliaciones/estados
+        Route::get('/estados', [EstadoController::class, 'index'])->name('estados.index');
+        Route::get('/estados/crear', [EstadoController::class, 'create'])->name('estados.create');
+        Route::post('/estados', [EstadoController::class, 'store'])->name('estados.store');
+        Route::get('/estados/{id}/editar', [EstadoController::class, 'edit'])->name('estados.edit');
+        Route::put('/estados/{id}', [EstadoController::class, 'update'])->name('estados.update');
+
+    });
 });
 
 // Rutas de login (públicas, cualquiera puede acceder al formulario)
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
 Route::post('/login', [LoginController::class, 'iniciarSesion'])->name('login.post');
+
+// Primer ingreso: cotizante / beneficiario nuevo crea su propia contraseña (pública)
+Route::get('/primer-ingreso', [PrimerIngresoController::class, 'mostrarFormulario'])->name('primer_ingreso.form');
+Route::post('/primer-ingreso', [PrimerIngresoController::class, 'guardar'])->middleware('throttle:5,1')->name('primer_ingreso.guardar');
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 
 // Panel del Usuario (roles distintos a Administrador)

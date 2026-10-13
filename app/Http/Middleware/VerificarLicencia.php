@@ -35,7 +35,16 @@ class VerificarLicencia
 
         $licencia = $usuarioActual?->licencia;
 
-        if ($licencia && $licencia->estaVencida()) {
+        if (! $licencia || $licencia->estado !== 'activa') {
+            return redirect()->route('admin.plan')
+                ->with('error', 'Tu licencia aún no está activa. Espera la aprobación del superadministrador para acceder al panel.');
+        }
+
+        if ($licencia->estaVencida()) {
+            if ($licencia->estado !== 'inactiva') {
+                $licencia->estado = 'inactiva';
+                $licencia->save();
+            }
             return redirect()->route('admin.plan')
                 ->with('error', 'Tu licencia está vencida. Renueva tu plan para seguir usando PrismaSalud.');
         }

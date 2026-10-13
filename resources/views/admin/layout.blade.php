@@ -135,10 +135,11 @@
                     ['icono' => 'usuarios',      'texto' => 'Usuarios y Roles',        'ruta' => route('usuarios.index'),      'clave' => 'usuarios',     'tablas' => ['usuarios', 'roles', 'tipos de documento']],
                     ['icono' => 'ubicaciones',   'texto' => 'Ubicaciones',             'ruta' => route('departamentos.index'), 'clave' => 'ubicaciones',  'tablas' => ['departamentos', 'ciudades', 'sedes']],
                     ['icono' => 'eps',           'texto' => 'EPS',                    'ruta' => route('eps.index'), 'clave' => 'eps', 'tablas' => ['eps', 'regimen']],
-                    ['icono' => 'afiliaciones',  'texto' => 'Afiliaciones',           'ruta' => '#', 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle_afiliado_afiliacion', 'estado']],
+                    ['icono' => 'afiliaciones',  'texto' => 'Afiliaciones',           'ruta' => route('afiliaciones.index'), 'clave' => 'afiliaciones',   'tablas' => ['afiliacion', 'beneficiarios', 'detalle de afiliacion', 'estado']],
                     ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => route('medico.index'), 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
                     ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => route('cita.index'), 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
                     ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => route('historia.index'), 'clave' => 'historia',       'tablas' => null],
+                    ['icono' => 'procedimientos','texto' => 'Procedimientos',         'ruta' => '#', 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
                     ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => route('medicamento.index'), 'clave' => 'farmacia',       'tablas' => ['medicamentos']],
                     ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
                     ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
@@ -196,6 +197,10 @@
                                             'tipo_cita' => route('tipo_cita.index'),
                                             'estado_cita' => route('estado_cita.index'),
                                             'medicamento', 'medicamentos' => route('medicamento.index'),
+                                            'afiliacion' => route('afiliaciones.index'),
+                                            'beneficiarios' => route('beneficiarios.index'),
+                                            'detalle de afiliacion' => route('afiliaciones.detalle.lista'),
+                                            'estado' => route('estados.index'),
                                             default => '#',
                                         };
                                     @endphp
@@ -207,11 +212,12 @@
 
                             {{-- FLYOUT ESCRITORIO: panel a la derecha, solo con hover.
                                  Nunca se muestra en móvil (hidden md:block). --}}
-                            <div class="hidden md:block absolute left-full top-0 ml-1 min-w-[190px] rounded-md shadow-lg py-2 z-50
+                            <div class="hidden md:block absolute left-full top-0 min-w-[190px] rounded-md shadow-lg py-2 z-50
                                         bg-[#1A5C3A] border border-white/10
                                         opacity-0 invisible
                                         group-hover:opacity-100 group-hover:visible
-                                        transition duration-150">
+                                        group-focus-within:opacity-100 group-focus-within:visible
+                                        transition-all duration-150 delay-300 group-hover:delay-0">
                                 @foreach ($item['tablas'] as $tabla)
                                     @php
                                         $rutaTabla = match ($tabla) {
@@ -231,6 +237,10 @@
                                             'tipo_cita' => route('tipo_cita.index'),
                                             'estado_cita' => route('estado_cita.index'),
                                             'medicamento', 'medicamentos' => route('medicamento.index'),
+                                            'afiliacion' => route('afiliaciones.index'),
+                                            'beneficiarios' => route('beneficiarios.index'),
+                                            'detalle de afiliacion' => route('afiliaciones.detalle.lista'),
+                                            'estado' => route('estados.index'),
                                             default => '#',
                                         };
                                     @endphp

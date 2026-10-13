@@ -32,7 +32,7 @@ class LoginController extends Controller
         // aceptaron los términos y condiciones antes de iniciar sesión.
         $credenciales = $request->validate([
             'cedula'     => 'required|integer',
-            'contrasena' => 'required|string',
+            'contrasena' => 'nullable|string',
             'terminos'   => 'accepted',
         ], [
             'terminos.accepted' => 'Debes aceptar los términos y condiciones para iniciar sesión.',
@@ -40,6 +40,12 @@ class LoginController extends Controller
 
         // Buscamos el usuario por cédula (la PK de la tabla).
         $usuario = Usuario::find($credenciales['cedula']);
+
+        // Cuenta nueva (cotizante o beneficiario recién registrado) que
+        // todavía no ha creado su contraseña: la llevamos a crearla.
+        if ($usuario && $usuario->debe_crear_contrasena) {
+            return redirect()->route('primer_ingreso.form', ['cedula' => $usuario->cedula]);
+        }
 
         // Si no existe como usuario de la plataforma, puede tratarse
         // de un MÉDICO: su cuenta vive en la tabla "medico" (tiene su
@@ -59,7 +65,7 @@ class LoginController extends Controller
 
         // Si no existe el usuario, o la contraseña no coincide con
         // el hash guardado (bcrypt), la sesión no se abre.
-        if (!$usuario || !password_verify($credenciales['contrasena'], $usuario->contrasena)) {
+        if (!$usuario || empty($credenciales['contrasena']) || !password_verify($credenciales['contrasena'], $usuario->contrasena)) {
             return back()->withErrors(['login' => 'Cédula o contraseña incorrectas.']);
         }
 

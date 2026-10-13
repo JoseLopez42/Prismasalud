@@ -1,0 +1,179 @@
+@extends('admin.layout')
+
+@section('titulo', 'Editar afiliación')
+@section('encabezado', 'Afiliaciones · Editar afiliación')
+
+@push('estilos')
+<style>
+    @keyframes aparecer {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .alerta-animada { animation: aparecer .25s ease; }
+    @keyframes sacudir {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+    }
+    .campo-invalido { animation: sacudir .3s ease; border-color: #ef4444 !important; }
+    .spinner {
+        width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: girar .6s linear infinite;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+</style>
+@endpush
+
+@section('contenido')
+
+    <a href="{{ route('afiliaciones.index') }}" class="text-sm text-teal-600 hover:underline">
+        ← Volver a afiliaciones
+    </a>
+
+    <div class="max-w-2xl mt-4">
+
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+
+            <div class="bg-gradient-to-r from-emerald-800 via-teal-700 to-teal-500 px-6 py-6 text-white">
+                <p class="font-bold text-lg leading-tight">Editar afiliación</p>
+                <p class="text-xs text-white/70">#{{ $afiliacion->id_afiliacion }}</p>
+            </div>
+
+            <div class="p-6">
+                @if ($errors->any())
+                    <div class="alerta-animada bg-red-50 text-red-600 text-sm rounded-md px-4 py-2 mb-5">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form id="form-afiliacion" method="POST" action="{{ route('afiliaciones.update', $afiliacion->id_afiliacion) }}" class="space-y-5" novalidate>
+                    @csrf
+                    @method('PUT')
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de afiliación</label>
+                        <input type="date" name="fecha_afiliacion" value="{{ old('fecha_afiliacion', $afiliacion->fecha_afiliacion) }}"
+                               class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                    </div>
+
+                    <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3">
+                        El <strong>parentesco</strong> y la <strong>EPS</strong> se toman automáticamente de la persona
+                        registrada como beneficiario (la EPS es la de su cotizante).
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de afiliación</label>
+                        <select name="id_tipo_afiliacion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            @foreach ($tipos as $tipo)
+                                <option value="{{ $tipo->id_regimen }}" {{ old('id_tipo_afiliacion', $afiliacion->id_tipo_afiliacion) == $tipo->id_regimen ? 'selected' : '' }}>
+                                    {{ $tipo->nombre_regimen }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Usuario</label>
+                        <select name="cc_usuario" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            @foreach ($usuarios as $u)
+                                <option value="{{ $u->cedula }}" {{ old('cc_usuario', $afiliacion->cc_usuario) == $u->cedula ? 'selected' : '' }}>
+                                    {{ $u->nombres }} {{ $u->apellidos }} ({{ $u->cedula }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Beneficiario</label>
+                        <select name="cc_afiliado" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            @foreach ($beneficiarios as $b)
+                                <option value="{{ $b->cc_afiliado }}" data-cotizante="{{ $b->cc_cotizante ?? $b->cc_afiliado }}" {{ old('cc_afiliado', $afiliacion->cc_afiliado) == $b->cc_afiliado ? 'selected' : '' }}>
+                                    {{ $b->nombres }} {{ $b->apellidos }} ({{ $b->cc_afiliado }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Estado</label>
+                        <select name="id_estado" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            @foreach ($estados as $es)
+                                <option value="{{ $es->id_estado }}" {{ old('id_estado', $afiliacion->id_estado) == $es->id_estado ? 'selected' : '' }}>
+                                    {{ $es->estado }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <a href="{{ route('afiliaciones.index') }}"
+                           class="flex-1 inline-flex items-center justify-center gap-2 border border-gray-300 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition">
+                            Cancelar
+                        </a>
+                        <button type="submit" id="boton-guardar"
+                                class="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 hover:shadow-md transition disabled:opacity-70 disabled:cursor-not-allowed">
+                            <span id="texto-boton" class="inline-flex items-center gap-1.5">Guardar cambios</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form-afiliacion');
+        const boton = document.getElementById('boton-guardar');
+        const texto = document.getElementById('texto-boton');
+
+        // Beneficiario: solo salen los familiares del usuario (cotizante) elegido
+        // (y el propio cotizante, que es el titular).
+        const selUsuario = form.querySelector('select[name="cc_usuario"]');
+        const selBenef = form.querySelector('select[name="cc_afiliado"]');
+        const opcionesBenef = Array.from(selBenef.querySelectorAll('option[data-cotizante]'))
+            .map(o => ({ valor: o.value, texto: o.textContent.trim(), cotizante: o.dataset.cotizante }));
+        let seleccionado = selBenef.value;
+
+        function filtrarBeneficiarios() {
+            seleccionado = selBenef.value || seleccionado;
+            const usuario = selUsuario.value;
+            const lista = usuario ? opcionesBenef.filter(o => o.cotizante === usuario) : [];
+
+            selBenef.innerHTML = '';
+            const base = document.createElement('option');
+            base.value = '';
+            base.textContent = !usuario
+                ? 'Primero selecciona el usuario...'
+                : (lista.length ? 'Seleccione...' : 'Este usuario no tiene beneficiarios registrados');
+            selBenef.appendChild(base);
+
+            lista.forEach(o => {
+                const op = document.createElement('option');
+                op.value = o.valor;
+                op.textContent = o.texto;
+                if (o.valor === seleccionado) op.selected = true;
+                selBenef.appendChild(op);
+            });
+        }
+
+        selUsuario.addEventListener('change', function () { seleccionado = ''; filtrarBeneficiarios(); });
+        filtrarBeneficiarios();
+        form.addEventListener('submit', function (evento) {
+            const invalidos = Array.from(form.querySelectorAll('.campo-form')).filter(c => !c.checkValidity());
+            if (invalidos.length > 0) {
+                evento.preventDefault();
+                invalidos.forEach(c => {
+                    c.classList.add('campo-invalido');
+                    c.addEventListener('animationend', () => c.classList.remove('campo-invalido'), { once: true });
+                });
+                invalidos[0].focus();
+                return;
+            }
+            boton.disabled = true;
+            texto.innerHTML = '<span class="spinner"></span> Guardando...';
+        });
+    </script>
+
+@endsection

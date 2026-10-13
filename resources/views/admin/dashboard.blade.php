@@ -39,6 +39,19 @@
             ['icono' => 'farmacia', 'texto' => 'Farmacia',       'ruta' => route('medicamento.index')],
             ['icono' => 'configuracion', 'texto' => 'Mi plan',   'ruta' => route('admin.plan')],
         ];
+
+        // Resumen visual de todos los módulos del sistema
+        $modulos = [
+            ['icono' => 'usuarios',      'titulo' => 'Usuarios y Roles',        'tablas' => ['usuarios', 'roles', 'tipos de documento']],
+            ['icono' => 'ubicaciones',   'titulo' => 'Ubicaciones',             'tablas' => ['departamento', 'ciudad', 'sede']],
+            ['icono' => 'eps',           'titulo' => 'EPS',                     'tablas' => ['eps', 'regimen']],
+            ['icono' => 'afiliaciones',  'titulo' => 'Afiliaciones',            'tablas' => ['afiliacion', 'beneficiarios', 'estado']],
+            ['icono' => 'medicos',       'titulo' => 'Médicos y Consultorios',  'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
+            ['icono' => 'citas',         'titulo' => 'Citas Médicas',           'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
+            ['icono' => 'historia',      'titulo' => 'Historia Clínica',        'tablas' => ['historia', 'diagnostico', 'enfermedad']],
+            ['icono' => 'procedimientos','titulo' => 'Procedimientos',          'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
+            ['icono' => 'farmacia',      'titulo' => 'Farmacia y Medicamentos', 'tablas' => ['medicamentos']],
+        ];
     @endphp
 
     {{-- Bienvenida --}}
@@ -90,6 +103,59 @@
                     @include('admin.partials.icono', ['icono' => 'flecha', 'clase' => 'w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform'])
                 </p>
             </a>
+        @endforeach
+    </div>
+
+    {{-- Módulos del sistema (vista general) --}}
+    <div class="mb-4">
+        <h3 class="text-base font-bold text-gray-900">Módulos del sistema</h3>
+        <p class="text-sm text-gray-500">Accede rápidamente a cada tabla del sistema</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        @foreach ($modulos as $modulo)
+            <div class="dashboard-entrada bg-white border border-gray-200 rounded-xl p-5 hover:-translate-y-1 hover:shadow-lg hover:border-teal-300 transition-all duration-300"
+                 style="animation-delay: {{ 300 + $loop->index * 60 }}ms">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0">
+                        @include('admin.partials.icono', ['icono' => $modulo['icono'], 'clase' => 'w-5 h-5'])
+                    </div>
+                    <p class="font-semibold text-gray-900 text-sm">{{ $modulo['titulo'] }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($modulo['tablas'] as $tabla)
+                        @php
+                            $rutaTabla = match ($tabla) {
+                                'departamento', 'departamentos' => route('departamentos.index'),
+                                'ciudad', 'ciudades' => route('ciudades.index'),
+                                'sede', 'sedes' => route('sedes.index'),
+                                'usuario', 'usuarios' => route('usuarios.index'),
+                                'tipo de documento', 'tipos de documento' => route('tipos_documento.index'),
+                                'rol', 'roles' => route('roles.index'),
+                                'eps' => route('eps.index'),
+                                'regimen' => route('regimen.index'),
+                                'afiliacion', 'afiliaciones' => route('afiliaciones.index'),
+                                'beneficiario', 'beneficiarios' => route('beneficiarios.index'),
+                                'estado', 'estados' => route('estados.index'),
+                                'medico' => route('medico.index'),
+                                'especialidad' => route('especialidad.index'),
+                                'consultorio' => route('consultorio.index'),
+                                'horario_medico' => route('horario_medico.index'),
+                                'cita' => route('cita.index'),
+                                'tipo_cita' => route('tipo_cita.index'),
+                                'estado_cita' => route('estado_cita.index'),
+                                'historia' => route('historia.index'),
+                                'medicamento', 'medicamentos' => route('medicamento.index'),
+                                default => '#',
+                            };
+                        @endphp
+                        <a href="{{ $rutaTabla }}"
+                           class="group inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1.5 rounded-full hover:bg-teal-600 hover:text-white hover:border-teal-600 hover:shadow-md hover:-translate-y-0.5 transition">
+                            {{ ucfirst($tabla) }}
+                            @include('admin.partials.icono', ['icono' => 'flecha', 'clase' => 'w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform'])
+                        </a>
+                    @endforeach
+                </div>
+            </div>
         @endforeach
     </div>
 
