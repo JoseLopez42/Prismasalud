@@ -212,11 +212,11 @@ Route::prefix('super-admin')->group(function () {
 
     // Recuperar contraseña del Superadministrador (3 pasos)
     Route::get('/recuperar', [SuperAdminRecuperarController::class, 'paso1'])->name('superadmin.recuperar');
-    Route::post('/recuperar', [SuperAdminRecuperarController::class, 'enviarCodigo'])->middleware('throttle:5,1')->name('superadmin.recuperar.enviar');
+    Route::post('/recuperar', [SuperAdminRecuperarController::class, 'enviarCodigo'])->middleware('throttle:20,1')->name('superadmin.recuperar.enviar');
     Route::get('/recuperar/codigo', [SuperAdminRecuperarController::class, 'paso2'])->name('superadmin.recuperar.codigo');
-    Route::post('/recuperar/codigo', [SuperAdminRecuperarController::class, 'verificarCodigo'])->middleware('throttle:5,1')->name('superadmin.recuperar.codigo.verificar');
+    Route::post('/recuperar/codigo', [SuperAdminRecuperarController::class, 'verificarCodigo'])->middleware('throttle:20,1')->name('superadmin.recuperar.codigo.verificar');
     Route::get('/recuperar/nueva', [SuperAdminRecuperarController::class, 'paso3'])->name('superadmin.recuperar.nueva');
-    Route::post('/recuperar/nueva', [SuperAdminRecuperarController::class, 'guardarContrasena'])->middleware('throttle:5,1')->name('superadmin.recuperar.nueva.guardar');
+    Route::post('/recuperar/nueva', [SuperAdminRecuperarController::class, 'guardarContrasena'])->middleware('throttle:20,1')->name('superadmin.recuperar.nueva.guardar');
 });
 
 // Panel del Superadministrador: http://127.0.0.1:8000/super-admin
