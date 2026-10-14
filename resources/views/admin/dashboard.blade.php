@@ -219,6 +219,12 @@
                         $estadoClases = $vencida
                             ? 'text-red-700 bg-red-50 border-red-100'
                             : ($porVencer ? 'text-amber-700 bg-amber-50 border-amber-100' : 'text-green-700 bg-green-50 border-green-100');
+                        $totalDias = $licenciaActual->fecha_inicio && $licenciaActual->fecha_fin
+                            ? $licenciaActual->fecha_inicio->diffInDays($licenciaActual->fecha_fin)
+                            : 0;
+                        $diasUsados = $licenciaActual->fecha_inicio
+                            ? (int) floor($licenciaActual->fecha_inicio->diffInDays(now()->min($licenciaActual->fecha_fin ?? now())))
+                            : 0;
                     @endphp
                     <div class="flex items-center justify-between gap-3 mb-3">
                         <span class="text-sm font-bold text-gray-900">{{ $licenciaActual->nombrePlan() }}</span>
@@ -228,7 +234,8 @@
                     </div>
                     <dl class="text-sm space-y-2.5">
                         <div class="flex justify-between gap-4"><dt class="text-gray-500">Inicio</dt><dd class="text-gray-700">{{ $licenciaActual->fecha_inicio ? $licenciaActual->fecha_inicio->format('d/m/Y') : '—' }}</dd></div>
-                        <div class="flex justify-between gap-4"><dt class="text-gray-500">Vence</dt><dd class="text-gray-700">{{ $licenciaActual->fecha_fin ? $licenciaActual->fecha_fin->format('d/m/Y') : '—' }}</dd></div>
+                        <div class="flex justify-between gap-4"><dt class="text-gray-500">Vence</dt><dd class="text-gray-700">{{ $licenciaActual->fecha_fin ? $licenciaActual->fecha_fin->format('d/m/Y') : '-' }}</dd></div>
+                        <div class="flex justify-between gap-4"><dt class="text-gray-500">Días usados</dt><dd class="text-gray-700">{{ $diasUsados }} de {{ $totalDias }}</dd></div>
                         @if ($restantes !== null)
                             <div class="flex justify-between gap-4">
                                 <dt class="text-gray-500">Días restantes</dt>
@@ -236,6 +243,18 @@
                             </div>
                         @endif
                     </dl>
+                    @if ($totalDias > 0)
+                        <div class="mb-3 mt-2">
+                            <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                                <span>Vigencia usada</span>
+                                <span>{{ $diasUsados }} de {{ $totalDias }} días</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                                <div class="h-full rounded-full {{ $vencida ? 'bg-red-500' : ($porVencer ? 'bg-amber-500' : 'bg-teal-500') }}"
+                                     style="width: {{ min(100, $totalDias > 0 ? round(($diasUsados / $totalDias) * 100) : 0) }}%;"></div>
+                            </div>
+                        </div>
+                    @endif
                     <a href="{{ route('admin.plan') }}"
                        class="mt-4 inline-flex w-full items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition">
                         Ver mi plan
