@@ -214,10 +214,10 @@
                                  Nunca se muestra en móvil (hidden md:block). --}}
                             <div class="hidden md:block absolute left-full top-0 min-w-[190px] rounded-md shadow-lg py-2 z-50
                                         bg-[#1A5C3A] border border-white/10
-                                        opacity-0 invisible
-                                        group-hover:opacity-100 group-hover:visible
-                                        group-focus-within:opacity-100 group-focus-within:visible
-                                        transition-all duration-150 delay-300 group-hover:delay-0">
+                                        opacity-0 invisible pointer-events-none
+                                        group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
+                                        group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto
+                                        transition-opacity duration-150">
                                 @foreach ($item['tablas'] as $tabla)
                                     @php
                                         $rutaTabla = match ($tabla) {
