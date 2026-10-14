@@ -613,5 +613,6 @@
     })();
     </script>
 
+    <script src="{{ asset('js/validacion-live.js') }}"></script>
 </body>
 </html>

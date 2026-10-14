@@ -110,6 +110,7 @@
             fondo.addEventListener('click', cerrar);
         })();
     </script>
+    <script src="{{ asset('js/validacion-live.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

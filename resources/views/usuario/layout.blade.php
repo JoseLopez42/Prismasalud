@@ -231,6 +231,7 @@
         });
     </script>
 
+    <script src="{{ asset('js/validacion-live.js') }}"></script>
     @include('partials.cookies')
 
 </body>
