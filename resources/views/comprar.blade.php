@@ -294,7 +294,7 @@
                             </div>
                             <div class="campo">
                                 <label for="contrasena">Contraseña</label>
-                                <input type="password" id="contrasena" name="contrasena" autocomplete="new-password" data-v data-requerido="Escribe tu contraseña." data-min="6" data-max="100" data-revalida="#contrasena_confirmation">
+                                <input type="password" id="contrasena" name="contrasena" autocomplete="new-password" data-v data-requerido="Escribe tu contraseña." data-min="6" data-max="100" data-patron="^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{6,100}$" data-patron-msg="La contraseña debe incluir al menos una letra mayúscula y un carácter especial (por ejemplo @, #, !)." data-revalida="#contrasena_confirmation">
                                 <p data-error-for="contrasena" class="msg-error {{ $errors->has('contrasena') ? '' : 'hidden' }}" role="alert">{{ $errors->first('contrasena') }}</p>
                             </div>
                             <div class="campo">

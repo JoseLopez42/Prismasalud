@@ -337,8 +337,21 @@
             function alternarSubmenu(evento) {
                 if (esPantallaMovil()) {
                     evento.preventDefault(); // en móvil no navega, solo despliega
-                    panel.classList.toggle('hidden');
-                    flecha.classList.toggle('rotada');
+                    const estabaOculto = panel.classList.contains('hidden');
+
+                    // Organiza el menú: cierra cualquier otro submenú abierto
+                    // para que no se acumulen/monten uno sobre otro.
+                    document.querySelectorAll('[id^="submenu-movil-"]').forEach(function (p) {
+                        p.classList.add('hidden');
+                    });
+                    document.querySelectorAll('.flecha-submenu-movil').forEach(function (f) {
+                        f.classList.remove('rotada');
+                    });
+
+                    if (estabaOculto) {
+                        panel.classList.remove('hidden');
+                        flecha.classList.add('rotada');
+                    }
                 }
                 // en escritorio no hacemos preventDefault: el enlace navega normal
             }
