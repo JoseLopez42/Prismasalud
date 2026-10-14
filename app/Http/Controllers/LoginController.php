@@ -49,9 +49,11 @@ class LoginController extends Controller
 
             if ($medico && $medico->estado === 'activo'
                 && password_verify($credenciales['contrasena'], $medico->contrasena)) {
-                $_SESSION['medico_cedula']   = $medico->cedula;
-                $_SESSION['medico_nombres']  = $medico->nombres;
-                $_SESSION['tipo_usuario_id'] = 3;
+                $_SESSION['medico_cedula']    = $medico->cedula;
+                $_SESSION['medico_nombres']   = $medico->nombres;
+                $_SESSION['medico_apellidos'] = $medico->apellidos;
+                $_SESSION['medico_foto']      = $medico->foto;
+                $_SESSION['tipo_usuario_id']  = 3;
 
                 return redirect()->route('medico.inicio');
             }

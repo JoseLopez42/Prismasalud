@@ -3,7 +3,45 @@
 @section('titulo', 'Inicio')
 @section('encabezado', 'Panel del Médico')
 
+@push('estilos')
+<style>
+    #modal-exito { animation: fondoEntra .2s ease; }
+    #modal-exito .tarjeta-exito { animation: tarjetaEntra .35s cubic-bezier(.18,.89,.32,1.28); }
+    @keyframes fondoEntra { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes tarjetaEntra {
+        from { opacity: 0; transform: translateY(14px) scale(.94); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .circulo-exito { animation: pulso .5s ease .1s both; }
+    @keyframes pulso {
+        0%   { transform: scale(.4); opacity: 0; }
+        60%  { transform: scale(1.12); opacity: 1; }
+        100% { transform: scale(1); }
+    }
+    .check-trazo { stroke-dasharray: 24; stroke-dashoffset: 24; animation: dibujar .4s ease .35s forwards; }
+    @keyframes dibujar { to { stroke-dashoffset: 0; } }
+</style>
+@endpush
+
 @section('contenido')
+
+    @if (session('exito'))
+        <div id="modal-exito" class="fixed inset-0 z-[80] flex items-center justify-center px-4 bg-black/50 backdrop-blur-sm">
+            <div class="tarjeta-exito bg-white rounded-2xl shadow-2xl w-full max-w-sm p-7 text-center">
+                <div class="circulo-exito mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path class="check-trazo" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">¡Cambios guardados!</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ session('exito') }}</p>
+                <button type="button" id="boton-cerrar-exito"
+                        class="mt-6 w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-green-700 transition">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    @endif
 
     @php
         $hora = (int) now()->format('G');
@@ -192,3 +230,24 @@
     @endif
 
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const modal = document.getElementById('modal-exito');
+        if (!modal) return;
+
+        const boton = document.getElementById('boton-cerrar-exito');
+
+        function cerrar() {
+            modal.style.animation = 'fondoEntra .2s ease reverse forwards';
+            setTimeout(() => modal.remove(), 180);
+        }
+
+        boton.addEventListener('click', cerrar);
+        modal.addEventListener('click', function (evento) {
+            if (evento.target === modal) cerrar();
+        });
+    })();
+</script>
+@endpush
