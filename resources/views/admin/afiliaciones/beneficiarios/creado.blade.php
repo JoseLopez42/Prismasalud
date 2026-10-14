@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('titulo', 'Cuenta creada')
-@section('encabezado', 'Afiliaciones · Cuenta creada')
+@section('encabezado', 'Afiliaciones  Cuenta creada')
 
 @section('contenido')
 
@@ -13,7 +13,7 @@
                 <p class="font-bold text-lg leading-tight">
                     {{ $esBeneficiario ? 'Beneficiario registrado' : 'Cotizante registrado' }}
                 </p>
-                <p class="text-xs text-white/70">{{ session('exito') ?? 'La cuenta de acceso ya está lista.' }}</p>
+                <p class="text-xs text-white/70">{{ session('exito') ?? 'La cuenta de acceso ya esta lista.' }}</p>
             </div>
 
             <div class="p-6 space-y-5">
@@ -50,7 +50,7 @@
 
                 <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-xl px-4 py-4">
                     <p class="font-semibold">Primer ingreso</p>
-                    <p class="mt-1">Inicia sesión con tu cédula y crea tu contraseña para ingresar.</p>
+                    <p class="mt-1">La persona debe iniciar sesion con su numero de cedula; como es su primer ingreso, alli podra crear su contrasena propia para entrar.</p>
                 </div>
 
                 <div class="flex gap-3 pt-1">
