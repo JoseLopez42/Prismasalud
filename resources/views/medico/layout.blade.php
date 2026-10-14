@@ -77,6 +77,7 @@
             @php
                 $menu = [
                     ['icono' => 'dashboard', 'texto' => 'Inicio',          'ruta' => route('medico.inicio'),          'clave' => 'inicio'],
+                    ['icono' => 'horarios',  'texto' => 'Mis horarios',    'ruta' => route('medico.horario.index'),   'clave' => 'horarios'],
                     ['icono' => 'historia',  'texto' => 'Historia médica', 'ruta' => route('medico.historia.index'),  'clave' => 'historia'],
                     ['icono' => 'procedimientos', 'texto' => 'Procedimientos', 'ruta' => route('medico.procedimiento.index'), 'clave' => 'procedimientos'],
                 ];

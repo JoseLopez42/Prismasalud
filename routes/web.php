@@ -27,6 +27,7 @@ use App\Http\Controllers\Medico\PanelMedicoController;
 use App\Http\Controllers\Medico\HistoriaMedicaController;
 use App\Http\Controllers\Medico\ProcedimientoController;
 use App\Http\Controllers\Medico\ConsultaMedicaController;
+use App\Http\Controllers\Medico\HorarioMedicoController as MedicoHorarioController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminLoginController;
 use App\Http\Controllers\SuperAdminRecuperarController;
@@ -274,6 +275,11 @@ Route::prefix('usuario')->middleware('esusuario')->group(function () {
 Route::prefix('medico')->middleware('esmedico')->group(function () {
     // Inicio: citas programadas del médico
     Route::get('/', [PanelMedicoController::class, 'inicio'])->name('medico.inicio');
+
+    // Agenda: todos los horarios programados del médico y el detalle
+    // de cada horario con sus pacientes agendados.
+    Route::get('/horarios', [MedicoHorarioController::class, 'index'])->name('medico.horario.index');
+    Route::get('/horarios/{id}', [MedicoHorarioController::class, 'detalle'])->name('medico.horario.detalle');
 
     // Atención de una cita: historia clínica, procedimientos y medicamentos
     Route::get('/citas/{id}', [ConsultaMedicaController::class, 'show'])->name('medico.cita.show');

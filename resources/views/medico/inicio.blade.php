@@ -34,6 +34,11 @@
                 <p class="text-white/80 text-sm mt-1">{{ $medico->especialidad->nombre ?? 'Sin especialidad' }} · {{ $citasHoy }} {{ $citasHoy === 1 ? 'cita' : 'citas' }} para hoy</p>
             </div>
             <div class="flex flex-wrap gap-2 flex-shrink-0">
+                <a href="{{ route('medico.horario.index') }}"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#1A5C3A] text-sm font-bold rounded-lg hover:bg-teal-50 shadow-md transition">
+                    @include('admin.partials.icono', ['icono' => 'horarios', 'clase' => 'w-4 h-4'])
+                    Mis horarios
+                </a>
                 <a href="{{ route('medico.historia.index') }}"
                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#1A5C3A] text-sm font-bold rounded-lg hover:bg-teal-50 shadow-md transition">
                     @include('admin.partials.icono', ['icono' => 'historia', 'clase' => 'w-4 h-4'])
