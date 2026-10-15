@@ -56,6 +56,7 @@
                         <input type="radio" name="id_tipo_cita" value="{{ $tipo->id }}"
                                data-nombre="{{ $tipo->nombre }}"
                                data-duracion="{{ $tipo->duracion_minutos }}"
+                               data-id-especialidad="{{ $tipo->id_especialidad ?? '' }}"
                                class="peer sr-only"
                                {{ (string) old('id_tipo_cita') === (string) $tipo->id ? 'checked' : '' }}>
                         <div class="h-full border-2 border-gray-200 rounded-xl p-4 transition
@@ -218,10 +219,35 @@
             const cuposInfo = document.getElementById('cupos-info');
 
             const estado = {
-                tipoId: null, tipoNombre: '',
+                tipoId: null, tipoNombre: '', tipoEspecialidad: '',
                 medicoCedula: null, medicoNombre: '', especialidad: '',
                 cupo: inputHora.value || '', consultorio: '',
             };
+
+            let chipActivo = 'todos';
+
+            function filtrarMedicos() {
+                let visibles = 0;
+                document.querySelectorAll('.medico-item').forEach(function (item) {
+                    const coincideChip = chipActivo === 'todos' || item.dataset.especialidad === chipActivo;
+                    const coincideTipo = !estado.tipoEspecialidad || item.dataset.especialidad === estado.tipoEspecialidad;
+                    const visible = coincideChip && coincideTipo;
+                    item.classList.toggle('hidden', !visible);
+                    if (visible) visibles++;
+                });
+                document.getElementById('sin-medicos').classList.toggle('hidden', visibles > 0);
+
+                const medicoOculto = form.querySelector('input[name="cedula_medico"]:checked') &&
+                    form.querySelector('input[name="cedula_medico"]:checked').closest('.medico-item').classList.contains('hidden');
+                if (medicoOculto) {
+                    form.querySelector('input[name="cedula_medico"]:checked').checked = false;
+                    estado.medicoCedula = null;
+                    estado.medicoNombre = '';
+                    estado.especialidad = '';
+                    estado.cupo = '';
+                    inputHora.value = '';
+                }
+            }
 
             let paso = {{ (int) $pasoInicial }};
 
@@ -307,14 +333,17 @@
                 radio.addEventListener('change', function () {
                     estado.tipoId = radio.value;
                     estado.tipoNombre = radio.dataset.nombre;
+                    estado.tipoEspecialidad = radio.dataset.idEspecialidad || '';
                     estado.cupo = '';
                     inputHora.value = '';
+                    filtrarMedicos();
                     // Si cambia el servicio, la duración cambia: recargar cupos.
                     if (paso === 2) cargarCupos();
                 });
                 if (radio.checked) {
                     estado.tipoId = radio.value;
                     estado.tipoNombre = radio.dataset.nombre;
+                    estado.tipoEspecialidad = radio.dataset.idEspecialidad || '';
                 }
             });
 
@@ -336,7 +365,7 @@
 
             document.querySelectorAll('.chip-especialidad').forEach(function (chip) {
                 chip.addEventListener('click', function () {
-                    const filtro = chip.dataset.filtro;
+                    chipActivo = chip.dataset.filtro;
                     document.querySelectorAll('.chip-especialidad').forEach(function (c) {
                         c.classList.remove('activo');
                         c.classList.remove('bg-teal-600', 'text-white', 'border-teal-600');
@@ -345,13 +374,7 @@
                     chip.classList.add('activo', 'bg-teal-600', 'text-white', 'border-teal-600');
                     chip.classList.remove('bg-white', 'text-gray-600', 'border-gray-300');
 
-                    let visibles = 0;
-                    document.querySelectorAll('.medico-item').forEach(function (item) {
-                        const coincide = filtro === 'todos' || item.dataset.especialidad === filtro;
-                        item.classList.toggle('hidden', !coincide);
-                        if (coincide) visibles++;
-                    });
-                    document.getElementById('sin-medicos').classList.toggle('hidden', visibles > 0);
+                    filtrarMedicos();
                 });
             });
 
@@ -454,6 +477,7 @@
             // ---------- Estado inicial ----------
             pintarIndicadores();
             mostrarPaso(paso);
+            filtrarMedicos();
             if (paso >= 2) cargarCupos();
         })();
     </script>

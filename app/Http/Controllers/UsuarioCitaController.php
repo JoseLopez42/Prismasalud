@@ -117,6 +117,19 @@ class UsuarioCitaController extends Controller
 
         $duracion = $this->duracionTipoCita((int) $datos['id_tipo_cita']);
 
+        // El médico debe corresponder a la especialidad del servicio (si el tipo la define).
+        $idEspecialidadTipo = TipoCita::where('id', $datos['id_tipo_cita'])->value('id_especialidad');
+
+        if ($idEspecialidadTipo) {
+            $idEspecialidadMedico = Medico::where('cedula', $datos['cedula_medico'])->value('id_especialidad');
+
+            if ((int) $idEspecialidadMedico !== (int) $idEspecialidadTipo) {
+                return back()->withInput()->withErrors([
+                    'cedula_medico' => 'El médico seleccionado no pertenece a la especialidad requerida para este servicio.',
+                ]);
+            }
+        }
+
         $inicioMin = $this->aMinutos($datos['hora_inicio']);
         $finMin    = $inicioMin + $duracion;
 
