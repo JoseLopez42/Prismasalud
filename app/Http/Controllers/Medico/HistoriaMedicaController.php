@@ -30,19 +30,22 @@ class HistoriaMedicaController extends Controller
             $paciente = Usuario::with(['tipoDocumento', 'tipoUsuario'])->find($cedulaBuscada);
 
             if ($paciente) {
-                $historias = HistoriaClinica::with('medico')
+                $historias = HistoriaClinica::with(['medico.especialidad', 'cita'])
                     ->where('cedula_paciente', $paciente->cedula)
                     ->orderBy('fecha', 'desc')
+                    ->orderBy('id', 'desc')
                     ->get();
 
-                $diagnosticos = Diagnostico::with('medico')
+                $diagnosticos = Diagnostico::with('medico.especialidad')
                     ->where('cedula_paciente', $paciente->cedula)
                     ->orderBy('fecha', 'desc')
+                    ->orderBy('id', 'desc')
                     ->get();
 
-                $enfermedades = Enfermedad::with('medico')
+                $enfermedades = Enfermedad::with('medico.especialidad')
                     ->where('cedula_paciente', $paciente->cedula)
                     ->orderBy('fecha', 'desc')
+                    ->orderBy('id', 'desc')
                     ->get();
             }
         }
