@@ -424,6 +424,13 @@
                     cuposInfo.textContent = 'Consultorio asignado: ' + data.consultorio + ' · duración ' + data.duracion + ' min.';
                 }
 
+                if (data.mensaje) {
+                    const aviso = document.createElement('p');
+                    aviso.className = 'text-xs font-semibold text-amber-600 mb-2';
+                    aviso.textContent = data.mensaje;
+                    cuposContainer.appendChild(aviso);
+                }
+
                 const titulo = document.createElement('p');
                 titulo.className = 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2';
                 titulo.textContent = 'Cupos disponibles';
@@ -437,6 +444,23 @@
                     boton.type = 'button';
                     boton.textContent = c.hora;
                     boton.dataset.hora = c.hora;
+
+                    if (c.ocupado) {
+                        boton.disabled = true;
+                        boton.className = 'px-2 py-2.5 text-sm font-semibold rounded-lg border bg-gray-100 text-gray-400 border-gray-200 line-through cursor-not-allowed';
+                        boton.title = 'Cupo ocupado';
+                        grid.appendChild(boton);
+                        return;
+                    }
+
+                    if (c.pasado) {
+                        boton.disabled = true;
+                        boton.className = 'px-2 py-2.5 text-sm font-semibold rounded-lg border bg-gray-50 text-gray-300 border-gray-200 line-through cursor-not-allowed';
+                        boton.title = 'Hora ya pasó';
+                        grid.appendChild(boton);
+                        return;
+                    }
+
                     boton.className = 'cupo-boton px-2 py-2.5 text-sm font-semibold rounded-lg border transition '
                         + (estado.cupo === c.hora
                             ? 'bg-teal-600 text-white border-teal-600'

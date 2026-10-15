@@ -39,9 +39,10 @@ class UsuarioCitaController extends Controller
     }
 
     /**
-     * Cupos (horas) disponibles de un médico para una fecha y tipo de cita.
-     * Se calculan a partir de su horario de atención (horario_medico),
-     * restando los cupos ya ocupados por otras citas activas.
+     * Cupos (horas) de un médico para una fecha y tipo de cita.
+     * Se calculan a partir de su horario de atención (horario_medico);
+     * los cupos ocupados por otras citas activas se devuelven marcados
+     * con ocupado = true para que el frontend los muestre tachados.
      */
     public function cupos(Request $request)
     {
@@ -77,6 +78,8 @@ class UsuarioCitaController extends Controller
 
         $cupos = [];
         $consultorio = null;
+        $esHoy = $datos['fecha'] === now()->toDateString();
+        $ahoraMin = (int) now()->format('H') * 60 + (int) now()->format('i');
 
         foreach ($horarios as $horario) {
             $consultorio = $consultorio ?: ($horario->consultorio->nombre ?? null);
@@ -85,22 +88,24 @@ class UsuarioCitaController extends Controller
             $fin    = $this->aMinutos($horario->hora_fin);
 
             for ($m = $inicio; $m + $duracion <= $fin; $m += $duracion) {
-                if ($this->slotOcupado($m, $m + $duracion, $ocupadas)) {
-                    continue;
-                }
+                $ocupado = $this->slotOcupado($m, $m + $duracion, $ocupadas);
 
                 $cupos[] = [
-                    'hora' => $this->aHora($m),
-                    'fin'  => $this->aHora($m + $duracion),
+                    'hora'   => $this->aHora($m),
+                    'fin'    => $this->aHora($m + $duracion),
+                    'pasado' => !$ocupado && $esHoy && $m <= $ahoraMin,
+                    'ocupado'=> $ocupado,
                 ];
             }
         }
 
+        $libres = array_filter($cupos, fn ($c) => ! $c['pasado'] && ! $c['ocupado']);
+
         return response()->json([
-            'cupos'       => $cupos,
+            'cupos'       => array_values($cupos),
             'consultorio' => $consultorio,
             'duracion'    => $duracion,
-            'mensaje'     => empty($cupos) ? 'No quedan cupos libres para esa fecha.' : null,
+            'mensaje'     => empty($libres) ? 'No quedan cupos libres para esa fecha.' : null,
         ]);
     }
 
@@ -132,6 +137,17 @@ class UsuarioCitaController extends Controller
 
         $inicioMin = $this->aMinutos($datos['hora_inicio']);
         $finMin    = $inicioMin + $duracion;
+
+        // Si la cita es hoy, la hora de inicio debe ser posterior a la hora actual.
+        if ($datos['fecha'] === now()->toDateString()) {
+            $ahoraMin = (int) now()->format('H') * 60 + (int) now()->format('i');
+
+            if ($inicioMin <= $ahoraMin) {
+                return back()->withInput()->withErrors([
+                    'hora_inicio' => 'No se pueden agendar citas en horarios que ya pasaron. Elige un cupo posterior a la hora actual.',
+                ]);
+            }
+        }
 
         // El cupo debe caber dentro de un horario activo del médico ese día.
         $horario = HorarioMedico::where('cedula_medico', $datos['cedula_medico'])
