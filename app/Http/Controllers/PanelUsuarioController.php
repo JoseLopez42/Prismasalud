@@ -97,24 +97,28 @@ class PanelUsuarioController extends Controller
     {
         $cedula = $this->cedulaUsuario();
 
-        $historias = HistoriaClinica::with('medico')
+        $historias = HistoriaClinica::with(['medico.especialidad', 'cita', 'diagnosticos', 'enfermedades'])
             ->where('cedula_paciente', $cedula)
             ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
-        $diagnosticos = Diagnostico::with('medico')
+        $diagnosticos = Diagnostico::with(['medico.especialidad', 'historiaClinica'])
             ->where('cedula_paciente', $cedula)
             ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
-        $enfermedades = Enfermedad::with('medico')
+        $enfermedades = Enfermedad::with(['medico.especialidad', 'historiaClinica'])
             ->where('cedula_paciente', $cedula)
             ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
-        $procedimientos = Procedimiento::with(['medico', 'tipoProcedimiento'])
+        $procedimientos = Procedimiento::with(['medico.especialidad', 'tipoProcedimiento', 'cita', 'detalles'])
             ->where('cedula_paciente', $cedula)
             ->orderBy('fecha', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         return view('usuario.historia.index', compact('historias', 'diagnosticos', 'enfermedades', 'procedimientos'))

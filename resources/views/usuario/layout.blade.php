@@ -231,6 +231,8 @@
         });
     </script>
 
+    @stack('scripts')
+
     @include('partials.cookies')
 
 </body>
