@@ -317,6 +317,15 @@ Route::prefix('medico')->middleware('esmedico')->group(function () {
     // Inicio: citas programadas del médico
     Route::get('/', [PanelMedicoController::class, 'inicio'])->name('medico.inicio');
 
+    // Agenda: todos los horarios programados del médico y el detalle
+    // de cada horario con sus pacientes agendados.
+    Route::get('/horarios', [MedicoHorarioController::class, 'index'])->name('medico.horario.index');
+    Route::get('/horarios/{id}', [MedicoHorarioController::class, 'detalle'])->name('medico.horario.detalle');
+
+    // Perfil del médico: actualizar datos básicos y foto.
+    Route::get('/perfil', [PerfilController::class, 'editar'])->name('medico.perfil');
+    Route::put('/perfil', [PerfilController::class, 'actualizar'])->name('medico.perfil.update');
+
     // Atención de una cita: historia clínica, procedimientos y medicamentos
     Route::get('/citas/{id}', [ConsultaMedicaController::class, 'show'])->name('medico.cita.show');
     Route::post('/citas/{id}/historia', [ConsultaMedicaController::class, 'storeHistoria'])->name('medico.cita.historia');

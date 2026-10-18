@@ -78,6 +78,20 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Especialidad <span class="text-gray-400 font-normal">(opcional)</span></label>
+                        <select name="id_especialidad"
+                                class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 appearance-none bg-white transition">
+                            <option value="">Todas las especialidades</option>
+                            @foreach ($especialidades as $especialidad)
+                                <option value="{{ $especialidad->id }}" {{ old('id_especialidad', $tipo->id_especialidad) == $especialidad->id ? 'selected' : '' }}>
+                                    {{ $especialidad->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Si la defines, al agendar cita solo se mostrarán los médicos de esa especialidad para este servicio.</p>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción <span class="text-gray-400 font-normal">(opcional)</span></label>
                         <textarea name="descripcion" rows="3"
                                   class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"

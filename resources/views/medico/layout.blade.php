@@ -77,8 +77,10 @@
             @php
                 $menu = [
                     ['icono' => 'dashboard', 'texto' => 'Inicio',          'ruta' => route('medico.inicio'),          'clave' => 'inicio'],
+                    ['icono' => 'horarios',  'texto' => 'Mis horarios',    'ruta' => route('medico.horario.index'),   'clave' => 'horarios'],
                     ['icono' => 'historia',  'texto' => 'Historia médica', 'ruta' => route('medico.historia.index'),  'clave' => 'historia'],
                     ['icono' => 'procedimientos', 'texto' => 'Procedimientos', 'ruta' => route('medico.procedimiento.index'), 'clave' => 'procedimientos'],
+                    ['icono' => 'perfil',    'texto' => 'Mi perfil',       'ruta' => route('medico.perfil'),          'clave' => 'perfil'],
                 ];
             @endphp
 
@@ -112,14 +114,19 @@
                         Médico
                     </span>
 
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
-                            {{ strtoupper(substr($_SESSION['medico_nombres'] ?? 'M', 0, 1)) }}
-                        </div>
-                        <p class="hidden sm:block text-sm font-semibold text-gray-900">
+                    <a href="{{ route('medico.perfil') }}" class="flex items-center gap-2 group" title="Mi perfil">
+                        @if (!empty($_SESSION['medico_foto']))
+                            <img src="{{ asset('storage/' . $_SESSION['medico_foto']) }}" alt="Foto de perfil"
+                                 class="w-9 h-9 rounded-full object-cover ring-1 ring-teal-200">
+                        @else
+                            <div class="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                                {{ strtoupper(substr($_SESSION['medico_nombres'] ?? 'M', 0, 1)) }}
+                            </div>
+                        @endif
+                        <p class="hidden sm:block text-sm font-semibold text-gray-900 group-hover:text-teal-700">
                             {{ $_SESSION['medico_nombres'] ?? '' }}
                         </p>
-                    </div>
+                    </a>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
