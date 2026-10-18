@@ -92,6 +92,9 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
     // Mi Plan: http://127.0.0.1:8000/admin/mi-plan
     Route::get('/mi-plan', [DashboardController::class, 'miPlan'])->name('admin.plan');
 
+    // Mensaje de pago aceptado: accesible aunque la licencia siga inactiva
+    Route::view('/pago-aceptado', 'admin.pago-aceptado')->name('admin.pago_aceptado');
+
     // Ver planes disponibles sin salir del panel: http://127.0.0.1:8000/admin/planes
     Route::get('/planes', [DashboardController::class, 'planes'])->name('admin.planes');
 

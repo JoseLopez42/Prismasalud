@@ -14,6 +14,7 @@ class VerificarLicencia
     protected array $rutasPermitidas = [
         'admin.plan',
         'admin.planes',
+        'admin.pago_aceptado',
         'comprar.form',
         'comprar.procesar',
         'logout',

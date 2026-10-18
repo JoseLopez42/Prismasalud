@@ -130,7 +130,6 @@
                             <th class="px-4 py-3">Médico</th>
                             <th class="px-4 py-3">Consultorio</th>
                             <th class="px-4 py-3">Estado</th>
-                            <th class="px-4 py-3 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -158,16 +157,10 @@
                                         {{ $cita->estadoCita->nombre ?? '—' }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-right">
-                                    <a href="{{ route('cita.edit', $cita->id) }}"
-                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-teal-700 bg-teal-50 border border-teal-100 text-xs font-semibold hover:bg-teal-600 hover:text-white transition">
-                                        Gestionar
-                                    </a>
-                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-14 text-center">
+                                <td colspan="5" class="px-4 py-14 text-center">
                                     <div class="inline-flex flex-col items-center">
                                         <div class="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-3">
                                             @include('admin.partials.icono', ['icono' => 'citas', 'clase' => 'w-8 h-8 text-teal-400'])

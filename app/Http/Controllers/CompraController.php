@@ -261,7 +261,7 @@ class CompraController extends Controller
             ? '¡Renovación registrada! Tu plan quedó inactivo y será activado por el superadministrador.'
             : '¡Compra registrada! Tu plan quedó inactivo y será activado por el superadministrador.';
 
-        return redirect()->route('admin.plan')->with('exito', $mensaje);
+        return redirect()->route('admin.pago_aceptado')->with('exito', $mensaje);
     }
 
     private function duracionEnDias(string $planId): int
