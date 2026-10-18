@@ -200,6 +200,7 @@ class BeneficiarioController extends Controller
             'direccion'        => ['required', 'string', 'max:255'],
             'correo'           => ['required', 'email', 'max:100', 'unique:beneficiarios,correo,' . $cc . ',cc_afiliado', 'unique:usuarios,correo,' . $cc . ',cedula'],
             'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
+            'foto'             => ['nullable', 'image', 'max:2048'],
         ], [
             'nombres.required'          => 'Los nombres son obligatorios.',
             'nombres.regex'             => 'Los nombres solo pueden contener letras, espacios, puntos, guiones y apóstrofos.',
@@ -218,6 +219,8 @@ class BeneficiarioController extends Controller
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.date'     => 'La fecha de nacimiento no es una fecha válida.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+            'foto.image'                => 'La foto debe ser una imagen (jpg, png, etc.).',
+            'foto.max'                  => 'La foto no puede pesar más de 2 MB.',
         ]);
 
         $edadReal = Carbon::parse($datos['fecha_nacimiento'])->age;
@@ -227,17 +230,30 @@ class BeneficiarioController extends Controller
             ])->withInput();
         }
 
-        // Actualiza el beneficiario y, si ya tiene cuenta, la sincroniza.
-        DB::transaction(function () use ($beneficiario, $datos) {
+        // Actualiza el beneficiario y, si ya tiene cuenta, la sincroniza (incluyendo foto).
+        DB::transaction(function () use ($beneficiario, $datos, $request) {
             $beneficiario->update($datos);
 
-            Usuario::where('cedula', $beneficiario->cc_afiliado)->update([
-                'nombres'   => $datos['nombres'],
-                'apellidos' => $datos['apellidos'],
-                'edad'      => $datos['edad'],
-                'telefono'  => $datos['telefono'],
-                'correo'    => $datos['correo'],
-            ]);
+            $usuario = Usuario::where('cedula', $beneficiario->cc_afiliado)->first();
+            if ($usuario) {
+                $usuario->update([
+                    'nombres'   => $datos['nombres'],
+                    'apellidos' => $datos['apellidos'],
+                    'edad'      => $datos['edad'],
+                    'telefono'  => $datos['telefono'],
+                    'correo'    => $datos['correo'],
+                ]);
+
+                // Foto: solo se cambia si suben una nueva
+                if ($request->hasFile('foto')) {
+                    // Elimina la foto anterior si existe
+                    if ($usuario->foto && file_exists(storage_path('app/public/' . $usuario->foto))) {
+                        unlink(storage_path('app/public/' . $usuario->foto));
+                    }
+                    $usuario->foto = $request->file('foto')->store('usuarios', 'public');
+                    $usuario->save();
+                }
+            }
         });
 
         return redirect()->route('beneficiarios.index')->with('exito', 'Beneficiario actualizado correctamente.');

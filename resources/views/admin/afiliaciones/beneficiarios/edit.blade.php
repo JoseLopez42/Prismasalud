@@ -18,9 +18,23 @@
                     <div class="bg-red-50 text-red-600 text-sm rounded-md px-4 py-2 mb-5">{{ $errors->first() }}</div>
                 @endif
 
-                <form method="POST" action="{{ route('beneficiarios.update', $beneficiario->cc_afiliado) }}" class="space-y-5">
+                <form method="POST" action="{{ route('beneficiarios.update', $beneficiario->cc_afiliado) }}" class="space-y-5" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+
+                    {{-- Foto de perfil --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Foto de perfil</label>
+                        @if ($beneficiario->usuario && $beneficiario->usuario->foto)
+                            <img src="{{ asset('storage/' . $beneficiario->usuario->foto) }}"
+                                 alt="Foto actual"
+                                 class="w-16 h-16 rounded-full object-cover mb-2 border border-gray-200">
+                        @endif
+                        <input type="file" name="foto" accept="image/*"
+                               class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal-50 file:text-teal-700 file:font-semibold hover:file:bg-teal-100">
+                        <p class="text-xs text-gray-400 mt-1">Déjalo vacío para conservar la foto actual.</p>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombres</label>

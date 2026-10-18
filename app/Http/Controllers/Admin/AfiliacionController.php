@@ -258,6 +258,25 @@ class AfiliacionController extends Controller
             'cc_usuario'         => 'required|exists:usuarios,cedula',
             'id_estado'          => 'required|exists:estado,id_estado',
             'cc_afiliado'        => 'required|exists:beneficiarios,cc_afiliado',
+
+            // Datos del cotizante (titular de la afiliación)
+            'nombres_cotizante'  => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
+            'apellidos_cotizante'=> ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
+            'correo_cotizante'   => ['required', 'email', 'max:100', 'unique:usuarios,correo,' . $afiliacion->cc_usuario . ',cedula'],
+            'telefono_cotizante' => ['required', 'string', 'max:20', 'regex:/^[+()\d\s\-]{7,20}$/'],
+        ], [
+            'fecha_afiliacion.required'   => 'La fecha de afiliación es obligatoria.',
+            'fecha_afiliacion.date'       => 'La fecha de afiliación no es válida.',
+            'id_tipo_afiliacion.required' => 'Selecciona el tipo de afiliación.',
+            'cc_usuario.required'         => 'Selecciona el cotizante titular.',
+            'id_estado.required'          => 'Selecciona el estado.',
+            'cc_afiliado.required'        => 'Selecciona el beneficiario.',
+            'nombres_cotizante.required'  => 'Los nombres del cotizante son obligatorios.',
+            'apellidos_cotizante.required'=> 'Los apellidos del cotizante son obligatorios.',
+            'correo_cotizante.required'   => 'El correo del cotizante es obligatorio.',
+            'correo_cotizante.email'      => 'El correo del cotizante no es válido.',
+            'correo_cotizante.unique'     => 'Ese correo ya está registrado para otro usuario.',
+            'telefono_cotizante.required' => 'El teléfono del cotizante es obligatorio.',
         ]);
 
         $derivados = $this->datosDelBeneficiario($datos['cc_afiliado'], $datos['cc_usuario']);
@@ -265,7 +284,21 @@ class AfiliacionController extends Controller
             return back()->withErrors(['cc_afiliado' => $derivados])->withInput();
         }
 
-        $afiliacion->update($datos + $derivados);
+        DB::transaction(function () use ($afiliacion, $datos, $derivados) {
+            // Actualiza la afiliación
+            $afiliacion->update($datos + $derivados);
+
+            // Actualiza los datos del cotizante (usuario titular)
+            $usuario = Usuario::where('cedula', $datos['cc_usuario'])->first();
+            if ($usuario) {
+                $usuario->update([
+                    'nombres'   => $datos['nombres_cotizante'],
+                    'apellidos' => $datos['apellidos_cotizante'],
+                    'correo'    => $datos['correo_cotizante'],
+                    'telefono'  => $datos['telefono_cotizante'],
+                ]);
+            }
+        });
 
         return redirect()->route('afiliaciones.index')->with('exito', 'Afiliación actualizada correctamente.');
     }

@@ -108,6 +108,42 @@
                         </select>
                     </div>
 
+                    {{-- Datos del cotizante (titular de la afiliación) --}}
+                    <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3 mb-5">
+                        <p class="font-bold mb-2">Datos del cotizante (titular)</p>
+                        <p class="text-xs mb-3">Edita los datos personales de quien es el titular de esta afiliación.</p>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombres</label>
+                                <input type="text" name="nombres_cotizante"
+                                       value="{{ old('nombres_cotizante', $afiliacion->usuario->nombres ?? '') }}"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Apellidos</label>
+                                <input type="text" name="apellidos_cotizante"
+                                       value="{{ old('apellidos_cotizante', $afiliacion->usuario->apellidos ?? '') }}"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Correo</label>
+                                <input type="email" name="correo_cotizante"
+                                       value="{{ old('correo_cotizante', $afiliacion->usuario->correo ?? '') }}"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
+                                <input type="text" name="telefono_cotizante"
+                                       value="{{ old('telefono_cotizante', $afiliacion->usuario->telefono ?? '') }}"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex gap-3 pt-2">
                         <a href="{{ route('afiliaciones.index') }}"
                            class="flex-1 inline-flex items-center justify-center gap-2 border border-gray-300 text-gray-600 font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition">
