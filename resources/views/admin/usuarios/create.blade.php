@@ -210,32 +210,7 @@
                         </div>
 
                         <div class="p-6 space-y-5">
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de afiliación</label>
-                                    <select name="id_tipo_afiliacion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
-                                        <option value="">Seleccione...</option>
-                                        @foreach ($tiposAfiliacion as $tipo)
-                                            <option value="{{ $tipo->id_regimen }}" {{ old('id_tipo_afiliacion') == $tipo->id_regimen ? 'selected' : '' }}>
-                                                {{ $tipo->nombre_regimen }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Estado</label>
-                                    <select name="id_estado" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
-                                        <option value="">Seleccione...</option>
-                                        @foreach ($estados as $es)
-                                            <option value="{{ $es->id_estado }}" {{ old('id_estado') == $es->id_estado ? 'selected' : '' }}>
-                                                {{ $es->estado }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de documento</label>
                                     <select name="id_tipo_documento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">

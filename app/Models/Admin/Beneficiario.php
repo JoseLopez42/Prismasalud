@@ -17,6 +17,16 @@ class Beneficiario extends Model
         'cc_afiliado', 'tipo_persona', 'cc_cotizante', 'parentesco', 'nit_eps',
         'nombres', 'apellidos', 'edad',
         'telefono', 'direccion', 'correo', 'fecha_nacimiento',
+
+        // Campos adicionales del paciente
+        'id_tipo_documento', 'pais_expedicion',
+        'genero', 'estado_civil', 'grupo_etnico',
+        'tiene_discapacidad', 'tipo_discapacidad',
+        'nacionalidad', 'pais_nacimiento',
+        'zona_residencia', 'telefono_fijo',
+        'estrato', 'nivel_educativo', 'ocupacion',
+        'tipo_sangre', 'victima_conflicto_armado',
+        'numero_afiliacion_anterior',
     ];
 
     // Si es beneficiario (familiar): el cotizante del que depende

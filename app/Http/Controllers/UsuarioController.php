@@ -7,9 +7,6 @@ use App\Models\TipoUsuario;
 use App\Models\Admin\Ciudad;
 use App\Models\Admin\TipoDocumento;
 use App\Models\Admin\Beneficiario;
-use App\Models\Admin\Afiliacion;
-use App\Models\Admin\Estado;
-use App\Models\Admin\TipoAfiliacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,8 +28,6 @@ class UsuarioController extends Controller
         $tiposUsuario = TipoUsuario::all();
         $ciudades = Ciudad::all();
         $tiposDocumento = TipoDocumento::all();
-        $tiposAfiliacion = TipoAfiliacion::all();
-        $estados = Estado::all();
 
         // Catálogos para los campos adicionales del paciente
         $paises = ['Colombia' => 'Colombia', 'Venezuela' => 'Venezuela', 'Estados Unidos' => 'Estados Unidos', 'España' => 'España', 'México' => 'México', 'Argentina' => 'Argentina', 'Chile' => 'Chile', 'Perú' => 'Perú', 'Ecuador' => 'Ecuador', 'Otro' => 'Otro'];
@@ -52,7 +47,7 @@ class UsuarioController extends Controller
 
         $seccionActiva = 'usuarios';
         return view('admin.usuarios.create', compact(
-            'tiposUsuario', 'ciudades', 'tiposDocumento', 'tiposAfiliacion', 'estados',
+            'tiposUsuario', 'ciudades', 'tiposDocumento',
             'paises', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
             'estratos', 'nivelesEducativos', 'tiposSangre', 'ocupaciones', 'seccionActiva'
         ));
@@ -75,18 +70,13 @@ class UsuarioController extends Controller
             'foto'              => 'nullable|image|max:2048', // máx 2MB
         ]);
 
-        // Si el rol es Paciente (id=2), validamos también los campos adicionales de afiliación
+        // Si el rol es Paciente (id=2), validamos también los campos adicionales de paciente
         $tipoUsuario = TipoUsuario::find($request->tipo_usuario_id);
         $esPaciente = $tipoUsuario && strtolower($tipoUsuario->nombre) === 'paciente';
 
+        $datosPaciente = null;
         if ($esPaciente) {
-            $request->merge([
-                'id_tipo_afiliacion' => $request->id_tipo_afiliacion,
-                'id_estado'          => $request->id_estado,
-            ]);
-            $datosAdicionales = $request->validate([
-                'id_tipo_afiliacion'  => 'required|exists:regimen,id_regimen',
-                'id_estado'           => 'required|exists:estado,id_estado',
+            $datosPaciente = $request->validate([
                 'id_tipo_documento'   => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
                 'pais_expedicion'     => ['nullable', 'string', 'max:100'],
                 'genero'              => ['nullable', 'string', 'max:20', 'in:Masculino,Femenino,Otro'],
@@ -106,8 +96,6 @@ class UsuarioController extends Controller
                 'victima_conflicto_armado' => ['nullable', 'boolean'],
                 'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
             ], [
-                'id_tipo_afiliacion.required' => 'Selecciona el tipo de afiliación.',
-                'id_estado.required'          => 'Selecciona el estado.',
                 'tipo_discapacidad.required_if' => 'Si tiene discapacidad, indica el tipo.',
                 'ocupacion_otra.required_if' => 'Si seleccionó "Otro" en ocupación, escriba la ocupación.',
             ]);
@@ -120,19 +108,17 @@ class UsuarioController extends Controller
 
         $datos['contrasena'] = bcrypt($datos['contrasena']);
 
-        $datosAdicionales = null;
-
-        DB::transaction(function () use ($datos, $request, $esPaciente, &$datosAdicionales) {
+        DB::transaction(function () use ($datos, $request, $esPaciente, &$datosPaciente) {
             $usuario = Usuario::create($datos);
 
-            // Si es Paciente, creamos también su beneficiario y su afiliación con los datos adicionales
-            if ($esPaciente && $datosAdicionales) {
-                $ocupacionFinal = $datosAdicionales['ocupacion'] === 'Otro'
-                    ? ($datosAdicionales['ocupacion_otra'] ?? null)
-                    : $datosAdicionales['ocupacion'];
+            // Si es Paciente, creamos su beneficiario (como cotizante titular)
+            // con los datos adicionales del paciente. NO se crea afiliación.
+            if ($esPaciente && $datosPaciente) {
+                $ocupacionFinal = $datosPaciente['ocupacion'] === 'Otro'
+                    ? ($datosPaciente['ocupacion_otra'] ?? null)
+                    : $datosPaciente['ocupacion'];
 
-                // Crear el beneficiario (titular de su propia afiliación)
-                $beneficiario = Beneficiario::create([
+                Beneficiario::create([
                     'cc_afiliado'      => $datos['cedula'],
                     'tipo_persona'     => 'cotizante',
                     'cc_cotizante'     => null,
@@ -145,39 +131,30 @@ class UsuarioController extends Controller
                     'direccion'        => '',
                     'correo'           => $datos['correo'],
                     'fecha_nacimiento' => null,
-                ]);
 
-                // Crear la afiliación con los datos adicionales del paciente
-                Afiliacion::create([
-                    'fecha_afiliacion'   => now()->toDateString(),
-                    'id_tipo_afiliacion' => $datosAdicionales['id_tipo_afiliacion'],
-                    'cc_usuario'         => $datos['cedula'],
-                    'id_estado'          => $datosAdicionales['id_estado'],
-                    'cc_afiliado'        => $datos['cedula'],
-
-                    // Campos adicionales del afiliado
-                    'id_tipo_documento'   => $datosAdicionales['id_tipo_documento'],
-                    'pais_expedicion'     => $datosAdicionales['pais_expedicion'],
-                    'genero'              => $datosAdicionales['genero'],
-                    'estado_civil'        => $datosAdicionales['estado_civil'],
-                    'grupo_etnico'        => $datosAdicionales['grupo_etnico'],
+                    // Campos adicionales del paciente (requieren migración en tabla beneficiarios)
+                    'id_tipo_documento'   => $datosPaciente['id_tipo_documento'],
+                    'pais_expedicion'     => $datosPaciente['pais_expedicion'],
+                    'genero'              => $datosPaciente['genero'],
+                    'estado_civil'        => $datosPaciente['estado_civil'],
+                    'grupo_etnico'        => $datosPaciente['grupo_etnico'],
                     'tiene_discapacidad'  => $request->boolean('tiene_discapacidad'),
-                    'tipo_discapacidad'   => $datosAdicionales['tipo_discapacidad'],
-                    'nacionalidad'        => $datosAdicionales['nacionalidad'],
-                    'pais_nacimiento'     => $datosAdicionales['pais_nacimiento'],
-                    'zona_residencia'     => $datosAdicionales['zona_residencia'],
-                    'telefono_fijo'       => $datosAdicionales['telefono_fijo'],
-                    'estrato'             => $datosAdicionales['estrato'],
-                    'nivel_educativo'     => $datosAdicionales['nivel_educativo'],
+                    'tipo_discapacidad'   => $datosPaciente['tipo_discapacidad'],
+                    'nacionalidad'        => $datosPaciente['nacionalidad'],
+                    'pais_nacimiento'     => $datosPaciente['pais_nacimiento'],
+                    'zona_residencia'     => $datosPaciente['zona_residencia'],
+                    'telefono_fijo'       => $datosPaciente['telefono_fijo'],
+                    'estrato'             => $datosPaciente['estrato'],
+                    'nivel_educativo'     => $datosPaciente['nivel_educativo'],
                     'ocupacion'           => $ocupacionFinal,
-                    'tipo_sangre'         => $datosAdicionales['tipo_sangre'],
+                    'tipo_sangre'         => $datosPaciente['tipo_sangre'],
                     'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
-                    'numero_afiliacion_anterior' => $datosAdicionales['numero_afiliacion_anterior'],
+                    'numero_afiliacion_anterior' => $datosPaciente['numero_afiliacion_anterior'],
                 ]);
             }
         });
 
-        return redirect()->route('usuarios.index')->with('exito', 'Usuario creado correctamente.' . ($esPaciente ? ' Se creó también su afiliación como paciente.' : ''));
+        return redirect()->route('usuarios.index')->with('exito', 'Usuario creado correctamente.' . ($esPaciente ? ' Se creó también su registro como paciente.' : ''));
     }
 
     // Formulario para editar un usuario existente
