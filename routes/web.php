@@ -287,9 +287,17 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
 Route::post('/login', [LoginController::class, 'iniciarSesion'])->name('login.post');
 
-// Primer ingreso: cotizante / beneficiario nuevo crea su propia contraseña (pública)
+// Primer ingreso: cotizante nuevo crea su propia contraseña (pública)
+// Flujo en 4 pasos (wizard en una sola vista):
+//   1) cédula      -> valida que exista, debe_crear_contrasena=1 y sea cotizante
+//   2) correo      -> guarda correo, genera código, lo envía por mail
+//   3) código      -> verifica el código de 6 dígitos (máx 5 intentos, 10 min)
+//   4) contraseña  -> crea la contraseña y completa el ingreso
 Route::get('/primer-ingreso', [PrimerIngresoController::class, 'mostrarFormulario'])->name('primer_ingreso.form');
-Route::post('/primer-ingreso', [PrimerIngresoController::class, 'guardar'])->middleware('throttle:5,1')->name('primer_ingreso.guardar');
+Route::post('/primer-ingreso/cedula', [PrimerIngresoController::class, 'validarCedula'])->name('primer_ingreso.cedula');
+Route::post('/primer-ingreso/correo', [PrimerIngresoController::class, 'enviarCodigo'])->middleware('throttle:3,60')->name('primer_ingreso.correo');
+Route::post('/primer-ingreso/codigo', [PrimerIngresoController::class, 'verificarCodigo'])->name('primer_ingreso.codigo');
+Route::post('/primer-ingreso/contrasena', [PrimerIngresoController::class, 'guardarContrasena'])->name('primer_ingreso.contrasena');
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 
 // Panel del Usuario (roles distintos a Administrador)
