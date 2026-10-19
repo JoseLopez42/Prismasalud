@@ -83,181 +83,6 @@
                         </select>
                     </div>
 
-                    {{-- Campos adicionales de afiliación --}}
-                    <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3 mb-5">
-                        <p class="font-bold mb-2">Datos adicionales del afiliado</p>
-                        <p class="text-xs mb-3">Datos que solicita la EPS/IPS al momento de la afiliación.</p>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de documento</label>
-                                <select name="id_tipo_documento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($tiposDocumento as $td)
-                                        <option value="{{ $td->id_tipo_documento }}" {{ old('id_tipo_documento') == $td->id_tipo_documento ? 'selected' : '' }}>
-                                            {{ $td->tipo_documento }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">País de expedición</label>
-                                <select name="pais_expedicion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($paises as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('pais_expedicion') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Género</label>
-                                <select name="genero" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($generos as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('genero') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Estado civil</label>
-                                <select name="estado_civil" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($estadosCiviles as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('estado_civil') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Grupo étnico</label>
-                                <select name="grupo_etnico" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($gruposEtnicos as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('grupo_etnico') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">¿Tiene discapacidad?</label>
-                                <select name="tiene_discapacidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="0" {{ old('tiene_discapacidad', false) ? '' : 'selected' }}>No</option>
-                                    <option value="1" {{ old('tiene_discapacidad') ? 'selected' : '' }}>Sí</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de discapacidad</label>
-                                <input type="text" name="tipo_discapacidad" id="tipo-discapacidad-campo"
-                                       placeholder="Solo si tiene discapacidad"
-                                       value="{{ old('tipo_discapacidad') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition {{ old('tiene_discapacidad') ? '' : 'hidden' }}"
-                                       {{ old('tiene_discapacidad') ? '' : 'disabled' }}>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nacionalidad</label>
-                                <select name="nacionalidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($paises as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('nacionalidad') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">País de nacimiento</label>
-                                <input type="text" name="pais_nacimiento" value="{{ old('pais_nacimiento', 'Colombia') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Zona de residencia</label>
-                                <select name="zona_residencia" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($zonasResidencia as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('zona_residencia') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono fijo</label>
-                                <input type="text" name="telefono_fijo" value="{{ old('telefono_fijo') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Estrato</label>
-                                <select name="estrato" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($estratos as $e)
-                                        <option value="{{ $e }}" {{ old('estrato') == $e ? 'selected' : '' }}>Estrato {{ $e }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nivel educativo</label>
-                                <select name="nivel_educativo" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($nivelesEducativos as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('nivel_educativo') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Ocupación / Profesión</label>
-                                <select name="ocupacion" id="ocupacion-select" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($ocupaciones as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('ocupacion') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                                <input type="text" name="ocupacion_otra" id="ocupacion-otra"
-                                       placeholder="Escribe tu ocupación"
-                                       value="{{ old('ocupacion_otra') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition hidden"
-                                       {{ old('ocupacion') === 'Otro' ? '' : 'disabled' }}>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de sangre</label>
-                                <select name="tipo_sangre" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="">Seleccione...</option>
-                                    @foreach ($tiposSangre as $valor => $etiqueta)
-                                        <option value="{{ $valor }}" {{ old('tipo_sangre') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">¿Víctima del conflicto armado?</label>
-                                <select name="victima_conflicto_armado" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                    <option value="0" {{ old('victima_conflicto_armado', false) ? '' : 'selected' }}>No</option>
-                                    <option value="1" {{ old('victima_conflicto_armado') ? 'selected' : '' }}>Sí</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Número de afiliación anterior</label>
-                            <input type="text" name="numero_afiliacion_anterior" value="{{ old('numero_afiliacion_anterior') }}"
-                                   placeholder="Si se transfiere de otra EPS"
-                                   class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
@@ -388,6 +213,185 @@
                             <input type="file" name="nuevo_foto" accept="image/*"
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm bg-white file:mr-3 file:rounded-md file:border-0 file:bg-teal-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-teal-700 hover:file:bg-teal-100">
                         </div>
+
+                        {{-- Datos adicionales del afiliado (solo para beneficiario nuevo) --}}
+                        <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3 mb-5">
+                            <p class="font-bold mb-2">Datos adicionales del afiliado</p>
+                            <p class="text-xs mb-3">Datos que solicita la EPS/IPS al momento de la afiliación.</p>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de documento</label>
+                                    <select name="id_tipo_documento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($tiposDocumento as $td)
+                                            <option value="{{ $td->id_tipo_documento }}" {{ old('id_tipo_documento') == $td->id_tipo_documento ? 'selected' : '' }}>
+                                                {{ $td->tipo_documento }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">País de expedición</label>
+                                    <select name="pais_expedicion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($paises as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('pais_expedicion') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Género</label>
+                                    <select name="genero" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($generos as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('genero') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Estado civil</label>
+                                    <select name="estado_civil" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($estadosCiviles as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('estado_civil') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Grupo étnico</label>
+                                    <select name="grupo_etnico" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($gruposEtnicos as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('grupo_etnico') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">¿Tiene discapacidad?</label>
+                                    <select name="tiene_discapacidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="0" {{ old('tiene_discapacidad', false) ? '' : 'selected' }}>No</option>
+                                        <option value="1" {{ old('tiene_discapacidad') ? 'selected' : '' }}>Sí</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de discapacidad</label>
+                                    <input type="text" name="tipo_discapacidad" id="tipo-discapacidad-campo"
+                                           placeholder="Solo si tiene discapacidad"
+                                           value="{{ old('tipo_discapacidad') }}"
+                                           class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition {{ old('tiene_discapacidad') ? '' : 'hidden' }}"
+                                           {{ old('tiene_discapacidad') ? '' : 'disabled' }}>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nacionalidad</label>
+                                    <select name="nacionalidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($paises as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('nacionalidad') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">País de nacimiento</label>
+                                    <select name="pais_nacimiento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($paises as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('pais_nacimiento') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Zona de residencia</label>
+                                    <select name="zona_residencia" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($zonasResidencia as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('zona_residencia') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono fijo</label>
+                                    <input type="text" name="telefono_fijo" value="{{ old('telefono_fijo') }}"
+                                           class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Estrato</label>
+                                    <select name="estrato" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($estratos as $e)
+                                            <option value="{{ $e }}" {{ old('estrato') == $e ? 'selected' : '' }}>Estrato {{ $e }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nivel educativo</label>
+                                    <select name="nivel_educativo" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($nivelesEducativos as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('nivel_educativo') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Ocupación / Profesión</label>
+                                    <select name="ocupacion" id="ocupacion-select" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($ocupaciones as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('ocupacion') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="text" name="ocupacion_otra" id="ocupacion-otra"
+                                           placeholder="Escribe tu ocupación"
+                                           value="{{ old('ocupacion_otra') }}"
+                                           class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition hidden"
+                                           {{ old('ocupacion') === 'Otro' ? '' : 'disabled' }}>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de sangre</label>
+                                    <select name="tipo_sangre" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        @foreach ($tiposSangre as $valor => $etiqueta)
+                                            <option value="{{ $valor }}" {{ old('tipo_sangre') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">¿Víctima del conflicto armado?</label>
+                                    <select name="victima_conflicto_armado" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        <option value="0" {{ old('victima_conflicto_armado', false) ? '' : 'selected' }}>No</option>
+                                        <option value="1" {{ old('victima_conflicto_armado') ? 'selected' : '' }}>Sí</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Número de afiliación anterior</label>
+                                <input type="text" name="numero_afiliacion_anterior" value="{{ old('numero_afiliacion_anterior') }}"
+                                       placeholder="Si se transfiere de otra EPS"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex gap-3 pt-2">
@@ -451,6 +455,11 @@
                 if (el.name && el.name.startsWith('nuevo_') && !el.name.endsWith('_foto')
                     && el.id !== 'nuevo-cotizante' && el.id !== 'nuevo-cotizante-hidden') {
                     el.required = esNuevo;
+                }
+                // Campos adicionales del afiliado: solo habilitados cuando es beneficiario nuevo
+                if (el.name && !el.name.startsWith('nuevo_') && el.name !== '_token') {
+                    el.disabled = !esNuevo;
+                    if (!esNuevo) el.value = '';
                 }
             });
             if (!esNuevo) {

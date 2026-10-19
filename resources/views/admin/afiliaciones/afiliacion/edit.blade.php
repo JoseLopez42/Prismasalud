@@ -235,8 +235,12 @@
                         <div class="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">País de nacimiento</label>
-                                <input type="text" name="pais_nacimiento" value="{{ old('pais_nacimiento', $afiliacion->pais_nacimiento ?? 'Colombia') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <select name="pais_nacimiento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <option value="">Seleccione...</option>
+                                    @foreach ($paises as $valor => $etiqueta)
+                                        <option value="{{ $valor }}" {{ old('pais_nacimiento', $afiliacion->pais_nacimiento ?? '') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Zona de residencia</label>
