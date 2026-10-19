@@ -44,7 +44,7 @@
 
                     <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3">
                         El <strong>parentesco</strong> y la <strong>EPS</strong> se toman automáticamente de la persona
-                        afiliada. Los beneficiarios nuevos se registran en el formulario de la derecha.
+                        afiliada. Si la persona no tiene EPS, la afiliación queda con el <strong>NIT de tu empresa</strong>.
                     </div>
 
                     <div>
@@ -71,16 +71,11 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Estado</label>
-                        <select name="id_estado" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
-                            <option value="">Seleccione...</option>
-                            @foreach ($estados as $es)
-                                <option value="{{ $es->id_estado }}" {{ old('id_estado') == $es->id_estado ? 'selected' : '' }}>
-                                    {{ $es->estado }}
-                                </option>
-                            @endforeach
-                        </select>
+                    {{-- El estado no se elige aquí: una afiliación nueva nace Activa.
+                         Se cambia después desde el panel de afiliaciones (Activar/Desactivar). --}}
+                    <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3">
+                        La afiliación se crea <strong>Activa</strong>. Después puedes desactivarla
+                        desde el panel de Afiliaciones, con el botón <strong>Desactivar</strong>.
                     </div>
 
                 </div>
@@ -90,17 +85,31 @@
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden h-fit">
                 <div class="bg-gradient-to-r from-emerald-800 via-teal-700 to-teal-500 px-6 py-5 text-white">
                     <p class="font-bold text-lg leading-tight">Beneficiario de la afiliación</p>
-                    <p class="text-xs text-white/70">Elige uno existente o crea uno nuevo a la derecha</p>
+                    <p class="text-xs text-white/70">Afilia al cotizante o agrega un familiar como beneficiario</p>
                 </div>
 
                 <div class="p-6 space-y-5">
+                    {{-- Empresa: ya está registrada con su NIT, no se escribe a mano --}}
+                    <div class="bg-white border border-teal-200 rounded-lg px-4 py-3">
+                        <p class="text-xs text-gray-500">La afiliación se registra a nombre de tu empresa:</p>
+                        @if (!empty($empresa['nit']))
+                            <p class="text-sm font-semibold text-gray-900">
+                                {{ $empresa['nombre'] ?: 'Mi empresa' }}
+                                <span class="text-gray-500 font-normal">· NIT {{ $empresa['nit'] }}</span>
+                            </p>
+                        @else
+                            <p class="text-sm font-semibold text-gray-900">Mi empresa</p>
+                            <p class="text-xs text-amber-600 mt-1">Tu empresa aún no tiene NIT registrado: completes tus datos en "Mi plan".</p>
+                        @endif
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Origen del beneficiario</label>
                         <div class="grid grid-cols-2 gap-3">
                             <label class="border border-gray-200 rounded-lg p-3 text-sm font-medium cursor-pointer hover:bg-teal-50">
-                                <input type="radio" name="origen_beneficiario" value="existente"
-                                       class="mr-1" {{ old('origen_beneficiario', 'existente') === 'existente' ? 'checked' : '' }}>
-                                Beneficiario existente
+                                <input type="radio" name="origen_beneficiario" value="sin"
+                                       class="mr-1" {{ old('origen_beneficiario', 'sin') === 'sin' ? 'checked' : '' }}>
+                                Sin beneficiario
                             </label>
                             <label class="border border-gray-200 rounded-lg p-3 text-sm font-medium cursor-pointer hover:bg-teal-50">
                                 <input type="radio" name="origen_beneficiario" value="nuevo"
@@ -110,21 +119,11 @@
                         </div>
                     </div>
 
-                    {{-- Beneficiario existente --}}
-                    <div id="panel-existente" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Beneficiario</label>
-                            <select name="cc_afiliado" id="sel-beneficiario"
-                                    class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                <option value="">Seleccione...</option>
-                                @foreach ($beneficiarios as $b)
-                                    <option value="{{ $b->cc_afiliado }}"
-                                            data-cotizante="{{ $b->cc_cotizante ?? $b->cc_afiliado }}"
-                                            {{ old('cc_afiliado') == $b->cc_afiliado ? 'selected' : '' }}>
-                                        {{ $b->nombres }} {{ $b->apellidos }} ({{ $b->cc_afiliado }})
-                                    </option>
-                                @endforeach
-                            </select>
+                    {{-- Sin beneficiario: solo se afilia al cotizante (titular) --}}
+                    <div id="panel-sin" class="space-y-4">
+                        <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3">
+                            Se afilia únicamente al <strong>cotizante (titular)</strong> elegido arriba.
+                            No se registra ningún beneficiario familiar.
                         </div>
                     </div>
 
@@ -413,14 +412,8 @@
         const boton = document.getElementById('boton-guardar');
         const texto = document.getElementById('texto-boton');
         const selUsuario = form.querySelector('select[name="cc_usuario"]');
-        const selBenef = form.querySelector('select[name="cc_afiliado"]');
-        const opcionesBenef = selBenef ? Array.from(selBenef.querySelectorAll('option[value]')).filter(o => o.value !== '').map(o => ({
-            valor: o.value,
-            texto: o.textContent.trim(),
-            cotizante: o.dataset.cotizante || ''
-        })) : [];
         const origenes = form.querySelectorAll('input[name="origen_beneficiario"]');
-        const panelExistente = document.getElementById('panel-existente');
+        const panelSin = document.getElementById('panel-sin');
         const panelNuevo = document.getElementById('panel-nuevo');
         const selCotizante = document.getElementById('nuevo-cotizante');
         const selCotizanteHidden = document.getElementById('nuevo-cotizante-hidden');
@@ -443,12 +436,11 @@
         }
 
         function alternarOrigen() {
-            const origen = Array.from(origenes).find(r => r.checked)?.value || 'existente';
+            const origen = Array.from(origenes).find(r => r.checked)?.value || 'sin';
             const esNuevo = origen === 'nuevo';
-            panelExistente.classList.toggle('hidden', esNuevo);
+            panelSin.classList.toggle('hidden', esNuevo);
             panelNuevo.classList.toggle('hidden', !esNuevo);
 
-            if (selBenef) selBenef.required = !esNuevo;
             // El cotizante del beneficiario se sincroniza con el usuario, no es editable.
             if (selCotizanteHidden) selCotizanteHidden.required = esNuevo;
             panelNuevo.querySelectorAll('input, select').forEach(el => {
@@ -473,30 +465,8 @@
         origenes.forEach(r => r.addEventListener('change', alternarOrigen));
         alternarOrigen();
 
-        if (selUsuario && selBenef) {
-            function filtrarBeneficiarios() {
-                const usuario = selUsuario.value;
-                const lista = usuario ? opcionesBenef.filter(o => o.cotizante === usuario) : [];
-                const seleccionado = selBenef.value;
-                selBenef.innerHTML = '';
-                const base = document.createElement('option');
-                base.value = '';
-                base.textContent = !usuario
-                    ? 'Primero selecciona el usuario...'
-                    : (lista.length ? 'Seleccione...' : 'Este usuario no tiene beneficiarios registrados');
-                selBenef.appendChild(base);
-
-                lista.forEach(o => {
-                    const op = document.createElement('option');
-                    op.value = o.valor;
-                    op.textContent = o.texto;
-                    if (o.valor === seleccionado) op.selected = true;
-                    selBenef.appendChild(op);
-                });
-            }
-            selUsuario.addEventListener('change', filtrarBeneficiarios);
+        if (selUsuario) {
             selUsuario.addEventListener('change', sincronizarCotizanteNuevo);
-            filtrarBeneficiarios();
             sincronizarCotizanteNuevo();
         }
 

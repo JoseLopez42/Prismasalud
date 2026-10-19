@@ -68,7 +68,7 @@
                                 <option value="" disabled {{ old('cedula_usuario') ? '' : 'selected' }}>Selecciona un paciente...</option>
                                 @foreach ($pacientes as $paciente)
                                     <option value="{{ $paciente->cedula }}" {{ old('cedula_usuario') == $paciente->cedula ? 'selected' : '' }}>
-                                        {{ $paciente->apellidos }}, {{ $paciente->nombres }} ({{ $paciente->tipoUsuario->nombre ?? 'usuario' }})
+                                        {{ $paciente->apellidos }}, {{ $paciente->nombres }} ({{ $paciente->nombre_rol }})
                                     </option>
                                 @endforeach
                             </select>

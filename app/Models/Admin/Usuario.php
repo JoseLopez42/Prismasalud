@@ -16,7 +16,7 @@ class Usuario extends Model
 
     protected $fillable = [
         'cedula', 'nombres', 'apellidos', 'edad', 'telefono', 'correo',
-        'foto', 'contrasena', 'tipo_usuario_id', 'nit_eps', 'activo',
-        'debe_crear_contrasena',
+        'foto', 'contrasena', 'tipo_usuario_id', 'id_sub_tipo_paciente',
+        'nit_eps', 'activo', 'debe_crear_contrasena',
     ];
 }

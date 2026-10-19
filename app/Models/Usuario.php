@@ -25,6 +25,7 @@ class Usuario extends Model
         'contrasena',
         'foto',
         'tipo_usuario_id',
+        'id_sub_tipo_paciente',
         'id_ciudad',
         'id_tipo_documento',
         'nit_eps',
@@ -41,6 +42,31 @@ class Usuario extends Model
     public function tipoUsuario()
     {
         return $this->belongsTo(TipoUsuario::class, 'tipo_usuario_id');
+    }
+
+    // Un paciente puede ser Cotizante o Beneficiario
+    public function subTipoPaciente()
+    {
+        return $this->belongsTo(SubTipoPaciente::class, 'id_sub_tipo_paciente');
+    }
+
+    /**
+     * Rol completo para mostrarlo en pantalla: "Paciente Cotizante" o
+     * "Paciente Beneficiario" en el caso de los pacientes.
+     */
+    public function getNombreRolAttribute(): string
+    {
+        $rol = $this->tipoUsuario->nombre ?? null;
+
+        if (! $rol) {
+            return '—';
+        }
+
+        if ($this->subTipoPaciente) {
+            return $rol . ' ' . $this->subTipoPaciente->nombre;
+        }
+
+        return $rol;
     }
 
     // Un usuario pertenece a una ciudad

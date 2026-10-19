@@ -23,7 +23,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-lg font-bold text-gray-900 truncate">{{ $usuario->nombres }} {{ $usuario->apellidos }}</p>
-                    <p class="text-sm text-gray-500">{{ $usuario->tipoUsuario->nombre ?? 'Paciente' }}</p>
+                    <p class="text-sm text-gray-500">{{ $usuario->nombre_rol }}</p>
                 </div>
                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold {{ $usuario->activo ? 'text-green-700 bg-green-50' : 'text-gray-600 bg-gray-100' }} px-2.5 py-1 rounded-full flex-shrink-0">
                     <span class="w-1.5 h-1.5 rounded-full {{ $usuario->activo ? 'bg-green-500' : 'bg-gray-400' }}"></span>

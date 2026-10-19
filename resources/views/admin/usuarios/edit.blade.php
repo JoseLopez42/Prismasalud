@@ -119,6 +119,13 @@
                                 @endforeach
                             </select>
                         </div>
+                        <p class="text-xs text-gray-400 mt-1">
+                            @if ($usuario->subTipoPaciente)
+                                Este paciente está registrado como <strong>{{ $usuario->subTipoPaciente->nombre }}</strong>.
+                            @else
+                                Al guardarlo como paciente se registrará como <strong>Paciente Cotizante</strong>.
+                            @endif
+                        </p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-4">

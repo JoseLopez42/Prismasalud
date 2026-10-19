@@ -7,6 +7,7 @@ use App\Models\Admin\Beneficiario;
 use App\Models\Admin\Eps;
 use App\Models\Admin\Parentesco;
 use App\Models\Usuario;
+use App\Models\SubTipoPaciente;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -138,6 +139,10 @@ class BeneficiarioController extends Controller
                 'foto'                  => $rutaFoto,
                 'contrasena'            => bcrypt(Str::random(40)), // relleno, nadie la conoce
                 'tipo_usuario_id'       => self::TIPO_PACIENTE,
+                // El sub tipo de paciente depende de cómo se registró la persona.
+                'id_sub_tipo_paciente'  => SubTipoPaciente::idPorNombre(
+                    $datos['tipo_persona'] === 'beneficiario' ? 'Beneficiario' : 'Cotizante'
+                ),
                 'activo'                => true,
                 'debe_crear_contrasena' => true,
             ]);
