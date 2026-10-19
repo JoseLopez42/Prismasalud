@@ -46,11 +46,30 @@ class AfiliacionController extends Controller
         $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
         $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
         $paises = ['Colombia' => 'Colombia', 'Venezuela' => 'Venezuela', 'Estados Unidos' => 'Estados Unidos', 'España' => 'España', 'México' => 'México', 'Argentina' => 'Argentina', 'Chile' => 'Chile', 'Perú' => 'Perú', 'Ecuador' => 'Ecuador', 'Otro' => 'Otro'];
+        $ocupaciones = [
+            'Agricultor' => 'Agricultor',
+            'Comerciante' => 'Comerciante',
+            'Conductor' => 'Conductor',
+            'Contador' => 'Contador',
+            'Ingeniero' => 'Ingeniero',
+            'Médico' => 'Médico',
+            'Enfermero' => 'Enfermero',
+            'Profesor' => 'Profesor',
+            'Abogado' => 'Abogado',
+            'Técnico' => 'Técnico',
+            'Obrero' => 'Obrero',
+            'Empleado' => 'Empleado',
+            'Estudiante' => 'Estudiante',
+            'Ama de casa' => 'Ama de casa',
+            'Pensionado' => 'Pensionado',
+            'Desempleado' => 'Desempleado',
+            'Otro' => 'Otro',
+        ];
 
         return view('admin.afiliaciones.afiliacion.create', compact(
             'beneficiarios', 'cotizantes', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones', 'seccionActiva'
         ));
     }
 
@@ -70,7 +89,7 @@ class AfiliacionController extends Controller
             'estado_civil'       => ['nullable', 'string', 'max:50'],
             'grupo_etnico'       => ['nullable', 'string', 'max:50'],
             'tiene_discapacidad' => ['nullable', 'boolean'],
-            'tipo_discapacidad'  => ['nullable', 'string', 'max:100'],
+            'tipo_discapacidad'  => ['nullable', 'string', 'max:100', 'required_if:tiene_discapacidad,1'],
             'nacionalidad'       => ['nullable', 'string', 'max:100'],
             'pais_nacimiento'    => ['nullable', 'string', 'max:100'],
             'zona_residencia'    => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
@@ -78,6 +97,7 @@ class AfiliacionController extends Controller
             'estrato'            => ['nullable', 'integer', 'min:1', 'max:6'],
             'nivel_educativo'    => ['nullable', 'string', 'max:50'],
             'ocupacion'          => ['nullable', 'string', 'max:100'],
+            'ocupacion_otra'     => ['nullable', 'string', 'max:100', 'required_if:ocupacion,Otro'],
             'tipo_sangre'        => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
             'victima_conflicto_armado' => ['nullable', 'boolean'],
             'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
@@ -94,6 +114,8 @@ class AfiliacionController extends Controller
             'estrato.min'                 => 'El estrato debe ser entre 1 y 6.',
             'estrato.max'                 => 'El estrato debe ser entre 1 y 6.',
             'tipo_sangre.in'              => 'El tipo de sangre no es válido.',
+            'tipo_discapacidad.required_if' => 'Si tiene discapacidad, indica el tipo.',
+            'ocupacion_otra.required_if'    => 'Si seleccionó "Otro" en ocupación, escriba la ocupación.',
         ]);
 
         // Ruta "beneficiario ya registrado"
@@ -224,7 +246,7 @@ class AfiliacionController extends Controller
                 'telefono_fijo'      => $request->telefono_fijo,
                 'estrato'            => $request->estrato,
                 'nivel_educativo'    => $request->nivel_educativo,
-                'ocupacion'          => $request->ocupacion,
+                'ocupacion'          => $request->ocupacion === 'Otro' ? $request->ocupacion_otra : $request->ocupacion,
                 'tipo_sangre'        => $request->tipo_sangre,
                 'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
                 'numero_afiliacion_anterior' => $request->numero_afiliacion_anterior,
@@ -278,11 +300,30 @@ class AfiliacionController extends Controller
         $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
         $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
         $paises = ['Colombia' => 'Colombia', 'Venezuela' => 'Venezuela', 'Estados Unidos' => 'Estados Unidos', 'España' => 'España', 'México' => 'México', 'Argentina' => 'Argentina', 'Chile' => 'Chile', 'Perú' => 'Perú', 'Ecuador' => 'Ecuador', 'Otro' => 'Otro'];
+        $ocupaciones = [
+            'Agricultor' => 'Agricultor',
+            'Comerciante' => 'Comerciante',
+            'Conductor' => 'Conductor',
+            'Contador' => 'Contador',
+            'Ingeniero' => 'Ingeniero',
+            'Médico' => 'Médico',
+            'Enfermero' => 'Enfermero',
+            'Profesor' => 'Profesor',
+            'Abogado' => 'Abogado',
+            'Técnico' => 'Técnico',
+            'Obrero' => 'Obrero',
+            'Empleado' => 'Empleado',
+            'Estudiante' => 'Estudiante',
+            'Ama de casa' => 'Ama de casa',
+            'Pensionado' => 'Pensionado',
+            'Desempleado' => 'Desempleado',
+            'Otro' => 'Otro',
+        ];
 
         return view('admin.afiliaciones.afiliacion.edit', compact(
             'afiliacion', 'beneficiarios', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones', 'seccionActiva'
         ));
     }
 
@@ -354,7 +395,7 @@ class AfiliacionController extends Controller
             'estado_civil'       => ['nullable', 'string', 'max:50'],
             'grupo_etnico'       => ['nullable', 'string', 'max:50'],
             'tiene_discapacidad' => ['nullable', 'boolean'],
-            'tipo_discapacidad'  => ['nullable', 'string', 'max:100'],
+            'tipo_discapacidad'  => ['nullable', 'string', 'max:100', 'required_if:tiene_discapacidad,1'],
             'nacionalidad'       => ['nullable', 'string', 'max:100'],
             'pais_nacimiento'    => ['nullable', 'string', 'max:100'],
             'zona_residencia'    => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
@@ -362,6 +403,7 @@ class AfiliacionController extends Controller
             'estrato'            => ['nullable', 'integer', 'min:1', 'max:6'],
             'nivel_educativo'    => ['nullable', 'string', 'max:50'],
             'ocupacion'          => ['nullable', 'string', 'max:100'],
+            'ocupacion_otra'     => ['nullable', 'string', 'max:100', 'required_if:ocupacion,Otro'],
             'tipo_sangre'        => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
             'victima_conflicto_armado' => ['nullable', 'boolean'],
             'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
@@ -385,6 +427,8 @@ class AfiliacionController extends Controller
             'estrato.min'                 => 'El estrato debe ser entre 1 y 6.',
             'estrato.max'                 => 'El estrato debe ser entre 1 y 6.',
             'tipo_sangre.in'              => 'El tipo de sangre no es válido.',
+            'tipo_discapacidad.required_if' => 'Si tiene discapacidad, indica el tipo.',
+            'ocupacion_otra.required_if'    => 'Si seleccionó "Otro" en ocupación, escriba la ocupación.',
         ]);
 
         $derivados = $this->datosDelBeneficiario($datos['cc_afiliado'], $datos['cc_usuario']);
@@ -408,7 +452,7 @@ class AfiliacionController extends Controller
                 'telefono_fijo'      => $datos['telefono_fijo'],
                 'estrato'            => $datos['estrato'],
                 'nivel_educativo'    => $datos['nivel_educativo'],
-                'ocupacion'          => $datos['ocupacion'],
+                'ocupacion'          => $datos['ocupacion'] === 'Otro' ? $request->ocupacion_otra : $datos['ocupacion'],
                 'tipo_sangre'        => $datos['tipo_sangre'],
                 'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
                 'numero_afiliacion_anterior' => $datos['numero_afiliacion_anterior'],

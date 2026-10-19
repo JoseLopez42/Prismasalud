@@ -215,13 +215,20 @@
                         <div class="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de discapacidad</label>
-                                <input type="text" name="tipo_discapacidad" value="{{ old('tipo_discapacidad', $afiliacion->tipo_discapacidad ?? '') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <input type="text" name="tipo_discapacidad" id="tipo-discapacidad-campo"
+                                       placeholder="Solo si tiene discapacidad"
+                                       value="{{ old('tipo_discapacidad', $afiliacion->tipo_discapacidad ?? '') }}"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition {{ (old('tiene_discapacidad', $afiliacion->tiene_discapacidad ?? false) ? '1' : '0') === '1' ? '' : 'hidden' }}"
+                                       {{ (old('tiene_discapacidad', $afiliacion->tiene_discapacidad ?? false) ? '1' : '0') === '1' ? '' : 'disabled' }}>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Nacionalidad</label>
-                                <input type="text" name="nacionalidad" value="{{ old('nacionalidad', $afiliacion->nacionalidad ?? 'Colombia') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <select name="nacionalidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <option value="">Seleccione...</option>
+                                    @foreach ($paises as $valor => $etiqueta)
+                                        <option value="{{ $valor }}" {{ old('nacionalidad', $afiliacion->nacionalidad ?? '') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
@@ -271,8 +278,17 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Ocupación / Profesión</label>
-                                <input type="text" name="ocupacion" value="{{ old('ocupacion', $afiliacion->ocupacion ?? '') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <select name="ocupacion" id="ocupacion-select" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <option value="">Seleccione...</option>
+                                    @foreach ($ocupaciones as $valor => $etiqueta)
+                                        <option value="{{ $valor }}" {{ old('ocupacion', $afiliacion->ocupacion ?? '') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="text" name="ocupacion_otra" id="ocupacion-otra"
+                                       placeholder="Escribe tu ocupación"
+                                       value="{{ old('ocupacion_otra', ($afiliacion->ocupacion ?? '') === 'Otro' ? '' : $afiliacion->ocupacion) }}"
+                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition {{ (old('ocupacion', $afiliacion->ocupacion ?? '') === 'Otro') ? '' : 'hidden' }}"
+                                       {{ (old('ocupacion', $afiliacion->ocupacion ?? '') === 'Otro') ? '' : 'disabled' }}>
                             </div>
                         </div>
 
@@ -354,6 +370,35 @@
 
         selUsuario.addEventListener('change', function () { seleccionado = ''; filtrarBeneficiarios(); });
         filtrarBeneficiarios();
+
+        // Mostrar/ocultar campo "Tipo de discapacidad" según la opción seleccionada
+        const selDiscapacidad = form.querySelector('select[name="tiene_discapacidad"]');
+        const campoTipoDiscapacidad = document.getElementById('tipo-discapacidad-campo');
+        if (selDiscapacidad && campoTipoDiscapacidad) {
+            function toggleTipoDiscapacidad() {
+                const esSi = selDiscapacidad.value === '1';
+                campoTipoDiscapacidad.classList.toggle('hidden', !esSi);
+                campoTipoDiscapacidad.disabled = !esSi;
+                if (!esSi) campoTipoDiscapacidad.value = '';
+            }
+            selDiscapacidad.addEventListener('change', toggleTipoDiscapacidad);
+            toggleTipoDiscapacidad();
+        }
+
+        // Mostrar/ocultar campo "Ocupación otra" según la opción seleccionada
+        const selOcupacion = document.getElementById('ocupacion-select');
+        const campoOcupacionOtra = document.getElementById('ocupacion-otra');
+        if (selOcupacion && campoOcupacionOtra) {
+            function toggleOcupacionOtra() {
+                const esOtro = selOcupacion.value === 'Otro';
+                campoOcupacionOtra.classList.toggle('hidden', !esOtro);
+                campoOcupacionOtra.disabled = !esOtro;
+                if (!esOtro) campoOcupacionOtra.value = '';
+            }
+            selOcupacion.addEventListener('change', toggleOcupacionOtra);
+            toggleOcupacionOtra();
+        }
+
         form.addEventListener('submit', function (evento) {
             const invalidos = Array.from(form.querySelectorAll('.campo-form')).filter(c => !c.checkValidity());
             if (invalidos.length > 0) {
