@@ -45,11 +45,12 @@ class AfiliacionController extends Controller
         $estratos = range(1, 6);
         $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
         $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
+        $paises = ['Colombia' => 'Colombia', 'Venezuela' => 'Venezuela', 'Estados Unidos' => 'Estados Unidos', 'España' => 'España', 'México' => 'México', 'Argentina' => 'Argentina', 'Chile' => 'Chile', 'Perú' => 'Perú', 'Ecuador' => 'Ecuador', 'Otro' => 'Otro'];
 
         return view('admin.afiliaciones.afiliacion.create', compact(
             'beneficiarios', 'cotizantes', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'seccionActiva'
         ));
     }
 
@@ -276,11 +277,12 @@ class AfiliacionController extends Controller
         $estratos = range(1, 6);
         $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
         $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
+        $paises = ['Colombia' => 'Colombia', 'Venezuela' => 'Venezuela', 'Estados Unidos' => 'Estados Unidos', 'España' => 'España', 'México' => 'México', 'Argentina' => 'Argentina', 'Chile' => 'Chile', 'Perú' => 'Perú', 'Ecuador' => 'Ecuador', 'Otro' => 'Otro'];
 
         return view('admin.afiliaciones.afiliacion.edit', compact(
             'afiliacion', 'beneficiarios', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'seccionActiva'
         ));
     }
 

@@ -163,8 +163,12 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">País de expedición</label>
-                                <input type="text" name="pais_expedicion" value="{{ old('pais_expedicion', $afiliacion->pais_expedicion ?? '') }}"
-                                       class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <select name="pais_expedicion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <option value="">Seleccione...</option>
+                                    @foreach ($paises as $valor => $etiqueta)
+                                        <option value="{{ $valor }}" {{ old('pais_expedicion', $afiliacion->pais_expedicion ?? '') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
