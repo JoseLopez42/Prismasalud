@@ -8,6 +8,7 @@ use App\Models\Admin\Beneficiario;
 use App\Models\Admin\Estado;
 use App\Models\Admin\Parentesco;
 use App\Models\Admin\TipoAfiliacion;
+use App\Models\Admin\TipoDocumento;
 use App\Models\Admin\Usuario;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -32,10 +33,23 @@ class AfiliacionController extends Controller
         $estados = Estado::all();
         $usuarios = $this->cotizantesComoUsuarios();
         $tipos = TipoAfiliacion::all();
+        $tiposDocumento = TipoDocumento::orderBy('tipo_documento')->get();
         $parentescos = Parentesco::orderBy('id_parentesco')->get();
         $seccionActiva = 'afiliaciones';
+
+        // Catálogos estáticos para los campos adicionales de afiliación
+        $generos = ['Masculino' => 'Masculino', 'Femenino' => 'Femenino', 'Otro' => 'Otro'];
+        $estadosCiviles = ['Soltero' => 'Soltero', 'Casado' => 'Casado', 'Unión libre' => 'Unión libre', 'Divorciado' => 'Divorciado', 'Viudo' => 'Viudo'];
+        $gruposEtnicos = ['Ninguno' => 'Ninguno', 'Indígena' => 'Indígena', 'Afrodescendiente' => 'Afrodescendiente', 'Raizal' => 'Raizal', 'Palenquero' => 'Palenquero', 'Gitano' => 'Gitano', 'Otro' => 'Otro'];
+        $zonasResidencia = ['Urbana' => 'Urbana', 'Rural' => 'Rural'];
+        $estratos = range(1, 6);
+        $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
+        $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
+
         return view('admin.afiliaciones.afiliacion.create', compact(
-            'beneficiarios', 'cotizantes', 'estados', 'usuarios', 'tipos', 'parentescos', 'seccionActiva'
+            'beneficiarios', 'cotizantes', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
+            'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'seccionActiva'
         ));
     }
 
@@ -47,6 +61,38 @@ class AfiliacionController extends Controller
             'cc_usuario'         => 'required|exists:usuarios,cedula',
             'id_estado'          => 'required|exists:estado,id_estado',
             'origen_beneficiario'=> 'required|in:existente,nuevo',
+
+            // Campos adicionales de afiliación (datos del afiliado en este registro)
+            'id_tipo_documento'  => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
+            'pais_expedicion'    => ['nullable', 'string', 'max:100'],
+            'genero'             => ['nullable', 'string', 'max:20', 'in:Masculino,Femenino,Otro'],
+            'estado_civil'       => ['nullable', 'string', 'max:50'],
+            'grupo_etnico'       => ['nullable', 'string', 'max:50'],
+            'tiene_discapacidad' => ['nullable', 'boolean'],
+            'tipo_discapacidad'  => ['nullable', 'string', 'max:100'],
+            'nacionalidad'       => ['nullable', 'string', 'max:100'],
+            'pais_nacimiento'    => ['nullable', 'string', 'max:100'],
+            'zona_residencia'    => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
+            'telefono_fijo'      => ['nullable', 'string', 'max:20'],
+            'estrato'            => ['nullable', 'integer', 'min:1', 'max:6'],
+            'nivel_educativo'    => ['nullable', 'string', 'max:50'],
+            'ocupacion'          => ['nullable', 'string', 'max:100'],
+            'tipo_sangre'        => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
+            'victima_conflicto_armado' => ['nullable', 'boolean'],
+            'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
+        ], [
+            'fecha_afiliacion.required'   => 'La fecha de afiliación es obligatoria.',
+            'fecha_afiliacion.date'       => 'La fecha de afiliación no es válida.',
+            'id_tipo_afiliacion.required' => 'Selecciona el tipo de afiliación.',
+            'cc_usuario.required'         => 'Selecciona el cotizante titular.',
+            'id_estado.required'          => 'Selecciona el estado.',
+            'id_tipo_documento.exists'    => 'El tipo de documento no es válido.',
+            'genero.in'                   => 'El género no es válido.',
+            'zona_residencia.in'          => 'La zona de residencia no es válida.',
+            'estrato.integer'             => 'El estrato debe ser un número del 1 al 6.',
+            'estrato.min'                 => 'El estrato debe ser entre 1 y 6.',
+            'estrato.max'                 => 'El estrato debe ser entre 1 y 6.',
+            'tipo_sangre.in'              => 'El tipo de sangre no es válido.',
         ]);
 
         // Ruta "beneficiario ya registrado"
@@ -162,6 +208,25 @@ class AfiliacionController extends Controller
                 'cc_usuario'         => $request->cc_usuario,
                 'id_estado'          => $request->id_estado,
                 'cc_afiliado'        => $ccAfiliado,
+
+                // Campos adicionales de afiliación
+                'id_tipo_documento'  => $request->id_tipo_documento,
+                'pais_expedicion'    => $request->pais_expedicion,
+                'genero'             => $request->genero,
+                'estado_civil'       => $request->estado_civil,
+                'grupo_etnico'       => $request->grupo_etnico,
+                'tiene_discapacidad' => $request->boolean('tiene_discapacidad'),
+                'tipo_discapacidad'  => $request->tipo_discapacidad,
+                'nacionalidad'       => $request->nacionalidad,
+                'pais_nacimiento'    => $request->pais_nacimiento,
+                'zona_residencia'    => $request->zona_residencia,
+                'telefono_fijo'      => $request->telefono_fijo,
+                'estrato'            => $request->estrato,
+                'nivel_educativo'    => $request->nivel_educativo,
+                'ocupacion'          => $request->ocupacion,
+                'tipo_sangre'        => $request->tipo_sangre,
+                'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
+                'numero_afiliacion_anterior' => $request->numero_afiliacion_anterior,
             ], $derivados));
 
             DB::commit();
@@ -200,8 +265,23 @@ class AfiliacionController extends Controller
         $estados = Estado::all();
         $usuarios = $this->cotizantesComoUsuarios($afiliacion->cc_usuario);
         $tipos = TipoAfiliacion::all();
+        $tiposDocumento = TipoDocumento::orderBy('tipo_documento')->get();
+        $parentescos = Parentesco::orderBy('id_parentesco')->get();
         $seccionActiva = 'afiliaciones';
-        return view('admin.afiliaciones.afiliacion.edit', compact('afiliacion', 'beneficiarios', 'estados', 'usuarios', 'tipos', 'seccionActiva'));
+
+        $generos = ['Masculino' => 'Masculino', 'Femenino' => 'Femenino', 'Otro' => 'Otro'];
+        $estadosCiviles = ['Soltero' => 'Soltero', 'Casado' => 'Casado', 'Unión libre' => 'Unión libre', 'Divorciado' => 'Divorciado', 'Viudo' => 'Viudo'];
+        $gruposEtnicos = ['Ninguno' => 'Ninguno', 'Indígena' => 'Indígena', 'Afrodescendiente' => 'Afrodescendiente', 'Raizal' => 'Raizal', 'Palenquero' => 'Palenquero', 'Gitano' => 'Gitano', 'Otro' => 'Otro'];
+        $zonasResidencia = ['Urbana' => 'Urbana', 'Rural' => 'Rural'];
+        $estratos = range(1, 6);
+        $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
+        $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
+
+        return view('admin.afiliaciones.afiliacion.edit', compact(
+            'afiliacion', 'beneficiarios', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
+            'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'seccionActiva'
+        ));
     }
 
     public function detalleLista()
@@ -264,6 +344,25 @@ class AfiliacionController extends Controller
             'apellidos_cotizante'=> ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
             'correo_cotizante'   => ['required', 'email', 'max:100', 'unique:usuarios,correo,' . $afiliacion->cc_usuario . ',cedula'],
             'telefono_cotizante' => ['required', 'string', 'max:20', 'regex:/^[+()\d\s\-]{7,20}$/'],
+
+            // Campos adicionales de afiliación
+            'id_tipo_documento'  => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
+            'pais_expedicion'    => ['nullable', 'string', 'max:100'],
+            'genero'             => ['nullable', 'string', 'max:20', 'in:Masculino,Femenino,Otro'],
+            'estado_civil'       => ['nullable', 'string', 'max:50'],
+            'grupo_etnico'       => ['nullable', 'string', 'max:50'],
+            'tiene_discapacidad' => ['nullable', 'boolean'],
+            'tipo_discapacidad'  => ['nullable', 'string', 'max:100'],
+            'nacionalidad'       => ['nullable', 'string', 'max:100'],
+            'pais_nacimiento'    => ['nullable', 'string', 'max:100'],
+            'zona_residencia'    => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
+            'telefono_fijo'      => ['nullable', 'string', 'max:20'],
+            'estrato'            => ['nullable', 'integer', 'min:1', 'max:6'],
+            'nivel_educativo'    => ['nullable', 'string', 'max:50'],
+            'ocupacion'          => ['nullable', 'string', 'max:100'],
+            'tipo_sangre'        => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
+            'victima_conflicto_armado' => ['nullable', 'boolean'],
+            'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
         ], [
             'fecha_afiliacion.required'   => 'La fecha de afiliación es obligatoria.',
             'fecha_afiliacion.date'       => 'La fecha de afiliación no es válida.',
@@ -277,6 +376,13 @@ class AfiliacionController extends Controller
             'correo_cotizante.email'      => 'El correo del cotizante no es válido.',
             'correo_cotizante.unique'     => 'Ese correo ya está registrado para otro usuario.',
             'telefono_cotizante.required' => 'El teléfono del cotizante es obligatorio.',
+            'id_tipo_documento.exists'    => 'El tipo de documento no es válido.',
+            'genero.in'                   => 'El género no es válido.',
+            'zona_residencia.in'          => 'La zona de residencia no es válida.',
+            'estrato.integer'             => 'El estrato debe ser un número del 1 al 6.',
+            'estrato.min'                 => 'El estrato debe ser entre 1 y 6.',
+            'estrato.max'                 => 'El estrato debe ser entre 1 y 6.',
+            'tipo_sangre.in'              => 'El tipo de sangre no es válido.',
         ]);
 
         $derivados = $this->datosDelBeneficiario($datos['cc_afiliado'], $datos['cc_usuario']);
@@ -285,8 +391,26 @@ class AfiliacionController extends Controller
         }
 
         DB::transaction(function () use ($afiliacion, $datos, $derivados) {
-            // Actualiza la afiliación
-            $afiliacion->update($datos + $derivados);
+            // Actualiza la afiliación (incluyendo campos adicionales)
+            $afiliacion->update(array_merge($datos, $derivados, [
+                'id_tipo_documento'  => $datos['id_tipo_documento'],
+                'pais_expedicion'    => $datos['pais_expedicion'],
+                'genero'             => $datos['genero'],
+                'estado_civil'       => $datos['estado_civil'],
+                'grupo_etnico'       => $datos['grupo_etnico'],
+                'tiene_discapacidad' => $request->boolean('tiene_discapacidad'),
+                'tipo_discapacidad'  => $datos['tipo_discapacidad'],
+                'nacionalidad'       => $datos['nacionalidad'],
+                'pais_nacimiento'    => $datos['pais_nacimiento'],
+                'zona_residencia'    => $datos['zona_residencia'],
+                'telefono_fijo'      => $datos['telefono_fijo'],
+                'estrato'            => $datos['estrato'],
+                'nivel_educativo'    => $datos['nivel_educativo'],
+                'ocupacion'          => $datos['ocupacion'],
+                'tipo_sangre'        => $datos['tipo_sangre'],
+                'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
+                'numero_afiliacion_anterior' => $datos['numero_afiliacion_anterior'],
+            ]));
 
             // Actualiza los datos del cotizante (usuario titular)
             $usuario = Usuario::where('cedula', $datos['cc_usuario'])->first();
