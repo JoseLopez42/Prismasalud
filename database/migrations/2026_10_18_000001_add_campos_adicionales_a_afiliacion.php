@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('afiliacion', function (Blueprint $table) {
             // Identificación
-            $table->unsignedInteger('id_tipo_documento')->nullable()->after('id_estado');
+            $table->unsignedBigInteger('id_tipo_documento')->nullable()->after('id_estado');
             $table->string('pais_expedicion', 100)->nullable()->after('id_tipo_documento');
 
             // Demográficos
@@ -40,7 +40,7 @@ return new class extends Migration
 
             // Foránea a tipo_documento
             $table->foreign('id_tipo_documento')
-                  ->references('id_tipo_documento')->on('tipo_documento');
+                  ->references('id')->on('tipo_documento');
         });
     }
 
