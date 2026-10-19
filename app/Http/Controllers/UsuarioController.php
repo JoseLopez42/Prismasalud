@@ -7,6 +7,15 @@ use App\Models\TipoUsuario;
 use App\Models\Admin\Ciudad;
 use App\Models\Admin\TipoDocumento;
 use App\Models\Admin\Beneficiario;
+use App\Models\Admin\Pais;
+use App\Models\Admin\Genero;
+use App\Models\Admin\EstadoCivil;
+use App\Models\Admin\GrupoEtnico;
+use App\Models\Admin\ZonaResidencia;
+use App\Models\Admin\Estrato;
+use App\Models\Admin\NivelEducativo;
+use App\Models\Admin\Ocupacion;
+use App\Models\Admin\TipoSangre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,21 +38,16 @@ class UsuarioController extends Controller
         $ciudades = Ciudad::all();
         $tiposDocumento = TipoDocumento::all();
 
-        // Catálogos para los campos adicionales del paciente
-        $paises = ['Colombia' => 'Colombia', 'Venezuela' => 'Venezuela', 'Estados Unidos' => 'Estados Unidos', 'España' => 'España', 'México' => 'México', 'Argentina' => 'Argentina', 'Chile' => 'Chile', 'Perú' => 'Perú', 'Ecuador' => 'Ecuador', 'Otro' => 'Otro'];
-        $generos = ['Masculino' => 'Masculino', 'Femenino' => 'Femenino', 'Otro' => 'Otro'];
-        $estadosCiviles = ['Soltero' => 'Soltero', 'Casado' => 'Casado', 'Unión libre' => 'Unión libre', 'Divorciado' => 'Divorciado', 'Viudo' => 'Viudo'];
-        $gruposEtnicos = ['Ninguno' => 'Ninguno', 'Indígena' => 'Indígena', 'Afrodescendiente' => 'Afrodescendiente', 'Raizal' => 'Raizal', 'Palenquero' => 'Palenquero', 'Gitano' => 'Gitano', 'Otro' => 'Otro'];
-        $zonasResidencia = ['Urbana' => 'Urbana', 'Rural' => 'Rural'];
-        $estratos = range(1, 6);
-        $nivelesEducativos = ['Ninguno' => 'Ninguno', 'Primaria' => 'Primaria', 'Secundaria' => 'Secundaria', 'Técnica' => 'Técnica', 'Tecnológica' => 'Tecnológica', 'Universitaria' => 'Universitaria', 'Posgrado' => 'Posgrado'];
-        $tiposSangre = ['O+' => 'O+', 'O-' => 'O-', 'A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'AB+' => 'AB+', 'AB-' => 'AB-'];
-        $ocupaciones = [
-            'Agricultor' => 'Agricultor', 'Comerciante' => 'Comerciante', 'Conductor' => 'Conductor', 'Contador' => 'Contador',
-            'Ingeniero' => 'Ingeniero', 'Médico' => 'Médico', 'Enfermero' => 'Enfermero', 'Profesor' => 'Profesor',
-            'Abogado' => 'Abogado', 'Técnico' => 'Técnico', 'Obrero' => 'Obrero', 'Empleado' => 'Empleado',
-            'Estudiante' => 'Estudiante', 'Ama de casa' => 'Ama de casa', 'Pensionado' => 'Pensionado', 'Desempleado' => 'Desempleado', 'Otro' => 'Otro',
-        ];
+        // Catálogos para los campos adicionales del paciente (extraídos de la base de datos)
+        $paises = Pais::activo()->pluck('nombre', 'nombre');
+        $generos = Genero::activo()->pluck('nombre', 'nombre');
+        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'nombre');
+        $gruposEtnicos = GrupoEtnico::activo()->pluck('nombre', 'nombre');
+        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'nombre');
+        $estratos = Estrato::activo()->pluck('numero', 'numero');
+        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'nombre');
+        $tiposSangre = TipoSangre::activo()->pluck('nombre', 'nombre');
+        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'nombre');
 
         $seccionActiva = 'usuarios';
         return view('admin.usuarios.create', compact(

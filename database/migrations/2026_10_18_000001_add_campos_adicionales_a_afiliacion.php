@@ -37,17 +37,12 @@ return new class extends Migration
 
             // Afiliación
             $table->string('numero_afiliacion_anterior', 50)->nullable()->after('victima_conflicto_armado');
-
-            // Foránea a tipo_documento
-            $table->foreign('id_tipo_documento')
-                  ->references('id')->on('tipo_documento');
         });
     }
 
     public function down(): void
     {
         Schema::table('afiliacion', function (Blueprint $table) {
-            $table->dropForeign(['id_tipo_documento']);
             $table->dropColumn([
                 'id_tipo_documento', 'pais_expedicion',
                 'genero', 'estado_civil', 'grupo_etnico', 'tiene_discapacidad', 'tipo_discapacidad',
