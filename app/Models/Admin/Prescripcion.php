@@ -13,10 +13,14 @@ class Prescripcion extends Model
         'id_cita', 'cedula_paciente', 'cedula_medico', 'id_medicamento',
         'medicamento', 'dosis', 'frecuencia', 'duracion',
         'indicaciones', 'fecha', 'activo',
+        'estado', 'fecha_entrega', 'cedula_farmaceuta',
+        'cantidad_entregada', 'observacion_entrega',
     ];
 
     protected $casts = [
         'fecha' => 'date',
+        'fecha_entrega' => 'datetime',
+        'cantidad_entregada' => 'integer',
         'activo' => 'boolean',
     ];
 
@@ -42,5 +46,17 @@ class Prescripcion extends Model
     public function medicamentoCatalogo()
     {
         return $this->belongsTo(Medicamento::class, 'id_medicamento', 'codigo');
+    }
+
+    // Farmacéutico que registró la entrega
+    public function farmaceutico()
+    {
+        return $this->belongsTo(Usuario::class, 'cedula_farmaceuta', 'cedula');
+    }
+
+    // ¿Ya fue entregada por la farmacia?
+    public function entregada(): bool
+    {
+        return $this->estado === 'entregada';
     }
 }

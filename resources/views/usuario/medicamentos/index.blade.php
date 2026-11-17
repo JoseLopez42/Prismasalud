@@ -29,6 +29,20 @@
                         </span>
                     </div>
 
+                    <div class="mb-4">
+                        @if ($prescripcion->estado === 'entregada')
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-100 px-2.5 py-1 rounded-full">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                Entregado {{ $prescripcion->fecha_entrega ? 'el ' . $prescripcion->fecha_entrega->format('d/m/Y') : '' }}
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Pendiente de entrega en farmacia
+                            </span>
+                        @endif
+                    </div>
+
                     <div class="flex flex-wrap gap-2 mb-4">
                         @if ($prescripcion->dosis)
                             <span class="text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">Dosis: {{ $prescripcion->dosis }}</span>

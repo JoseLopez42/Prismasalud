@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('beneficiarios', 'nit_eps')) {
+            return;
+        }
+
         Schema::table('beneficiarios', function (Blueprint $table) {
             $table->string('nit_eps', 20)->nullable()->after('parentesco');
 
