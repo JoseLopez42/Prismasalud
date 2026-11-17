@@ -107,7 +107,14 @@
                             <td class="px-4 py-3 text-gray-600">
                                 {{ $prescripcion->medico ? 'Dr(a). ' . $prescripcion->medico->nombres . ' ' . $prescripcion->medico->apellidos : '—' }}
                             </td>
-                            <td class="px-4 py-3 text-gray-600">{{ $prescripcion->fecha->format('d/m/Y') }}</td>
+                            <td class="px-4 py-3 text-gray-600">
+                                {{ $prescripcion->fecha->format('d/m/Y') }}
+                                @if ($prescripcion->fecha_limite)
+                                    <p class="text-[11px] {{ $prescripcion->vencida() ? 'text-rose-600 font-semibold' : 'text-gray-400' }}">
+                                        Límite: {{ $prescripcion->fecha_limite->format('d/m/Y') }}
+                                    </p>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 @if ($esEntregada)
                                     <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">

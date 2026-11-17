@@ -379,6 +379,16 @@
                         </div>
                     </div>
                     <div>
+                        <label for="fecha_limite" class="block text-sm font-medium text-gray-700 mb-1.5">Fecha límite para reclamar *</label>
+                        <input type="date" id="fecha_limite" name="fecha_limite" value="{{ old('fecha_limite') }}"
+                               min="{{ now()->toDateString() }}" required
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        @error('fecha_limite')
+                            <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-400 mt-1">Pasada esta fecha, el medicamento deja de aparecer en farmacia.</p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Indicaciones</label>
                         <textarea name="indicaciones" rows="2" placeholder="Ej: Tomar después de las comidas"
                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('indicaciones') }}</textarea>
@@ -402,6 +412,7 @@
                             @if ($prescripcion->dosis)<p><strong>Dosis:</strong> {{ $prescripcion->dosis }}</p>@endif
                             @if ($prescripcion->frecuencia)<p><strong>Frecuencia:</strong> {{ $prescripcion->frecuencia }}</p>@endif
                             @if ($prescripcion->duracion)<p><strong>Duración:</strong> {{ $prescripcion->duracion }}</p>@endif
+                            <p><strong>Fecha límite:</strong> {{ $prescripcion->fecha_limite ? $prescripcion->fecha_limite->format('d/m/Y') : '—' }}</p>
                             @if ($prescripcion->indicaciones)<p><strong>Indicaciones:</strong> {{ $prescripcion->indicaciones }}</p>@endif
                         </div>
 
@@ -441,6 +452,16 @@
                                             <input type="text" name="duracion" value="{{ old('duracion', $prescripcion->duracion) }}" maxlength="100"
                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Fecha límite para reclamar *</label>
+                                        <input type="date" name="fecha_limite"
+                                               value="{{ old('fecha_limite', $prescripcion->fecha_limite ? $prescripcion->fecha_limite->format('Y-m-d') : '') }}"
+                                               min="{{ now()->toDateString() }}" required
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        @error('fecha_limite')
+                                            <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                     <div>
                                         <label class="block text-xs font-medium text-gray-600 mb-1">Indicaciones</label>

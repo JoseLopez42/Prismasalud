@@ -41,6 +41,11 @@
                                 Pendiente de entrega en farmacia
                             </span>
                         @endif
+                        @if ($prescripcion->fecha_limite && $prescripcion->estado !== 'entregada')
+                            <p class="text-xs {{ $prescripcion->vencida() ? 'text-rose-600 font-semibold' : 'text-gray-500' }} mt-1.5">
+                                {{ $prescripcion->vencida() ? 'Plazo vencido el' : 'Reclamar antes del' }} {{ $prescripcion->fecha_limite->format('d/m/Y') }}
+                            </p>
+                        @endif
                     </div>
 
                     <div class="flex flex-wrap gap-2 mb-4">

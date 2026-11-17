@@ -148,6 +148,7 @@ class ConsultaMedicaController extends Controller
             'dosis'        => 'nullable|string|max:100',
             'frecuencia'   => 'nullable|string|max:100',
             'duracion'     => 'nullable|string|max:100',
+            'fecha_limite' => 'required|date|after_or_equal:today',
             'indicaciones' => 'nullable|string',
         ]);
 
@@ -190,6 +191,7 @@ class ConsultaMedicaController extends Controller
             'dosis'        => 'nullable|string|max:100',
             'frecuencia'   => 'nullable|string|max:100',
             'duracion'     => 'nullable|string|max:100',
+            'fecha_limite' => 'required|date|after_or_equal:today',
             'indicaciones' => 'nullable|string',
         ]);
 

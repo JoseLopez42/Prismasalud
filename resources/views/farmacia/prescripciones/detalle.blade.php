@@ -49,6 +49,11 @@
                                 <span class="font-mono text-[11px] text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-100">{{ $prescripcion->id_medicamento }}</span>
                             @endif
                             <span class="text-[11px] text-gray-500">Formulada el {{ $prescripcion->fecha->format('d/m/Y') }}</span>
+                            @if ($prescripcion->fecha_limite)
+                                <span class="text-[11px] font-semibold {{ $prescripcion->vencida() ? 'text-rose-600 bg-rose-50' : 'text-amber-700 bg-amber-50' }} px-2 py-0.5 rounded-full">
+                                    Reclamar antes del {{ $prescripcion->fecha_limite->format('d/m/Y') }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                     @if ($esEntregada)
@@ -148,6 +153,12 @@
                 <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 lg:sticky lg:top-6">
                     <h3 class="text-base font-bold text-gray-900 mb-1">Registrar entrega</h3>
                     <p class="text-sm text-gray-500 mb-5">Confirma la entrega del medicamento al paciente</p>
+
+                    @if ($prescripcion->fecha_limite)
+                        <div class="bg-amber-50 text-amber-700 text-xs rounded-xl px-4 py-3 mb-5 border border-amber-100">
+                            Fecha límite para reclamar: <strong>{{ $prescripcion->fecha_limite->format('d/m/Y') }}</strong>
+                        </div>
+                    @endif
 
                     @if ($stock !== null)
                         <div class="flex items-center justify-between rounded-xl px-4 py-3 mb-5 border

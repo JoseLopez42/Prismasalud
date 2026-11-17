@@ -12,13 +12,14 @@ class Prescripcion extends Model
     protected $fillable = [
         'id_cita', 'cedula_paciente', 'cedula_medico', 'id_medicamento',
         'medicamento', 'dosis', 'frecuencia', 'duracion',
-        'indicaciones', 'fecha', 'activo',
+        'indicaciones', 'fecha', 'fecha_limite', 'activo',
         'estado', 'fecha_entrega', 'cedula_farmaceuta',
         'cantidad_entregada', 'observacion_entrega',
     ];
 
     protected $casts = [
         'fecha' => 'date',
+        'fecha_limite' => 'date',
         'fecha_entrega' => 'datetime',
         'cantidad_entregada' => 'integer',
         'activo' => 'boolean',
@@ -58,5 +59,26 @@ class Prescripcion extends Model
     public function entregada(): bool
     {
         return $this->estado === 'entregada';
+    }
+
+    public function vencida(): bool
+    {
+        return $this->estado === 'pendiente'
+            && $this->fecha_limite !== null
+            && $this->fecha_limite->lt(now()->startOfDay());
+    }
+
+    public function scopeDisponibleEnFarmacia($query)
+    {
+        $hoy = now()->toDateString();
+
+        return $query->where(function ($consulta) use ($hoy) {
+            $consulta->where(function ($estado) {
+                $estado->where('estado', '!=', 'pendiente')
+                       ->orWhereNull('estado');
+            })
+            ->orWhereNull('fecha_limite')
+            ->orWhereDate('fecha_limite', '>=', $hoy);
+        });
     }
 }

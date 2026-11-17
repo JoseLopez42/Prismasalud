@@ -103,8 +103,11 @@
                         <p class="text-xs text-gray-500 truncate">
                             {{ $prescripcion->medicamento }}
                             @if ($prescripcion->id_medicamento) · <span class="font-mono">{{ $prescripcion->id_medicamento }}</span> @endif
-                            · {{ $prescripcion->fecha->format('d/m/Y') }}
-                        </p>
+                             · {{ $prescripcion->fecha->format('d/m/Y') }}
+                             @if ($prescripcion->fecha_limite)
+                                 · Límite: {{ $prescripcion->fecha_limite->format('d/m/Y') }}
+                             @endif
+                         </p>
                     </div>
                     <a href="{{ route('farmacia.prescripciones.detalle', $prescripcion->id) }}"
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition flex-shrink-0">

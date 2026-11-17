@@ -23,14 +23,15 @@ class FarmaciaController extends Controller
         $hoy = now()->toDateString();
 
         $resumen = [
-            ['icono' => 'medicamentos', 'numero' => Prescripcion::where('estado', 'pendiente')->where('activo', true)->count(), 'texto' => 'Pendientes de entrega'],
+            ['icono' => 'medicamentos', 'numero' => Prescripcion::disponibleEnFarmacia()->where('estado', 'pendiente')->where('activo', true)->count(), 'texto' => 'Pendientes de entrega'],
             ['icono' => 'entrega',      'numero' => Prescripcion::where('estado', 'entregada')->whereDate('fecha_entrega', $hoy)->count(), 'texto' => 'Entregadas hoy'],
             ['icono' => 'lista',        'numero' => Prescripcion::where('estado', 'entregada')->count(), 'texto' => 'Entregadas (total)'],
             ['icono' => 'inventario',   'numero' => Medicamento::where('activo', true)->where('stock', 0)->count(), 'texto' => 'Medicamentos sin stock'],
         ];
 
         // Prescripciones que esperan entrega (las más recientes primero)
-        $pendientes = Prescripcion::with(['paciente', 'medico', 'medicamentoCatalogo'])
+        $pendientes = Prescripcion::disponibleEnFarmacia()
+            ->with(['paciente', 'medico', 'medicamentoCatalogo'])
             ->where('estado', 'pendiente')
             ->where('activo', true)
             ->orderByDesc('fecha')
@@ -39,7 +40,8 @@ class FarmaciaController extends Controller
             ->get();
 
         // Últimas entregas registradas
-        $ultimasEntregas = Prescripcion::with(['paciente', 'farmaceutico'])
+        $ultimasEntregas = Prescripcion::disponibleEnFarmacia()
+            ->with(['paciente', 'farmaceutico'])
             ->where('estado', 'entregada')
             ->where('activo', true)
             ->orderByDesc('fecha_entrega')
@@ -68,7 +70,8 @@ class FarmaciaController extends Controller
 
         $buscar = trim((string) $request->query('buscar', ''));
 
-        $consulta = Prescripcion::with(['paciente', 'medico', 'medicamentoCatalogo'])
+        $consulta = Prescripcion::disponibleEnFarmacia()
+            ->with(['paciente', 'medico', 'medicamentoCatalogo'])
             ->where('activo', true);
 
         if ($estado !== 'todas') {
@@ -113,6 +116,12 @@ class FarmaciaController extends Controller
             ->where('activo', true)
             ->findOrFail($id);
 
+        if ($prescripcion->vencida()) {
+            return redirect()
+                ->route('farmacia.prescripciones.index', ['estado' => 'pendiente'])
+                ->with('error', 'El plazo para reclamar esta prescripción venció y ya no está disponible en farmacia.');
+        }
+
         $seccionActiva = 'prescripciones';
 
         return view('farmacia.prescripciones.detalle', compact('prescripcion', 'seccionActiva'));
@@ -132,6 +141,10 @@ class FarmaciaController extends Controller
         $prescripcion = Prescripcion::with('medicamentoCatalogo')
             ->where('activo', true)
             ->findOrFail($id);
+
+        if ($prescripcion->vencida()) {
+            return back()->with('error', 'El plazo para reclamar esta prescripción venció y ya no se puede entregar.');
+        }
 
         if ($prescripcion->estado !== 'pendiente') {
             return back()->with('error', 'Esta prescripción ya fue entregada.');
