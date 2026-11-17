@@ -55,4 +55,9 @@ class CitaMedica extends Model
     {
         return $this->belongsTo(EstadoCita::class, 'id_estado_cita');
     }
+
+    public function atendida(): bool
+    {
+        return strtolower(trim((string) ($this->estadoCita->nombre ?? ''))) === 'atendida';
+    }
 }

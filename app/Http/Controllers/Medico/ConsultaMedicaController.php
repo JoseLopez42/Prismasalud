@@ -24,6 +24,7 @@ class ConsultaMedicaController extends Controller
     public function show($id)
     {
         $cita = $this->citaDelMedico($id);
+        $citaAtendida = $cita->atendida();
 
         $historias = HistoriaClinica::with(['diagnosticos', 'enfermedades'])
             ->where('id_cita', $cita->id)
@@ -47,7 +48,7 @@ class ConsultaMedicaController extends Controller
 
         return view('medico.cita.show', compact(
             'cita', 'historias', 'procedimientos', 'prescripciones',
-            'medicamentos', 'tipos', 'estados', 'seccionActiva'
+            'medicamentos', 'tipos', 'estados', 'seccionActiva', 'citaAtendida'
         ));
     }
 
@@ -55,6 +56,7 @@ class ConsultaMedicaController extends Controller
     public function storeHistoria(Request $request, $id)
     {
         $cita = $this->citaDelMedico($id);
+        $this->abortarSiCitaAtendida($cita->id);
 
         $datos = $request->validate([
             'fecha'           => 'required|date',
@@ -78,6 +80,7 @@ class ConsultaMedicaController extends Controller
     public function storeDiagnostico(Request $request, $id)
     {
         $cita = $this->citaDelMedico($id);
+        $this->abortarSiCitaAtendida($cita->id);
 
         $datos = $request->validate([
             'id_historia_clinica' => 'nullable|exists:historia_clinica,id',
@@ -99,6 +102,7 @@ class ConsultaMedicaController extends Controller
     public function storeEnfermedad(Request $request, $id)
     {
         $cita = $this->citaDelMedico($id);
+        $this->abortarSiCitaAtendida($cita->id);
 
         $datos = $request->validate([
             'id_historia_clinica' => 'nullable|exists:historia_clinica,id',
@@ -120,6 +124,7 @@ class ConsultaMedicaController extends Controller
     public function storeProcedimiento(Request $request, $id)
     {
         $cita = $this->citaDelMedico($id);
+        $this->abortarSiCitaAtendida($cita->id);
 
         $datos = $request->validate([
             'id_tipo_procedimiento' => 'nullable|exists:tipo_procedimiento,id',
@@ -142,6 +147,7 @@ class ConsultaMedicaController extends Controller
     public function storePrescripcion(Request $request, $id)
     {
         $cita = $this->citaDelMedico($id);
+        $this->abortarSiCitaAtendida($cita->id);
 
         $datos = $request->validate([
             'id_medicamento' => 'required|exists:medicamento,codigo',
@@ -168,6 +174,7 @@ class ConsultaMedicaController extends Controller
     public function marcarAtendida($id)
     {
         $cita = $this->citaDelMedico($id);
+        $this->abortarSiCitaAtendida($cita->id);
 
         $idEstado = EstadoCita::where('nombre', 'Atendida')->value('id');
 
@@ -185,6 +192,7 @@ class ConsultaMedicaController extends Controller
         $prescripcion = Prescripcion::findOrFail($id);
 
         abort_unless((int) $prescripcion->cedula_medico === $this->cedulaMedico(), 403);
+        $this->abortarSiCitaAtendida($prescripcion->id_cita);
 
         $datos = $request->validate([
             'id_medicamento' => 'required|exists:medicamento,codigo',
