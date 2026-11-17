@@ -77,19 +77,18 @@
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactivo
                                     </span>
                                 @endif
-                                <form method="POST" action="{{ route('beneficiarios.estado', $b->cc_afiliado) }}" class="inline-block ml-2">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="text-xs font-medium text-teal-600 hover:underline">
-                                        {{ ($b->usuario?->activo ?? true) ? 'Desactivar' : 'Activar' }}
-                                    </button>
-                                </form>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <a href="{{ route('beneficiarios.edit', $b->cc_afiliado) }}"
-                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-xs font-medium hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 transition">
-                                    Editar
-                                </a>
+                                <button type="button"
+                                        class="btn-acciones inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 transition"
+                                        aria-label="Acciones" aria-haspopup="menu" aria-expanded="false"
+                                        data-estado-url="{{ route('beneficiarios.estado', $b->cc_afiliado) }}"
+                                        data-edit-url="{{ route('beneficiarios.edit', $b->cc_afiliado) }}"
+                                        data-activo="{{ ($b->usuario?->activo ?? true) ? '1' : '0' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <circle cx="10" cy="4" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="16" r="1.6"/>
+                                    </svg>
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -149,19 +148,18 @@
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactivo
                                     </span>
                                 @endif
-                                <form method="POST" action="{{ route('beneficiarios.estado', $b->cc_afiliado) }}" class="inline-block ml-2">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="text-xs font-medium text-teal-600 hover:underline">
-                                        {{ ($b->usuario?->activo ?? true) ? 'Desactivar' : 'Activar' }}
-                                    </button>
-                                </form>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <a href="{{ route('beneficiarios.edit', $b->cc_afiliado) }}"
-                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-xs font-medium hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 transition">
-                                    Editar
-                                </a>
+                                <button type="button"
+                                        class="btn-acciones inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 hover:border-gray-300 transition"
+                                        aria-label="Acciones" aria-haspopup="menu" aria-expanded="false"
+                                        data-estado-url="{{ route('beneficiarios.estado', $b->cc_afiliado) }}"
+                                        data-edit-url="{{ route('beneficiarios.edit', $b->cc_afiliado) }}"
+                                        data-activo="{{ ($b->usuario?->activo ?? true) ? '1' : '0' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <circle cx="10" cy="4" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="16" r="1.6"/>
+                                    </svg>
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -174,8 +172,79 @@
         </div>
     </div>
 
+    {{-- Menú de acciones (3 puntos), compartido por todas las filas --}}
+    <div id="menu-acciones"
+         class="fixed z-50 hidden w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 text-sm"
+         role="menu" aria-label="Acciones de la persona">
+        <form id="form-estado-menu" method="POST" action="">
+            @csrf
+            @method('PATCH')
+            <button type="submit" id="btn-estado-menu"
+                    class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition"
+                    role="menuitem">Desactivar</button>
+        </form>
+        <a id="link-editar-menu" href="#"
+           class="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition"
+           role="menuitem">Editar</a>
+    </div>
+
 @endsection
 
 @push('scripts')
     @include('admin.partials.script_listado')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menu = document.getElementById('menu-acciones');
+            const formEstado = document.getElementById('form-estado-menu');
+            const botonEstado = document.getElementById('btn-estado-menu');
+            const enlaceEditar = document.getElementById('link-editar-menu');
+            let disparadorActual = null;
+
+            function cerrarMenu() {
+                menu.classList.add('hidden');
+                if (disparadorActual) disparadorActual.setAttribute('aria-expanded', 'false');
+                disparadorActual = null;
+            }
+
+            document.addEventListener('click', function (event) {
+                const disparador = event.target.closest('.btn-acciones');
+
+                if (disparador) {
+                    event.preventDefault();
+                    const abrir = disparador !== disparadorActual;
+                    cerrarMenu();
+                    if (!abrir) return;
+
+                    formEstado.action = disparador.dataset.estadoUrl;
+                    enlaceEditar.href = disparador.dataset.editUrl;
+                    botonEstado.textContent = disparador.dataset.activo === '1' ? 'Desactivar' : 'Activar';
+
+                    // Se muestra primero para poder medirlo y se coloca cerca
+                    // del botón usando position: fixed (no lo corta la tabla).
+                    menu.classList.remove('hidden');
+                    const rect = disparador.getBoundingClientRect();
+                    const ancho = menu.offsetWidth;
+                    const alto = menu.offsetHeight;
+                    let top = rect.bottom + 6;
+                    if (top + alto > window.innerHeight - 8) top = rect.top - alto - 6;
+
+                    menu.style.left = Math.max(8, rect.right - ancho) + 'px';
+                    menu.style.top = Math.max(8, top) + 'px';
+
+                    disparador.setAttribute('aria-expanded', 'true');
+                    disparadorActual = disparador;
+                    return;
+                }
+
+                if (!menu.contains(event.target)) cerrarMenu();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') cerrarMenu();
+            });
+
+            window.addEventListener('scroll', cerrarMenu, true);
+            window.addEventListener('resize', cerrarMenu);
+        });
+    </script>
 @endpush

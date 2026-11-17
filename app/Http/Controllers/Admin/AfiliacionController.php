@@ -416,7 +416,9 @@ class AfiliacionController extends Controller
 
         $mensaje = $nuevoEstado == $activo ? 'Afiliación activada correctamente.' : 'Afiliación desactivada correctamente.';
 
-        return redirect()->route('afiliaciones.index')->with('exito', $mensaje);
+        // Se vuelve a la página desde la que se accionó (listado o detalle
+        // del núcleo), para no perder el contexto de la persona cambiada.
+        return back()->with('exito', $mensaje);
     }
 
     /**

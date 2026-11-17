@@ -17,17 +17,19 @@
 @section('contenido')
     <a href="{{ route('afiliaciones.index') }}" class="text-sm text-teal-600 hover:underline">← Volver a afiliaciones</a>
 
-    <div class="mt-4">
+    {{-- Una sola columna: "Datos de la afiliación" y debajo el bloque del
+         beneficiario. Centrado y con ancho acotado para que se vea ordenado. --}}
+    <div class="mt-4 mx-auto max-w-4xl">
         @if ($errors->any())
             <div class="alerta-animada bg-red-50 text-red-600 text-sm rounded-md px-4 py-2 mb-5">
                 {{ $errors->first() }}
             </div>
         @endif
 
-        <form id="form-afiliacion" method="POST" action="{{ route('afiliaciones.store') }}" enctype="multipart/form-data" class="grid md:grid-cols-2 gap-4" novalidate>
+        <form id="form-afiliacion" method="POST" action="{{ route('afiliaciones.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 gap-4" novalidate>
             @csrf
 
-            {{-- Columna 1: datos de la afiliación --}}
+            {{-- Datos de la afiliación --}}
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden h-fit">
                 <div class="bg-gradient-to-r from-emerald-800 via-teal-700 to-teal-500 px-6 py-5 text-white">
                     <p class="font-bold text-lg leading-tight">Datos de la afiliación</p>
@@ -35,28 +37,30 @@
                 </div>
 
                 <div class="p-6 space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de afiliación</label>
-                        <input type="date" name="fecha_afiliacion" value="{{ old('fecha_afiliacion', now()->format('Y-m-d')) }}"
-                               class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm bg-gray-100 text-gray-600 focus:outline-none transition cursor-not-allowed" required readonly>
-                        <p class="text-xs text-gray-400 mt-1">Se asigna automáticamente la fecha actual del sistema.</p>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de afiliación</label>
+                            <input type="date" name="fecha_afiliacion" value="{{ old('fecha_afiliacion', now()->format('Y-m-d')) }}"
+                                   class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm bg-gray-100 text-gray-600 focus:outline-none transition cursor-not-allowed" required readonly>
+                            <p class="text-xs text-gray-400 mt-1">Se asigna automáticamente la fecha actual del sistema.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de afiliación</label>
+                            <select name="id_tipo_afiliacion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                                <option value="">Seleccione...</option>
+                                @foreach ($tipos as $tipo)
+                                    <option value="{{ $tipo->id_regimen }}" {{ old('id_tipo_afiliacion') == $tipo->id_regimen ? 'selected' : '' }}>
+                                        {{ $tipo->nombre_regimen }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="bg-teal-50 border border-teal-100 text-teal-800 text-sm rounded-md px-4 py-3">
                         El <strong>parentesco</strong> y la <strong>EPS</strong> se toman automáticamente de la persona
                         afiliada. Si la persona no tiene EPS, la afiliación queda con el <strong>NIT de tu empresa</strong>.
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de afiliación</label>
-                        <select name="id_tipo_afiliacion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
-                            <option value="">Seleccione...</option>
-                            @foreach ($tipos as $tipo)
-                                <option value="{{ $tipo->id_regimen }}" {{ old('id_tipo_afiliacion') == $tipo->id_regimen ? 'selected' : '' }}>
-                                    {{ $tipo->nombre_regimen }}
-                                </option>
-                            @endforeach
-                        </select>
                     </div>
 
                     <div>
@@ -81,7 +85,7 @@
                 </div>
             </div>
 
-            {{-- Columna 2: beneficiario --}}
+            {{-- Beneficiario de la afiliación (debajo de los datos de la afiliación) --}}
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden h-fit">
                 <div class="bg-gradient-to-r from-emerald-800 via-teal-700 to-teal-500 px-6 py-5 text-white">
                     <p class="font-bold text-lg leading-tight">Beneficiario de la afiliación</p>

@@ -37,6 +37,7 @@
                         <th class="px-4 py-3">Régimen</th>
                         <th class="px-4 py-3">EPS</th>
                         <th class="px-4 py-3">Estado</th>
+                        <th class="px-4 py-3 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -69,14 +70,33 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-4 py-3 text-right">
+                                @include('admin.partials.acciones_fila', [
+                                    'rutaEditar' => route('afiliaciones.edit', $afiliacion->id_afiliacion),
+                                    'formId' => 'form-estado-nucleo-' . $afiliacion->id_afiliacion,
+                                    'rutaEstado' => route('afiliaciones.estado', $afiliacion->id_afiliacion),
+                                    'activo' => $afiliacion->id_estado == 1,
+                                    'tituloDesactivar' => '¿Desactivar a esta persona?',
+                                    'textoDesactivar' => 'La persona quedará inactiva en este núcleo familiar.',
+                                    'tituloActivar' => '¿Activar a esta persona?',
+                                    'textoActivar' => 'La persona volverá a estar activa en este núcleo familiar.',
+                                ])
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-12 text-center text-gray-500">No hay personas afiliadas a este núcleo.</td>
+                            <td colspan="9" class="px-4 py-12 text-center text-gray-500">No hay personas afiliadas a este núcleo.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
+    @include('admin.partials.modal_confirmacion')
+
 @endsection
+
+@push('scripts')
+    @include('admin.partials.script_listado')
+@endpush
