@@ -311,16 +311,19 @@
                                                     <span class="text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full">Cita #{{ $historia->cita->id }}</span>
                                                 @endif
                                                 @if ($esAutor)
+                                                    @php
+                                                        $registroHistoria = [
+                                                            'fecha' => $historia->fecha->format('Y-m-d'),
+                                                            'motivo_consulta' => $historia->motivo_consulta,
+                                                            'antecedentes' => $historia->antecedentes,
+                                                            'examen_fisico' => $historia->examen_fisico,
+                                                            'observaciones' => $historia->observaciones,
+                                                        ];
+                                                    @endphp
                                                     <button type="button"
                                                             data-editar="historia" data-id="{{ $historia->id }}"
                                                             data-action="{{ route('medico.historia.update', $historia->id) }}"
-                                                            data-record="@json([
-                                                                'fecha' => $historia->fecha->format('Y-m-d'),
-                                                                'motivo_consulta' => $historia->motivo_consulta,
-                                                                'antecedentes' => $historia->antecedentes,
-                                                                'examen_fisico' => $historia->examen_fisico,
-                                                                'observaciones' => $historia->observaciones,
-                                                            ])"
+                                                            data-record="@json($registroHistoria)"
                                                             class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 px-2.5 py-1 rounded-lg hover:bg-teal-100 transition">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -472,15 +475,18 @@
                                             </p>
                                         </div>
                                         @if ($esAutor)
+                                            @php
+                                                $registroDiagnostico = [
+                                                    'fecha' => $diagnostico->fecha->format('Y-m-d'),
+                                                    'descripcion' => $diagnostico->descripcion,
+                                                    'tipo' => $diagnostico->tipo,
+                                                    'id_historia_clinica' => $diagnostico->id_historia_clinica,
+                                                ];
+                                            @endphp
                                             <button type="button"
                                                     data-editar="diagnostico" data-id="{{ $diagnostico->id }}"
                                                     data-action="{{ route('medico.diagnostico.update', $diagnostico->id) }}"
-                                                    data-record="@json([
-                                                        'fecha' => $diagnostico->fecha->format('Y-m-d'),
-                                                        'descripcion' => $diagnostico->descripcion,
-                                                        'tipo' => $diagnostico->tipo,
-                                                        'id_historia_clinica' => $diagnostico->id_historia_clinica,
-                                                    ])"
+                                                    data-record="@json($registroDiagnostico)"
                                                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 px-2.5 py-1 rounded-lg hover:bg-teal-100 transition">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -596,15 +602,18 @@
                                             </p>
                                         </div>
                                         @if ($esAutor)
+                                            @php
+                                                $registroEnfermedad = [
+                                                    'fecha' => $enfermedad->fecha->format('Y-m-d'),
+                                                    'nombre' => $enfermedad->nombre,
+                                                    'descripcion' => $enfermedad->descripcion,
+                                                    'id_historia_clinica' => $enfermedad->id_historia_clinica,
+                                                ];
+                                            @endphp
                                             <button type="button"
                                                     data-editar="enfermedad" data-id="{{ $enfermedad->id }}"
                                                     data-action="{{ route('medico.enfermedad.update', $enfermedad->id) }}"
-                                                    data-record="@json([
-                                                        'fecha' => $enfermedad->fecha->format('Y-m-d'),
-                                                        'nombre' => $enfermedad->nombre,
-                                                        'descripcion' => $enfermedad->descripcion,
-                                                        'id_historia_clinica' => $enfermedad->id_historia_clinica,
-                                                    ])"
+                                                    data-record="@json($registroEnfermedad)"
                                                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 px-2.5 py-1 rounded-lg hover:bg-teal-100 transition">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -660,13 +669,21 @@
         </div>
 
         {{-- Valores antiguos para reabrir el modal tras un error de validación --}}
-        <script type="application/json" id="datos-edicion">@json(['edit' => old('_edit'), 'valores' => old()->all()])</script>
+        <script type="application/json" id="datos-edicion">@json(['edit' => old('_edit'), 'valores' => old() ?? []])</script>
     @endif
 
 @endsection
 
 @push('scripts')
     @if ($paciente)
+    @php
+        $historiasOptions = $historias->map(function ($h) {
+            return [
+                'id' => $h->id,
+                'texto' => $h->fecha->format('d/m/Y') . ' — ' . \Illuminate\Support\Str::limit($h->motivo_consulta ?: 'Sin motivo', 40),
+            ];
+        })->values();
+    @endphp
     <script>
         (function () {
             // ---------- Toast de éxito ----------
@@ -764,9 +781,7 @@
                 }
             };
 
-            var historiasOptions = @json($historias->map(function ($h) {
-                return ['id' => $h->id, 'texto' => $h->fecha->format('d/m/Y') . ' — ' . \Illuminate\Support\Str::limit($h->motivo_consulta ?: 'Sin motivo', 40)];
-            })->values());
+            var historiasOptions = @json($historiasOptions);
 
             function crearCampo(campo, valor) {
                 var wrap = document.createElement('div');

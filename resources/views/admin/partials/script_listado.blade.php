@@ -68,26 +68,70 @@
     document.addEventListener('keydown', function (evento) {
         if (evento.key === 'Escape') {
             cerrarModalConfirmacion();
-            document.querySelectorAll('.menu-acciones').forEach(function (m) { m.classList.add('hidden'); });
+            ocultarMenusAcciones();
         }
     });
 
     // ======================================================================
     // MENÚ DE ACCIONES POR FILA (dropdown profesional)
+    // Se posiciona de forma fija para que NO se corte con el overflow-x-auto
+    // de la tarjeta de la tabla (antes pasaba en listados anchos).
     // ======================================================================
+    function posicionarMenuAcciones(menu, boton) {
+        if (!menu || !boton) return;
+
+        const rect = boton.getBoundingClientRect();
+
+        // El ancho se mide ya con el menú visible.
+        const ancho = menu.offsetWidth || 192;
+
+        menu.style.position = 'fixed';
+        menu.style.top = rect.bottom + 'px';              // el mt-1.5 de la clase da el espacio
+        menu.style.left = Math.max(8, rect.right - ancho) + 'px';
+        menu.style.right = 'auto';
+        menu.style.zIndex = '100';
+    }
+
+    function ocultarMenusAcciones() {
+        document.querySelectorAll('.menu-acciones').forEach(function (menu) {
+            menu.classList.add('hidden');
+            menu.removeAttribute('style');
+        });
+    }
+
     document.addEventListener('click', function (evento) {
         const boton = evento.target.closest('.boton-menu-acciones');
-        const menus = document.querySelectorAll('.menu-acciones');
 
         if (boton) {
             const menu = document.getElementById(boton.getAttribute('data-menu-id'));
-            menus.forEach(function (m) { if (m !== menu) m.classList.add('hidden'); });
-            if (menu) menu.classList.toggle('hidden');
+
+            document.querySelectorAll('.menu-acciones').forEach(function (otro) {
+                if (otro !== menu) {
+                    otro.classList.add('hidden');
+                    otro.removeAttribute('style');
+                }
+            });
+
+            if (menu) {
+                const seAbrira = menu.classList.contains('hidden');
+                menu.classList.toggle('hidden');
+
+                if (seAbrira) {
+                    posicionarMenuAcciones(menu, boton);
+                } else {
+                    menu.removeAttribute('style');
+                }
+            }
             return;
         }
 
-        menus.forEach(function (m) { m.classList.add('hidden'); });
+        ocultarMenusAcciones();
     });
+
+    // Si la página se desplaza o cambia de tamaño, cerramos los menús abiertos
+    // para que no queden flotando en una posición vieja.
+    window.addEventListener('scroll', ocultarMenusAcciones, true);
+    window.addEventListener('resize', ocultarMenusAcciones);
 
     // ======================================================================
     // BUSCADOR RÁPIDO (filtra las filas de la tabla en vivo)

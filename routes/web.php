@@ -21,12 +21,17 @@ use App\Http\Controllers\Admin\HorarioMedicoController;
 use App\Http\Controllers\Admin\TipoCitaController;
 use App\Http\Controllers\Admin\EstadoCitaController;
 use App\Http\Controllers\Admin\CitaMedicaController;
+use App\Http\Controllers\Admin\ProcedimientoController as AdminProcedimientoController;
+use App\Http\Controllers\Admin\TipoProcedimientoController as AdminTipoProcedimientoController;
 use App\Http\Controllers\Admin\HistoriaClinicaController;
 use App\Http\Controllers\Admin\MedicamentoController;
 use App\Http\Controllers\Medico\PanelMedicoController;
+use App\Http\Controllers\Medico\HorarioMedicoController as MedicoHorarioController;
+use App\Http\Controllers\Medico\PerfilController;
 use App\Http\Controllers\Medico\HistoriaMedicaController;
 use App\Http\Controllers\Medico\ProcedimientoController;
 use App\Http\Controllers\Medico\ConsultaMedicaController;
+use App\Http\Controllers\Farmacia\FarmaciaController;
 use App\Http\Controllers\Admin\AfiliacionController;
 use App\Http\Controllers\Admin\BeneficiarioController;
 use App\Http\Controllers\Admin\EstadoController;
@@ -207,6 +212,28 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
         Route::patch('/horarios/{id}/estado', [HorarioMedicoController::class, 'cambiarEstado'])->name('horario_medico.estado');
     });
 
+    // Procedimientos: /admin/procedimientos/...
+    Route::prefix('procedimientos')->group(function () {
+
+        Route::get('/', [AdminProcedimientoController::class, 'index'])->name('procedimiento.index');
+        Route::get('/crear', [AdminProcedimientoController::class, 'create'])->name('procedimiento.create');
+        Route::post('/', [AdminProcedimientoController::class, 'store'])->name('procedimiento.store');
+        Route::get('/{id}/editar', [AdminProcedimientoController::class, 'edit'])->name('procedimiento.edit');
+        Route::put('/{id}', [AdminProcedimientoController::class, 'update'])->name('procedimiento.update');
+        Route::patch('/{id}/estado', [AdminProcedimientoController::class, 'cambiarEstado'])->name('procedimiento.estado');
+    });
+
+    // Tipos de procedimiento: /admin/tipos-procedimiento/...
+    Route::prefix('tipos-procedimiento')->group(function () {
+
+        Route::get('/', [AdminTipoProcedimientoController::class, 'index'])->name('tipo_procedimiento.index');
+        Route::get('/crear', [AdminTipoProcedimientoController::class, 'create'])->name('tipo_procedimiento.create');
+        Route::post('/', [AdminTipoProcedimientoController::class, 'store'])->name('tipo_procedimiento.store');
+        Route::get('/{id}/editar', [AdminTipoProcedimientoController::class, 'edit'])->name('tipo_procedimiento.edit');
+        Route::put('/{id}', [AdminTipoProcedimientoController::class, 'update'])->name('tipo_procedimiento.update');
+        Route::patch('/{id}/estado', [AdminTipoProcedimientoController::class, 'cambiarEstado'])->name('tipo_procedimiento.estado');
+    });
+
     // Citas Médicas: /admin/citas/...
     Route::prefix('citas')->group(function () {
 
@@ -364,6 +391,23 @@ Route::prefix('medico')->middleware('esmedico')->group(function () {
     Route::put('/procedimiento/{id}', [ProcedimientoController::class, 'updateProcedimiento'])->name('medico.procedimiento.update');
     Route::put('/detalle-procedimiento/{id}', [ProcedimientoController::class, 'updateDetalleProcedimiento'])->name('medico.detalle_procedimiento.update');
     Route::put('/prescripcion/{id}', [ConsultaMedicaController::class, 'updatePrescripcion'])->name('medico.prescripcion.update');
+});
+
+// Panel del Farmacéutico: /farmacia/...
+// Ve las prescripciones de los pacientes, registra la entrega de los
+// medicamentos y administra el stock del inventario.
+Route::prefix('farmacia')->middleware('esfarmaceuta')->group(function () {
+    // Dashboard: http://127.0.0.1:8000/farmacia
+    Route::get('/', [FarmaciaController::class, 'inicio'])->name('farmacia.inicio');
+
+    // Prescripciones: listado con filtro de estado y búsqueda de paciente/medicamento
+    Route::get('/prescripciones', [FarmaciaController::class, 'prescripciones'])->name('farmacia.prescripciones.index');
+    Route::get('/prescripciones/{id}', [FarmaciaController::class, 'detalle'])->name('farmacia.prescripciones.detalle');
+    Route::post('/prescripciones/{id}/entregar', [FarmaciaController::class, 'entregar'])->name('farmacia.prescripciones.entregar');
+
+    // Inventario: el farmacéutico registra cuántas unidades hay de cada medicamento
+    Route::get('/inventario', [FarmaciaController::class, 'inventario'])->name('farmacia.inventario.index');
+    Route::put('/inventario/{codigo}', [FarmaciaController::class, 'actualizarStock'])->name('farmacia.inventario.stock');
 });
 
 // Login del Superadministrador (dueños de PrismaSalud): URL aparte, NO es el login de IPS.

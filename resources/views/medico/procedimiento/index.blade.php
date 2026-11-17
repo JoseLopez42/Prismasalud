@@ -123,10 +123,20 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción *</label>
-                            <input type="text" name="descripcion" value="{{ old('descripcion') }}" maxlength="255" required
-                                   placeholder="Ej: Cuadro hemático"
-                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Procedimiento *</label>
+                            <select name="descripcion" required
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <option value="">Seleccione el procedimiento</option>
+                                @foreach ($catalogo->groupBy('tipoProcedimiento.nombre') as $categoria => $items)
+                                    <optgroup label="{{ $categoria }}">
+                                        @foreach ($items as $item)
+                                            <option value="{{ $item->nombre }}" {{ old('descripcion') == $item->nombre ? 'selected' : '' }}>
+                                                {{ $item->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Observaciones</label>
@@ -183,9 +193,25 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-medium text-gray-600 mb-1">Descripción *</label>
-                                            <input type="text" name="descripcion" value="{{ old('descripcion', $procedimiento->descripcion) }}" required maxlength="255"
-                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Procedimiento *</label>
+                                            <select name="descripcion" required
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                                <option value="">Seleccione el procedimiento</option>
+                                                @if ($procedimiento->descripcion && ! $catalogo->contains('nombre', $procedimiento->descripcion))
+                                                    <option value="{{ $procedimiento->descripcion }}" selected>
+                                                        {{ $procedimiento->descripcion }} (valor anterior)
+                                                    </option>
+                                                @endif
+                                                @foreach ($catalogo->groupBy('tipoProcedimiento.nombre') as $categoria => $items)
+                                                    <optgroup label="{{ $categoria }}">
+                                                        @foreach ($items as $item)
+                                                            <option value="{{ $item->nombre }}" {{ old('descripcion', $procedimiento->descripcion) == $item->nombre ? 'selected' : '' }}>
+                                                                {{ $item->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @endforeach
+                                            </select>
                                         </div>
                                         <div>
                                             <label class="block text-xs font-medium text-gray-600 mb-1">Observaciones</label>

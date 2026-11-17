@@ -79,9 +79,14 @@ class LoginController extends Controller
         $_SESSION['tipo_usuario_id']  = $usuario->tipo_usuario_id;
 
         // Redirigimos según el tipo de usuario: el Administrador va a
-        // su panel (/admin) y los demás roles al panel del Usuario.
+        // su panel (/admin), el Farmacéutico al de farmacia y los
+        // demás roles al panel del Usuario.
         if ($usuario->tipo_usuario_id == 1) {
             return redirect()->route('admin.dashboard');
+        }
+
+        if ($usuario->tipo_usuario_id == 4) {
+            return redirect()->route('farmacia.inicio');
         }
 
         return redirect()->route('usuario.inicio');

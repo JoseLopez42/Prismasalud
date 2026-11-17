@@ -23,6 +23,11 @@ class EsUsuario
             return redirect('/login')->with('error', 'No tienes permiso para acceder a esta sección.');
         }
 
+        // El farmacéutico tiene su propio panel: no entra al de pacientes.
+        if ($_SESSION['tipo_usuario_id'] == 4) {
+            return redirect()->route('farmacia.inicio');
+        }
+
         return $next($request);
     }
 }
