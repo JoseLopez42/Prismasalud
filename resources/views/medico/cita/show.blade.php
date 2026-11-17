@@ -365,18 +365,100 @@
     <section id="panel-medicamento" class="tab-panel hidden">
         <div class="grid lg:grid-cols-2 gap-6">
             @unless ($citaAtendida)
+                @php
+                    $filasMedicamentos = old('medicamentos', [
+                        ['id_medicamento' => '', 'dosis' => '', 'frecuencia' => '', 'duracion' => '', 'fecha_limite' => '', 'indicaciones' => ''],
+                    ]);
+                @endphp
                 <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
-                    <h3 class="font-bold text-gray-900 mb-4">Formular medicamento</h3>
+                    <h3 class="font-bold text-gray-900 mb-4">Formular medicamentos</h3>
                     <form method="POST" action="{{ route('medico.cita.prescripcion', $cita->id) }}" class="space-y-4">
                         @csrf
                         <input type="hidden" name="_tab" value="medicamento">
+                        <div id="medicamentos-container" class="space-y-4">
+                            @foreach ($filasMedicamentos as $indice => $fila)
+                                <div class="medicamento-fila border border-gray-200 rounded-xl p-4 space-y-3">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="text-xs font-semibold text-gray-500">Medicamento {{ $loop->iteration }}</span>
+                                        <button type="button" class="quitar-medicamento text-xs font-semibold text-rose-600 hover:text-rose-800">Quitar</button>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Medicamento *</label>
+                                        <select name="medicamentos[{{ $indice }}][id_medicamento]" required
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                            <option value="">Selecciona un medicamento del catálogo</option>
+                                            @foreach ($medicamentos as $medicamento)
+                                                <option value="{{ $medicamento->codigo }}" {{ ($fila['id_medicamento'] ?? '') == $medicamento->codigo ? 'selected' : '' }}>
+                                                    {{ $medicamento->nombre }}{{ $medicamento->presentacion ? ' — ' . $medicamento->presentacion : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error("medicamentos.$indice.id_medicamento")
+                                            <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                                        @enderror
+                                        @if ($medicamentos->isEmpty())
+                                            <p class="text-xs text-amber-600 mt-1">No hay medicamentos activos en el catálogo.</p>
+                                        @endif
+                                    </div>
+                                    <div class="grid sm:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Dosis</label>
+                                            <input type="text" name="medicamentos[{{ $indice }}][dosis]" value="{{ $fila['dosis'] ?? '' }}" maxlength="100" placeholder="500 mg"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Frecuencia</label>
+                                            <input type="text" name="medicamentos[{{ $indice }}][frecuencia]" value="{{ $fila['frecuencia'] ?? '' }}" maxlength="100" placeholder="Cada 8 horas"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Duración</label>
+                                            <input type="text" name="medicamentos[{{ $indice }}][duracion]" value="{{ $fila['duracion'] ?? '' }}" maxlength="100" placeholder="5 días"
+                                                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha límite para reclamar *</label>
+                                        <input type="date" name="medicamentos[{{ $indice }}][fecha_limite]" value="{{ $fila['fecha_limite'] ?? '' }}"
+                                               min="{{ now()->toDateString() }}" required
+                                               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                        @error("medicamentos.$indice.fecha_limite")
+                                            <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Indicaciones</label>
+                                        <textarea name="medicamentos[{{ $indice }}][indicaciones]" rows="2" placeholder="Ej: Tomar después de las comidas"
+                                                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ $fila['indicaciones'] ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="text-xs text-gray-400">Pasada la fecha límite, el medicamento deja de aparecer en farmacia.</p>
+                        <button type="button" id="agregar-medicamento"
+                                class="w-full inline-flex items-center justify-center gap-2 border border-teal-600 text-teal-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-teal-50 transition">
+                            + Agregar otro medicamento
+                        </button>
+                        <button type="submit"
+                                class="w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 hover:shadow-md transition">
+                            Formular medicamento(s)
+                        </button>
+                    </form>
+                </div>
+
+                <template id="plantilla-medicamento">
+                    <div class="medicamento-fila border border-gray-200 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-semibold text-gray-500">Medicamento nuevo</span>
+                            <button type="button" class="quitar-medicamento text-xs font-semibold text-rose-600 hover:text-rose-800">Quitar</button>
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Medicamento *</label>
-                            <select name="id_medicamento" required
+                            <select name="medicamentos[__INDICE__][id_medicamento]" required
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                 <option value="">Selecciona un medicamento del catálogo</option>
                                 @foreach ($medicamentos as $medicamento)
-                                    <option value="{{ $medicamento->codigo }}" {{ old('id_medicamento') == $medicamento->codigo ? 'selected' : '' }}>
+                                    <option value="{{ $medicamento->codigo }}">
                                         {{ $medicamento->nombre }}{{ $medicamento->presentacion ? ' — ' . $medicamento->presentacion : '' }}
                                     </option>
                                 @endforeach
@@ -388,41 +470,32 @@
                         <div class="grid sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Dosis</label>
-                                <input type="text" name="dosis" value="{{ old('dosis') }}" maxlength="100" placeholder="500 mg"
+                                <input type="text" name="medicamentos[__INDICE__][dosis]" maxlength="100" placeholder="500 mg"
                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Frecuencia</label>
-                                <input type="text" name="frecuencia" value="{{ old('frecuencia') }}" maxlength="100" placeholder="Cada 8 horas"
+                                <input type="text" name="medicamentos[__INDICE__][frecuencia]" maxlength="100" placeholder="Cada 8 horas"
                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Duración</label>
-                                <input type="text" name="duracion" value="{{ old('duracion') }}" maxlength="100" placeholder="5 días"
+                                <input type="text" name="medicamentos[__INDICE__][duracion]" maxlength="100" placeholder="5 días"
                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                             </div>
                         </div>
                         <div>
-                            <label for="fecha_limite" class="block text-sm font-medium text-gray-700 mb-1.5">Fecha límite para reclamar *</label>
-                            <input type="date" id="fecha_limite" name="fecha_limite" value="{{ old('fecha_limite') }}"
-                                   min="{{ now()->toDateString() }}" required
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha límite para reclamar *</label>
+                            <input type="date" name="medicamentos[__INDICE__][fecha_limite]" min="{{ now()->toDateString() }}" required
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                            @error('fecha_limite')
-                                <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-400 mt-1">Pasada esta fecha, el medicamento deja de aparecer en farmacia.</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Indicaciones</label>
-                            <textarea name="indicaciones" rows="2" placeholder="Ej: Tomar después de las comidas"
-                                      class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">{{ old('indicaciones') }}</textarea>
+                            <textarea name="medicamentos[__INDICE__][indicaciones]" rows="2" placeholder="Ej: Tomar después de las comidas"
+                                      class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"></textarea>
                         </div>
-                        <button type="submit"
-                                class="w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 hover:shadow-md transition">
-                            Formular medicamento
-                        </button>
-                    </form>
-                </div>
+                    </div>
+                </template>
             @endunless
 
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
@@ -536,5 +609,29 @@
         });
 
         activarTab('{{ $tabInicial }}');
+
+        @unless ($citaAtendida)
+            const contenedorMedicamentos = document.getElementById('medicamentos-container');
+            const plantillaMedicamento = document.getElementById('plantilla-medicamento');
+            let indiceMedicamento = {{ count($filasMedicamentos) }};
+
+            document.getElementById('agregar-medicamento').addEventListener('click', function () {
+                const html = plantillaMedicamento.innerHTML.replace(/__INDICE__/g, indiceMedicamento);
+                contenedorMedicamentos.insertAdjacentHTML('beforeend', html);
+                indiceMedicamento++;
+            });
+
+            contenedorMedicamentos.addEventListener('click', function (evento) {
+                const boton = evento.target.closest('.quitar-medicamento');
+                if (!boton) { return; }
+
+                if (contenedorMedicamentos.querySelectorAll('.medicamento-fila').length <= 1) {
+                    alert('Debe dejar al menos un medicamento.');
+                    return;
+                }
+
+                boton.closest('.medicamento-fila').remove();
+            });
+        @endunless
     </script>
 @endpush
