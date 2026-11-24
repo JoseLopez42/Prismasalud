@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -133,6 +134,10 @@ class SuperAdminLoginController extends Controller
         $_SESSION['superadmin_id'] = $estado['id'];
         $_SESSION['superadmin_nombre'] = $estado['nombre'];
         unset($_SESSION['sa_login']);
+
+        // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_users
+        DB::table('users')->where('id', $estado['id'])
+            ->update(['ultimo_ingreso' => now()]);
 
         return redirect()->route('superadmin.dashboard');
     }

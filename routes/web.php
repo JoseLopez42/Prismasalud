@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\EstadoCitaController;
 use App\Http\Controllers\Admin\CitaMedicaController;
 use App\Http\Controllers\Admin\HistoriaClinicaController;
 use App\Http\Controllers\Admin\MedicamentoController;
+use App\Http\Controllers\Admin\ApiMedicamentoController;
 use App\Http\Controllers\Medico\PanelMedicoController;
 use App\Http\Controllers\Medico\HorarioMedicoController as MedicoHorarioController;
 use App\Http\Controllers\Medico\PerfilController;
@@ -253,6 +254,9 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
         Route::put('/medicamentos/{codigo}', [MedicamentoController::class, 'update'])->name('medicamento.update');
         Route::patch('/medicamentos/{codigo}/estado', [MedicamentoController::class, 'cambiarEstado'])->name('medicamento.estado');
     });
+
+    // API de medicamentos de Colombia (Invima - datos.gov.co): /admin/api/medicamentos
+    Route::get('/api/medicamentos', [ApiMedicamentoController::class, 'index'])->name('api.medicamentos');
 
     // Afiliaciones: http://127.0.0.1:8000/admin/afiliaciones/...
     Route::prefix('afiliaciones')->group(function () {
