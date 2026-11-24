@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Admin\Medico;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
@@ -61,6 +62,10 @@ class LoginController extends Controller
                 $_SESSION['medico_foto']      = $medico->foto;
                 $_SESSION['tipo_usuario_id']  = 3;
 
+                // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_medico
+                DB::table('medico')->where('cedula', $medico->cedula)
+                    ->update(['ultimo_ingreso' => now()]);
+
                 return redirect()->route('medico.inicio');
             }
         }
@@ -78,10 +83,19 @@ class LoginController extends Controller
         $_SESSION['usuario_nombres']  = $usuario->nombres;
         $_SESSION['tipo_usuario_id']  = $usuario->tipo_usuario_id;
 
+        // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_usuarios
+        DB::table('usuarios')->where('cedula', $usuario->cedula)
+            ->update(['ultimo_ingreso' => now()]);
+
         // Redirigimos según el tipo de usuario: el Administrador va a
-        // su panel (/admin) y los demás roles al panel del Usuario.
+        // su panel (/admin), el Farmacéutico al de farmacia y los
+        // demás roles al panel del Usuario.
         if ($usuario->tipo_usuario_id == 1) {
             return redirect()->route('admin.dashboard');
+        }
+
+        if ($usuario->tipo_usuario_id == 4) {
+            return redirect()->route('farmacia.inicio');
         }
 
         return redirect()->route('usuario.inicio');

@@ -7,6 +7,7 @@ use App\Models\Usuario;
 use App\Mail\CodigoPrimerIngresoMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -239,6 +240,10 @@ class PrimerIngresoController extends Controller
         $_SESSION['usuario_cedula']  = $usuario->cedula;
         $_SESSION['usuario_nombres'] = $usuario->nombres;
         $_SESSION['tipo_usuario_id'] = $usuario->tipo_usuario_id;
+
+        // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_usuarios
+        DB::table('usuarios')->where('cedula', $usuario->cedula)
+            ->update(['ultimo_ingreso' => now()]);
 
         // Limpia la sesión del wizard
         session()->forget(['primer_ingreso_cedula', 'primer_ingreso_paso', 'primer_ingreso_correo']);

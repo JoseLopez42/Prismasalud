@@ -71,6 +71,8 @@ class HistoriaMedicaController extends Controller
             'observaciones'   => 'nullable|string',
         ]);
 
+        $this->abortarSiCitaAtendida($datos['id_cita'] ?? null);
+
         $datos['cedula_medico'] = $this->cedulaMedico();
         $datos['activo'] = true;
 
@@ -91,6 +93,10 @@ class HistoriaMedicaController extends Controller
             'tipo'                => 'nullable|string|max:50',
             'fecha'               => 'required|date',
         ]);
+
+        if (!empty($datos['id_historia_clinica'])) {
+            $this->abortarSiRegistroEnCitaAtendida(HistoriaClinica::find($datos['id_historia_clinica']));
+        }
 
         $datos['cedula_medico'] = $this->cedulaMedico();
         $datos['activo'] = true;
@@ -113,6 +119,10 @@ class HistoriaMedicaController extends Controller
             'fecha'               => 'required|date',
         ]);
 
+        if (!empty($datos['id_historia_clinica'])) {
+            $this->abortarSiRegistroEnCitaAtendida(HistoriaClinica::find($datos['id_historia_clinica']));
+        }
+
         $datos['cedula_medico'] = $this->cedulaMedico();
         $datos['activo'] = true;
 
@@ -128,6 +138,7 @@ class HistoriaMedicaController extends Controller
     {
         $historia = HistoriaClinica::findOrFail($id);
         $this->autorizarAutor($historia->cedula_medico);
+        $this->abortarSiRegistroEnCitaAtendida($historia);
 
         $datos = $request->validate([
             'fecha'           => 'required|date',
@@ -147,6 +158,7 @@ class HistoriaMedicaController extends Controller
     {
         $diagnostico = Diagnostico::findOrFail($id);
         $this->autorizarAutor($diagnostico->cedula_medico);
+        $this->abortarSiRegistroEnCitaAtendida($diagnostico);
 
         $datos = $request->validate([
             'id_historia_clinica' => 'nullable|exists:historia_clinica,id',
@@ -165,6 +177,7 @@ class HistoriaMedicaController extends Controller
     {
         $enfermedad = Enfermedad::findOrFail($id);
         $this->autorizarAutor($enfermedad->cedula_medico);
+        $this->abortarSiRegistroEnCitaAtendida($enfermedad);
 
         $datos = $request->validate([
             'id_historia_clinica' => 'nullable|exists:historia_clinica,id',

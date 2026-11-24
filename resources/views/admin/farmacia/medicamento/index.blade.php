@@ -57,6 +57,7 @@
                     <th class="px-4 py-3">Nombre</th>
                     <th class="px-4 py-3">Presentación</th>
                     <th class="px-4 py-3">Descripción</th>
+                    <th class="px-4 py-3">Stock</th>
                     <th class="px-4 py-3">Estado</th>
                     <th class="px-4 py-3 text-right">Acciones</th>
                 </tr>
@@ -79,6 +80,17 @@
                         </td>
                         <td class="px-4 py-3 text-gray-600">{{ $medicamento->presentacion ?: '—' }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $medicamento->descripcion ?: '—' }}</td>
+                        <td class="px-4 py-3">
+                            @if ($medicamento->stock > 0)
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>{{ $medicamento->stock }} unidades
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Sin stock
+                                </span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3">
                             @if ($medicamento->activo)
                                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
@@ -105,7 +117,7 @@
                     </tr>
                 @empty
                     <tr class="fila-vacio">
-                        <td colspan="6" class="px-4 py-16 text-center">
+                        <td colspan="7" class="px-4 py-16 text-center">
                             <div class="inline-flex flex-col items-center">
                                 <div class="w-20 h-20 rounded-full bg-teal-50 flex items-center justify-center mb-4">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -125,7 +137,7 @@
                         </td>
                     </tr>
                     <tr id="fila-vacio-busqueda" class="fila-vacio oculto">
-                        <td colspan="6" class="px-4 py-12 text-center">
+                        <td colspan="7" class="px-4 py-12 text-center">
                             <p class="text-sm font-semibold text-gray-500">Sin resultados</p>
                             <p class="text-xs text-gray-400 mt-1">No se encontraron medicamentos con ese criterio de búsqueda.</p>
                         </td>

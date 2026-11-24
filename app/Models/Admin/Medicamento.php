@@ -17,10 +17,11 @@ class Medicamento extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'codigo', 'nombre', 'presentacion', 'descripcion', 'activo',
+        'codigo', 'nombre', 'presentacion', 'descripcion', 'stock', 'activo',
     ];
 
     protected $casts = [
+        'stock' => 'integer',
         'activo' => 'boolean',
     ];
 }

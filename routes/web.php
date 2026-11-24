@@ -23,10 +23,14 @@ use App\Http\Controllers\Admin\EstadoCitaController;
 use App\Http\Controllers\Admin\CitaMedicaController;
 use App\Http\Controllers\Admin\HistoriaClinicaController;
 use App\Http\Controllers\Admin\MedicamentoController;
+use App\Http\Controllers\Admin\ApiMedicamentoController;
 use App\Http\Controllers\Medico\PanelMedicoController;
+use App\Http\Controllers\Medico\HorarioMedicoController as MedicoHorarioController;
+use App\Http\Controllers\Medico\PerfilController;
 use App\Http\Controllers\Medico\HistoriaMedicaController;
 use App\Http\Controllers\Medico\ProcedimientoController;
 use App\Http\Controllers\Medico\ConsultaMedicaController;
+use App\Http\Controllers\Farmacia\FarmaciaController;
 use App\Http\Controllers\Admin\AfiliacionController;
 use App\Http\Controllers\Admin\BeneficiarioController;
 use App\Http\Controllers\Admin\EstadoController;
@@ -251,6 +255,9 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
         Route::patch('/medicamentos/{codigo}/estado', [MedicamentoController::class, 'cambiarEstado'])->name('medicamento.estado');
     });
 
+    // API de medicamentos de Colombia (Invima - datos.gov.co): /admin/api/medicamentos
+    Route::get('/api/medicamentos', [ApiMedicamentoController::class, 'index'])->name('api.medicamentos');
+
     // Afiliaciones: http://127.0.0.1:8000/admin/afiliaciones/...
     Route::prefix('afiliaciones')->group(function () {
 
@@ -364,6 +371,23 @@ Route::prefix('medico')->middleware('esmedico')->group(function () {
     Route::put('/procedimiento/{id}', [ProcedimientoController::class, 'updateProcedimiento'])->name('medico.procedimiento.update');
     Route::put('/detalle-procedimiento/{id}', [ProcedimientoController::class, 'updateDetalleProcedimiento'])->name('medico.detalle_procedimiento.update');
     Route::put('/prescripcion/{id}', [ConsultaMedicaController::class, 'updatePrescripcion'])->name('medico.prescripcion.update');
+});
+
+// Panel del Farmacéutico: /farmacia/...
+// Ve las prescripciones de los pacientes, registra la entrega de los
+// medicamentos y administra el stock del inventario.
+Route::prefix('farmacia')->middleware('esfarmaceuta')->group(function () {
+    // Dashboard: http://127.0.0.1:8000/farmacia
+    Route::get('/', [FarmaciaController::class, 'inicio'])->name('farmacia.inicio');
+
+    // Prescripciones: listado con filtro de estado y búsqueda de paciente/medicamento
+    Route::get('/prescripciones', [FarmaciaController::class, 'prescripciones'])->name('farmacia.prescripciones.index');
+    Route::get('/prescripciones/{id}', [FarmaciaController::class, 'detalle'])->name('farmacia.prescripciones.detalle');
+    Route::post('/prescripciones/{id}/entregar', [FarmaciaController::class, 'entregar'])->name('farmacia.prescripciones.entregar');
+
+    // Inventario: el farmacéutico registra cuántas unidades hay de cada medicamento
+    Route::get('/inventario', [FarmaciaController::class, 'inventario'])->name('farmacia.inventario.index');
+    Route::put('/inventario/{codigo}', [FarmaciaController::class, 'actualizarStock'])->name('farmacia.inventario.stock');
 });
 
 // Login del Superadministrador (dueños de PrismaSalud): URL aparte, NO es el login de IPS.

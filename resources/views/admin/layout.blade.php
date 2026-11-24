@@ -143,6 +143,7 @@
                     ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => route('medicamento.index'), 'clave' => 'farmacia',       'tablas' => ['medicamentos']],
                     ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
                     ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
+                    ['icono' => 'api',           'texto' => 'API',                    'ruta' => route('api.medicamentos'), 'clave' => 'api', 'tablas' => null],
                 ];
             @endphp
 
