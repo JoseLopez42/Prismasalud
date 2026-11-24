@@ -84,7 +84,11 @@ class SuperAdminEmpresaController extends Controller
         $datos = $this->validar($request);
         $plan = Plan::findOrFail($datos['plan_id']);
 
-        Licencia::create($datos + ['plan' => $plan->slug]);
+        $licencia = Licencia::create($datos + ['plan' => $plan->slug]);
+
+        if ($licencia->estado === 'activa') {
+            $this->suspenderLicenciasAnteriores($licencia);
+        }
 
         return redirect()->route('superadmin.empresas.index')
             ->with('exito', 'Empresa creada correctamente.');
@@ -106,6 +110,10 @@ class SuperAdminEmpresaController extends Controller
 
         $licencia->update($datos + ['plan' => $plan->slug]);
 
+        if ($licencia->estado === 'activa') {
+            $this->suspenderLicenciasAnteriores($licencia);
+        }
+
         return redirect()->route('superadmin.empresas.index')
             ->with('exito', 'Los datos de "' . $licencia->nombre_ips . '" se guardaron.');
     }
@@ -117,6 +125,7 @@ class SuperAdminEmpresaController extends Controller
 
         // Activar una licencia comprada que aun esta inactiva (en espera de superadmin)
         if ($licencia->estado === 'inactiva') {
+            $this->suspenderLicenciasAnteriores($licencia);
             $licencia->update(['estado' => 'activa']);
             $admin = null;
             if ($licencia->usuario_cedula) {
@@ -146,11 +155,29 @@ class SuperAdminEmpresaController extends Controller
 
         $suspender = $licencia->estado !== 'suspendida';
 
+        if (! $suspender) {
+            $this->suspenderLicenciasAnteriores($licencia);
+
+            if ($licencia->usuario_cedula) {
+                Usuario::where('cedula', $licencia->usuario_cedula)
+                    ->update(['licencia_id' => $licencia->id]);
+            }
+        }
+
         $licencia->update(['estado' => $suspender ? 'suspendida' : 'activa']);
 
         return back()->with('exito', $suspender
             ? '"' . $licencia->nombre_ips . '" quedó suspendida.'
             : '"' . $licencia->nombre_ips . '" quedó activa de nuevo.');
+    }
+
+    /**
+     * Delega en el modelo para que la regla sea la misma al activar desde el
+     * panel del superadmin y al renovar desde el panel del administrador.
+     */
+    private function suspenderLicenciasAnteriores(Licencia $licencia): void
+    {
+        Licencia::suspenderAnteriores($licencia);
     }
 
     // ---------- Ayudas ----------

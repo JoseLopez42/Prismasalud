@@ -25,13 +25,11 @@ class Usuario extends Model
         'contrasena',
         'foto',
         'tipo_usuario_id',
-        'id_sub_tipo_paciente',
         'id_ciudad',
         'id_tipo_documento',
         'nit_eps',
         'activo',
         'licencia_id',
-        'debe_crear_contrasena',
     ];
 
     protected $hidden = [
@@ -42,31 +40,6 @@ class Usuario extends Model
     public function tipoUsuario()
     {
         return $this->belongsTo(TipoUsuario::class, 'tipo_usuario_id');
-    }
-
-    // Un paciente puede ser Cotizante o Beneficiario
-    public function subTipoPaciente()
-    {
-        return $this->belongsTo(SubTipoPaciente::class, 'id_sub_tipo_paciente');
-    }
-
-    /**
-     * Rol completo para mostrarlo en pantalla: "Paciente Cotizante" o
-     * "Paciente Beneficiario" en el caso de los pacientes.
-     */
-    public function getNombreRolAttribute(): string
-    {
-        $rol = $this->tipoUsuario->nombre ?? null;
-
-        if (! $rol) {
-            return '—';
-        }
-
-        if ($this->subTipoPaciente) {
-            return $rol . ' ' . $this->subTipoPaciente->nombre;
-        }
-
-        return $rol;
     }
 
     // Un usuario pertenece a una ciudad
@@ -81,7 +54,8 @@ class Usuario extends Model
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 
-    // Licencia (plan comprado) del usuario
+    // Plan/licencia comprada por este administrador (la asigna el superadmin
+    // al activar la licencia; antes de eso se busca por usuario_cedula).
     public function licencia()
     {
         return $this->belongsTo(Licencia::class, 'licencia_id');

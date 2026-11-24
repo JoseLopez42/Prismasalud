@@ -143,6 +143,9 @@
                     ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => route('medicamento.index'), 'clave' => 'farmacia',       'tablas' => ['medicamentos']],
                     ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
                     ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
+
+                    // Última opción del menú: vista previa de los recordatorios por WhatsApp.
+                    ['icono' => 'mensaje',       'texto' => 'Recordatorios',          'ruta' => route('admin.recordatorios'), 'clave' => 'recordatorios', 'tablas' => null],
                 ];
             @endphp
 

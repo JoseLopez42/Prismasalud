@@ -14,8 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'esadministrador'  => \App\Http\Middleware\EsAdministrador::class,
             'esusuario'        => \App\Http\Middleware\EsUsuario::class,
-            'esmedico'         => \App\Http\Middleware\EsMedico::class,
-            'esfarmaceuta'     => \App\Http\Middleware\EsFarmaceuta::class,
             'essuperadmin'     => \App\Http\Middleware\EsSuperAdmin::class,
             'verificarlicencia' => \App\Http\Middleware\VerificarLicencia::class,
         ]);
