@@ -19,6 +19,8 @@ use App\Models\Admin\Estrato;
 use App\Models\Admin\NivelEducativo;
 use App\Models\Admin\Ocupacion;
 use App\Models\Admin\TipoSangre;
+use App\Models\SubTipoPaciente;
+use App\Models\Empresa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +46,7 @@ class AfiliacionController extends Controller
         $tipos = TipoAfiliacion::all();
         $tiposDocumento = TipoDocumento::orderBy('tipo_documento')->get();
         $parentescos = Parentesco::orderBy('id_parentesco')->get();
+        $empresa = $this->empresaDelAdmin();
         $seccionActiva = 'afiliaciones';
 
         // Catálogos para los campos adicionales (extraídos de la base de datos)
@@ -60,18 +63,21 @@ class AfiliacionController extends Controller
         return view('admin.afiliaciones.afiliacion.create', compact(
             'beneficiarios', 'cotizantes', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones',
+            'empresa', 'seccionActiva'
         ));
     }
 
     public function store(Request $request)
     {
+        // Empresa (IPS) del administrador: ya está registrada con su NIT.
+        $empresa = $this->empresaDelAdmin();
+
         $request->validate([
             'fecha_afiliacion'   => 'required|date',
             'id_tipo_afiliacion' => 'required|exists:regimen,id_regimen',
             'cc_usuario'         => 'required|exists:usuarios,cedula',
-            'id_estado'          => 'required|exists:estado,id_estado',
-            'origen_beneficiario'=> 'required|in:existente,nuevo',
+            'origen_beneficiario'=> 'required|in:sin,nuevo',
 
             // Campos adicionales de afiliación (datos del afiliado en este registro)
             'id_tipo_documento'  => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
@@ -97,7 +103,6 @@ class AfiliacionController extends Controller
             'fecha_afiliacion.date'       => 'La fecha de afiliación no es válida.',
             'id_tipo_afiliacion.required' => 'Selecciona el tipo de afiliación.',
             'cc_usuario.required'         => 'Selecciona el cotizante titular.',
-            'id_estado.required'          => 'Selecciona el estado.',
             'id_tipo_documento.exists'    => 'El tipo de documento no es válido.',
             'genero.in'                   => 'El género no es válido.',
             'zona_residencia.in'          => 'La zona de residencia no es válida.',
@@ -109,11 +114,9 @@ class AfiliacionController extends Controller
             'ocupacion_otra.required_if'    => 'Si seleccionó "Otro" en ocupación, escriba la ocupación.',
         ]);
 
-        // Ruta "beneficiario ya registrado"
-        if ($request->origen_beneficiario === 'existente') {
-            $request->validate([
-                'cc_afiliado' => 'required|exists:beneficiarios,cc_afiliado',
-            ]);
+        // Ruta "sin beneficiario": solo se afilia al cotizante (titular).
+        if ($request->origen_beneficiario === 'sin') {
+            $this->asegurarFichaCotizante((int) $request->cc_usuario);
         } else {
             // Ruta "nuevo beneficiario": se crea desde aquí, dentro de la afiliación.
             $request->validate([
@@ -168,8 +171,9 @@ class AfiliacionController extends Controller
         DB::beginTransaction();
 
         try {
-            $ccAfiliado = $request->origen_beneficiario === 'existente'
-                ? (int) $request->cc_afiliado
+            // Sin beneficiario: la persona afiliada es el propio cotizante.
+            $ccAfiliado = $request->origen_beneficiario === 'sin'
+                ? (int) $request->cc_usuario
                 : (int) $request->nuevo_cc_afiliado;
 
             // Si se afilia a una persona nueva, se crea el beneficiario + su cuenta.
@@ -205,6 +209,9 @@ class AfiliacionController extends Controller
                     'foto'                  => $rutaFoto,
                     'contrasena'            => bcrypt(str()->random(40)),
                     'tipo_usuario_id'       => 2,
+                    // Los pacientes que se crean desde el módulo de Afiliación
+                    // son BENEFICIARIOS (dependen de un cotizante).
+                    'id_sub_tipo_paciente'  => SubTipoPaciente::idPorNombre('Beneficiario'),
                     'activo'                => true,
                     'debe_crear_contrasena' => true,
                 ]);
@@ -220,8 +227,15 @@ class AfiliacionController extends Controller
                 'fecha_afiliacion'   => $request->fecha_afiliacion,
                 'id_tipo_afiliacion' => $request->id_tipo_afiliacion,
                 'cc_usuario'         => $request->cc_usuario,
-                'id_estado'          => $request->id_estado,
+                // Toda afiliación nace Activa. El estado se cambia después
+                // desde el panel de Afiliaciones (Activar / Desactivar).
+                'id_estado'          => $this->estadoActivoId(),
                 'cc_afiliado'        => $ccAfiliado,
+
+                // La empresa (IPS) del administrador ya está registrada con su
+                // NIT, así que no se pide: se toma de su licencia.
+                'nit_empresa'        => $empresa['nit'],
+                'nombre_empresa'     => $empresa['nombre'],
 
                 // Campos adicionales de afiliación
                 'id_tipo_documento'  => $request->id_tipo_documento,
@@ -281,6 +295,7 @@ class AfiliacionController extends Controller
         $tipos = TipoAfiliacion::all();
         $tiposDocumento = TipoDocumento::orderBy('tipo_documento')->get();
         $parentescos = Parentesco::orderBy('id_parentesco')->get();
+        $empresa = $this->empresaDelAdmin();
         $seccionActiva = 'afiliaciones';
 
         // Catálogos para los campos adicionales (extraídos de la base de datos)
@@ -297,7 +312,8 @@ class AfiliacionController extends Controller
         return view('admin.afiliaciones.afiliacion.edit', compact(
             'afiliacion', 'beneficiarios', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones',
+            'empresa', 'seccionActiva'
         ));
     }
 
@@ -349,123 +365,60 @@ class AfiliacionController extends Controller
     {
         $afiliacion = Afiliacion::findOrFail($id);
 
+        // Aquí solo se editan los datos de la afiliación. Los datos del
+        // usuario, del beneficiario y los datos personales del afiliado se
+        // editan en sus propios módulos.
         $datos = $request->validate([
             'fecha_afiliacion'   => 'required|date',
             'id_tipo_afiliacion' => 'required|exists:regimen,id_regimen',
             'cc_usuario'         => 'required|exists:usuarios,cedula',
-            'id_estado'          => 'required|exists:estado,id_estado',
-            'cc_afiliado'        => 'required|exists:beneficiarios,cc_afiliado',
-
-            // Datos del cotizante (titular de la afiliación)
-            'nombres_cotizante'  => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
-            'apellidos_cotizante'=> ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
-            'correo_cotizante'   => ['required', 'email', 'max:100', 'unique:usuarios,correo,' . $afiliacion->cc_usuario . ',cedula'],
-            'telefono_cotizante' => ['required', 'string', 'max:20', 'regex:/^[+()\d\s\-]{7,20}$/'],
-
-            // Campos adicionales de afiliación
-            'id_tipo_documento'  => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
-            'pais_expedicion'    => ['nullable', 'string', 'max:100'],
-            'genero'             => ['nullable', 'string', 'max:20', 'in:Masculino,Femenino,Otro'],
-            'estado_civil'       => ['nullable', 'string', 'max:50'],
-            'grupo_etnico'       => ['nullable', 'string', 'max:50'],
-            'tiene_discapacidad' => ['nullable', 'boolean'],
-            'tipo_discapacidad'  => ['nullable', 'string', 'max:100', 'required_if:tiene_discapacidad,1'],
-            'nacionalidad'       => ['nullable', 'string', 'max:100'],
-            'pais_nacimiento'    => ['nullable', 'string', 'max:100'],
-            'zona_residencia'    => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
-            'telefono_fijo'      => ['nullable', 'string', 'max:20'],
-            'estrato'            => ['nullable', 'integer', 'min:1', 'max:6'],
-            'nivel_educativo'    => ['nullable', 'string', 'max:50'],
-            'ocupacion'          => ['nullable', 'string', 'max:100'],
-            'ocupacion_otra'     => ['nullable', 'string', 'max:100', 'required_if:ocupacion,Otro'],
-            'tipo_sangre'        => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
-            'victima_conflicto_armado' => ['nullable', 'boolean'],
-            'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
+            'cc_afiliado'        => 'nullable|exists:beneficiarios,cc_afiliado',
         ], [
             'fecha_afiliacion.required'   => 'La fecha de afiliación es obligatoria.',
             'fecha_afiliacion.date'       => 'La fecha de afiliación no es válida.',
             'id_tipo_afiliacion.required' => 'Selecciona el tipo de afiliación.',
             'cc_usuario.required'         => 'Selecciona el cotizante titular.',
-            'id_estado.required'          => 'Selecciona el estado.',
-            'cc_afiliado.required'        => 'Selecciona el beneficiario.',
-            'nombres_cotizante.required'  => 'Los nombres del cotizante son obligatorios.',
-            'apellidos_cotizante.required'=> 'Los apellidos del cotizante son obligatorios.',
-            'correo_cotizante.required'   => 'El correo del cotizante es obligatorio.',
-            'correo_cotizante.email'      => 'El correo del cotizante no es válido.',
-            'correo_cotizante.unique'     => 'Ese correo ya está registrado para otro usuario.',
-            'telefono_cotizante.required' => 'El teléfono del cotizante es obligatorio.',
-            'id_tipo_documento.exists'    => 'El tipo de documento no es válido.',
-            'genero.in'                   => 'El género no es válido.',
-            'zona_residencia.in'          => 'La zona de residencia no es válida.',
-            'estrato.integer'             => 'El estrato debe ser un número del 1 al 6.',
-            'estrato.min'                 => 'El estrato debe ser entre 1 y 6.',
-            'estrato.max'                 => 'El estrato debe ser entre 1 y 6.',
-            'tipo_sangre.in'              => 'El tipo de sangre no es válido.',
-            'tipo_discapacidad.required_if' => 'Si tiene discapacidad, indica el tipo.',
-            'ocupacion_otra.required_if'    => 'Si seleccionó "Otro" en ocupación, escriba la ocupación.',
         ]);
 
-        $derivados = $this->datosDelBeneficiario($datos['cc_afiliado'], $datos['cc_usuario']);
+        // Sin beneficiario: la persona afiliada es el propio cotizante.
+        $ccAfiliado = $datos['cc_afiliado'] ?: (int) $datos['cc_usuario'];
+
+        if (empty($datos['cc_afiliado'])) {
+            $this->asegurarFichaCotizante((int) $datos['cc_usuario']);
+        }
+
+        $derivados = $this->datosDelBeneficiario($ccAfiliado, $datos['cc_usuario']);
         if (is_string($derivados)) {
             return back()->withErrors(['cc_afiliado' => $derivados])->withInput();
         }
 
-        DB::transaction(function () use ($afiliacion, $datos, $derivados) {
-            // Actualiza la afiliación (incluyendo campos adicionales)
-            $afiliacion->update(array_merge($datos, $derivados, [
-                'id_tipo_documento'  => $datos['id_tipo_documento'],
-                'pais_expedicion'    => $datos['pais_expedicion'],
-                'genero'             => $datos['genero'],
-                'estado_civil'       => $datos['estado_civil'],
-                'grupo_etnico'       => $datos['grupo_etnico'],
-                'tiene_discapacidad' => $request->boolean('tiene_discapacidad'),
-                'tipo_discapacidad'  => $datos['tipo_discapacidad'],
-                'nacionalidad'       => $datos['nacionalidad'],
-                'pais_nacimiento'    => $datos['pais_nacimiento'],
-                'zona_residencia'    => $datos['zona_residencia'],
-                'telefono_fijo'      => $datos['telefono_fijo'],
-                'estrato'            => $datos['estrato'],
-                'nivel_educativo'    => $datos['nivel_educativo'],
-                'ocupacion'          => $datos['ocupacion'] === 'Otro' ? $request->ocupacion_otra : $datos['ocupacion'],
-                'tipo_sangre'        => $datos['tipo_sangre'],
-                'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
-                'numero_afiliacion_anterior' => $datos['numero_afiliacion_anterior'],
-            ]));
+        $datos['cc_afiliado'] = $ccAfiliado;
 
-            // Actualiza los datos del cotizante (usuario titular)
-            $usuario = Usuario::where('cedula', $datos['cc_usuario'])->first();
-            if ($usuario) {
-                $usuario->update([
-                    'nombres'   => $datos['nombres_cotizante'],
-                    'apellidos' => $datos['apellidos_cotizante'],
-                    'correo'    => $datos['correo_cotizante'],
-                    'telefono'  => $datos['telefono_cotizante'],
-                ]);
-            }
+        DB::transaction(function () use ($afiliacion, $datos, $derivados) {
+            $afiliacion->update(array_merge($datos, $derivados));
         });
 
         return redirect()->route('afiliaciones.index')->with('exito', 'Afiliación actualizada correctamente.');
     }
-
-    // Alterna entre Activo (1) e Inactivo (2)
+    // Alterna entre Activo (1) e Inactivo (2).
+    // Solo cambia ESTA afiliación: ni los usuarios ni los demás
+    // beneficiarios del núcleo se desactivan.
     public function cambiarEstado($id)
     {
         $afiliacion = Afiliacion::findOrFail($id);
-        $nuevoEstado = $afiliacion->id_estado == 1 ? 2 : 1;
+        $activo = $this->estadoActivoId();
+        $nuevoEstado = $afiliacion->id_estado == $activo
+            ? $this->estadoId('Inactivo', 2)
+            : $activo;
 
-        // Si se desactiva/activa a un cotizante (titular), el cambio se aplica
-        // a todo su núcleo familiar (todas las afiliaciones con el mismo usuario).
-        if ((string) $afiliacion->cc_afiliado === (string) $afiliacion->cc_usuario) {
-            Afiliacion::where('cc_usuario', $afiliacion->cc_usuario)
-                ->update(['id_estado' => $nuevoEstado]);
-        } else {
-            $afiliacion->id_estado = $nuevoEstado;
-            $afiliacion->save();
-        }
+        $afiliacion->id_estado = $nuevoEstado;
+        $afiliacion->save();
 
-        $mensaje = $nuevoEstado == 1 ? 'Afiliación activada correctamente.' : 'Afiliación desactivada correctamente.';
+        $mensaje = $nuevoEstado == $activo ? 'Afiliación activada correctamente.' : 'Afiliación desactivada correctamente.';
 
-        return redirect()->route('afiliaciones.index')->with('exito', $mensaje);
+        // Se vuelve a la página desde la que se accionó (listado o detalle
+        // del núcleo), para no perder el contexto de la persona cambiada.
+        return back()->with('exito', $mensaje);
     }
 
     /**
@@ -484,14 +437,96 @@ class AfiliacionController extends Controller
             return 'Esa persona no es beneficiaria del usuario seleccionado.';
         }
 
-        if (!$persona->nit_eps) {
-            return 'Esta persona no tiene EPS asignada. Registra primero la EPS del cotizante.';
-        }
-
         return [
             'parentesco' => $persona->esCotizante() ? 'Titular' : ($persona->parentesco ?: 'Sin dato'),
+            // La EPS es la de la persona. Si no tiene EPS asignada, la afiliación
+            // queda con el NIT de la empresa que la registra.
             'nit_eps'    => $persona->nit_eps,
         ];
+    }
+
+    /**
+     * Id de un estado del catálogo de estados de afiliación.
+     */
+    private function estadoId(string $nombre, int $porDefecto = 1): int
+    {
+        $id = Estado::where('estado', $nombre)->value('id_estado');
+
+        return $id ? (int) $id : $porDefecto;
+    }
+
+    /**
+     * Id del estado "Activo" del catálogo de estados de afiliación.
+     * Toda afiliación se crea activa.
+     */
+    private function estadoActivoId(): int
+    {
+        return $this->estadoId('Activo');
+    }
+
+    /**
+     * Datos de la empresa (IPS) del administrador que está en el panel.
+     * La empresa ya quedó registrada con su NIT al comprar el plan, así que
+     * no hay que escribirla en el formulario de afiliación.
+     */
+    private function empresaDelAdmin(): array
+    {
+        $cedula = $_SESSION['usuario_cedula'] ?? null;
+
+        if ($cedula) {
+            $licencia = \App\Models\Usuario::find($cedula)?->licencia;
+
+            if ($licencia && $licencia->nit) {
+                return [
+                    'nit'    => $licencia->nit,
+                    'nombre' => $licencia->nombre_ips,
+                ];
+            }
+
+            $empresa = Empresa::where('usuario_cedula', $cedula)->orderByDesc('id')->first();
+
+            if ($empresa) {
+                return [
+                    'nit'    => $empresa->nit,
+                    'nombre' => $empresa->nombre,
+                ];
+            }
+        }
+
+        return ['nit' => null, 'nombre' => null];
+    }
+
+    /**
+     * El usuario que se afilia sin beneficiario es el cotizante (titular).
+     * Si todavía no tiene ficha en "beneficiarios", se le crea una para que
+     * la afiliación pueda registrarse.
+     */
+    private function asegurarFichaCotizante(int $ccUsuario): void
+    {
+        if (Beneficiario::find($ccUsuario)) {
+            return;
+        }
+
+        $usuario = \App\Models\Usuario::find($ccUsuario);
+
+        if (! $usuario) {
+            return;
+        }
+
+        Beneficiario::create([
+            'cc_afiliado'  => $ccUsuario,
+            'tipo_persona' => 'cotizante',
+            'cc_cotizante' => null,
+            'parentesco'   => null,
+            'nit_eps'      => null,
+            'nombres'      => $usuario->nombres,
+            'apellidos'    => $usuario->apellidos,
+            'edad'         => $usuario->edad,
+            'telefono'     => $usuario->telefono,
+            'direccion'    => '',
+            'correo'       => $usuario->correo,
+            'fecha_nacimiento' => null,
+        ]);
     }
 
     /**

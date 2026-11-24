@@ -7,6 +7,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PanelUsuarioController;
 use App\Http\Controllers\UsuarioCitaController;
 use App\Http\Controllers\RecuperarPasswordController;
+use App\Http\Controllers\CompraController;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\SuperAdminLoginController;
+use App\Http\Controllers\SuperAdminRecuperarController;
+use App\Models\Plan;
 use App\Http\Controllers\Admin\DepartamentoController;
 use App\Http\Controllers\Admin\CiudadController;
 use App\Http\Controllers\Admin\SedeController;
@@ -24,6 +29,8 @@ use App\Http\Controllers\Admin\CitaMedicaController;
 use App\Http\Controllers\Admin\HistoriaClinicaController;
 use App\Http\Controllers\Admin\MedicamentoController;
 use App\Http\Controllers\Admin\ApiMedicamentoController;
+use App\Http\Controllers\Admin\ProcedimientoController as AdminProcedimientoController;
+use App\Http\Controllers\Admin\TipoProcedimientoController as AdminTipoProcedimientoController;
 use App\Http\Controllers\Medico\PanelMedicoController;
 use App\Http\Controllers\Medico\HorarioMedicoController as MedicoHorarioController;
 use App\Http\Controllers\Medico\PerfilController;
@@ -34,11 +41,6 @@ use App\Http\Controllers\Farmacia\FarmaciaController;
 use App\Http\Controllers\Admin\AfiliacionController;
 use App\Http\Controllers\Admin\BeneficiarioController;
 use App\Http\Controllers\Admin\EstadoController;
-use App\Http\Controllers\SuperAdminController;
-use App\Http\Controllers\SuperAdminLoginController;
-use App\Http\Controllers\SuperAdminRecuperarController;
-use App\Http\Controllers\CompraController;
-use App\Models\Plan;
 use App\Http\Controllers\PrimerIngresoController;
 
 Route::get('/', function () {
@@ -50,6 +52,10 @@ Route::view('/nosotros', 'nosotros')->name('nosotros');
 
 // Catalogo de servicios (publico)
 Route::view('/servicios', 'servicios')->name('servicios.index');
+
+// Marco legal (publico)
+Route::view('/terminos-y-condiciones', 'terminos_condiciones')->name('terminos.index');
+Route::view('/politica-de-privacidad', 'politica_privacidad')->name('privacidad.index');
 
 // Blog (publico)
 Route::view('/blog', 'blog')->name('blog.index');
@@ -76,16 +82,11 @@ Route::get('/planes/{plan}', function (string $plan) {
     ]);
 })->where('plan', '[a-z0-9-]+')->name('planes.detalle');
 
-// Compra de un plan (publico): formulario + procesamiento.
-// throttle:5,1 -> maximo 5 intentos por minuto, para evitar spam de licencias falsas.
+// Compra de un plan (publico): formulario + procesamiento
 Route::middleware('throttle:20,1')->group(function () {
     Route::get('/comprar/{plan}', [CompraController::class, 'mostrarFormulario'])->where('plan', '[a-z0-9-]+')->name('comprar.form');
     Route::post('/comprar/{plan}', [CompraController::class, 'procesar'])->where('plan', '[a-z0-9-]+')->name('comprar.procesar');
 });
-
-// Marco legal (publico)
-Route::view('/terminos-y-condiciones', 'terminos_condiciones')->name('terminos.index');
-Route::view('/politica-de-privacidad', 'politica_privacidad')->name('privacidad.index');
 
 // Todo lo que hace el Administrador va bajo /admin/...
 Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->group(function () {
@@ -99,8 +100,11 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
     // Mensaje de pago aceptado: accesible aunque la licencia siga inactiva
     Route::view('/pago-aceptado', 'admin.pago-aceptado')->name('admin.pago_aceptado');
 
-    // Ver planes disponibles sin salir del panel: http://127.0.0.1:8000/admin/planes
+    // Planes disponibles dentro del panel del administrador
     Route::get('/planes', [DashboardController::class, 'planes'])->name('admin.planes');
+
+    // Recordatorios: vista previa de los mensajes automáticos por WhatsApp.
+    Route::view('/recordatorios', 'admin.recordatorios')->name('admin.recordatorios');
 
     // Usuarios: http://127.0.0.1:8000/admin/usuarios
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
@@ -258,6 +262,22 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
     // API de medicamentos de Colombia (Invima - datos.gov.co): /admin/api/medicamentos
     Route::get('/api/medicamentos', [ApiMedicamentoController::class, 'index'])->name('api.medicamentos');
 
+    Route::prefix('procedimientos')->group(function () {
+        Route::get('/', [AdminProcedimientoController::class, 'index'])->name('procedimiento.index');
+        Route::get('/crear', [AdminProcedimientoController::class, 'create'])->name('procedimiento.create');
+        Route::post('/', [AdminProcedimientoController::class, 'store'])->name('procedimiento.store');
+        Route::get('/{id}/editar', [AdminProcedimientoController::class, 'edit'])->name('procedimiento.edit');
+        Route::put('/{id}', [AdminProcedimientoController::class, 'update'])->name('procedimiento.update');
+        Route::patch('/{id}/estado', [AdminProcedimientoController::class, 'cambiarEstado'])->name('procedimiento.estado');
+
+        Route::get('/tipos', [AdminTipoProcedimientoController::class, 'index'])->name('tipo_procedimiento.index');
+        Route::get('/tipos/crear', [AdminTipoProcedimientoController::class, 'create'])->name('tipo_procedimiento.create');
+        Route::post('/tipos', [AdminTipoProcedimientoController::class, 'store'])->name('tipo_procedimiento.store');
+        Route::get('/tipos/{id}/editar', [AdminTipoProcedimientoController::class, 'edit'])->name('tipo_procedimiento.edit');
+        Route::put('/tipos/{id}', [AdminTipoProcedimientoController::class, 'update'])->name('tipo_procedimiento.update');
+        Route::patch('/tipos/{id}/estado', [AdminTipoProcedimientoController::class, 'cambiarEstado'])->name('tipo_procedimiento.estado');
+    });
+
     // Afiliaciones: http://127.0.0.1:8000/admin/afiliaciones/...
     Route::prefix('afiliaciones')->group(function () {
 
@@ -325,6 +345,15 @@ Route::prefix('usuario')->middleware('esusuario')->group(function () {
     Route::get('/afiliacion', [PanelUsuarioController::class, 'miAfiliacion'])->name('usuario.afiliacion.index');
     Route::get('/perfil', [PanelUsuarioController::class, 'miPerfil'])->name('usuario.perfil');
 });
+
+// Rutas de recuperación de contraseña (públicas).
+// Son tres pasos separados: 1) correo -> 2) código -> 3) nueva contraseña.
+Route::get('/recuperar', [RecuperarPasswordController::class, 'mostrarFormularioSolicitud'])->name('recuperar.solicitar.form');
+Route::post('/recuperar', [RecuperarPasswordController::class, 'enviarCodigo'])->name('recuperar.solicitar');
+Route::get('/verificar-codigo', [RecuperarPasswordController::class, 'mostrarFormularioVerificar'])->name('recuperar.verificar.form');
+Route::post('/verificar-codigo', [RecuperarPasswordController::class, 'verificarCodigo'])->name('recuperar.verificar');
+Route::get('/nueva-contrasena', [RecuperarPasswordController::class, 'mostrarFormularioNuevaContrasena'])->name('recuperar.nueva.form');
+Route::post('/nueva-contrasena', [RecuperarPasswordController::class, 'guardarNuevaContrasena'])->name('recuperar.nueva');
 
 // Panel del Médico. Su cuenta vive en la tabla "medico" (cédula +
 // contraseña propia), por eso tiene su propio espacio /medico.
@@ -409,21 +438,10 @@ Route::prefix('super-admin')->group(function () {
     Route::post('/recuperar/nueva', [SuperAdminRecuperarController::class, 'guardarContrasena'])->middleware('throttle:20,1')->name('superadmin.recuperar.nueva.guardar');
 });
 
-// Panel del Superadministrador: http://127.0.0.1:8000/super-admin
+// Panel del Superadministrador
 Route::prefix('super-admin')->middleware('essuperadmin')->group(function () {
     Route::get('/', [SuperAdminController::class, 'index'])->name('superadmin.dashboard');
 });
 
-// Empresas y Administradores del Superadmin (están en routes/superadmin.php)
+// Empresas, administradores, planes y pagos del Superadministrador
 require __DIR__.'/superadmin.php';
-
-// Rutas de recuperación de contraseña (públicas).
-// Son tres pasos separados: 1) correo -> 2) código -> 3) nueva contraseña.
-Route::get('/recuperar', [RecuperarPasswordController::class, 'mostrarFormularioSolicitud'])->name('recuperar.solicitar.form');
-Route::post('/recuperar', [RecuperarPasswordController::class, 'enviarCodigo'])->name('recuperar.solicitar');
-
-Route::get('/verificar-codigo', [RecuperarPasswordController::class, 'mostrarFormularioVerificar'])->name('recuperar.verificar.form');
-Route::post('/verificar-codigo', [RecuperarPasswordController::class, 'verificarCodigo'])->name('recuperar.verificar');
-
-Route::get('/nueva-contrasena', [RecuperarPasswordController::class, 'mostrarFormularioNuevaContrasena'])->name('recuperar.nueva.form');
-Route::post('/nueva-contrasena', [RecuperarPasswordController::class, 'guardarNuevaContrasena'])->name('recuperar.nueva');

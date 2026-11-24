@@ -141,7 +141,7 @@ class PanelUsuarioController extends Controller
      */
     public function miPerfil()
     {
-        $usuario = Usuario::with(['tipoDocumento', 'ciudad', 'tipoUsuario'])->find($this->cedulaUsuario());
+        $usuario = Usuario::with(['tipoDocumento', 'ciudad', 'tipoUsuario', 'subTipoPaciente'])->find($this->cedulaUsuario());
 
         return view('usuario.perfil', compact('usuario'))->with('seccionActiva', 'perfil');
     }

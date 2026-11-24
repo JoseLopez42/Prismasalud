@@ -11,7 +11,8 @@ class Afiliacion extends Model
 
     protected $fillable = [
         'fecha_afiliacion', 'parentesco', 'id_tipo_afiliacion',
-        'nit_eps', 'cc_usuario', 'id_estado', 'cc_afiliado',
+        'nit_eps', 'nit_empresa', 'nombre_empresa',
+        'cc_usuario', 'id_estado', 'cc_afiliado',
 
         // Identificación
         'id_tipo_documento', 'pais_expedicion',

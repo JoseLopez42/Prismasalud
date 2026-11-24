@@ -61,6 +61,7 @@
                     <th class="px-4 py-3">Fecha</th>
                     <th class="px-4 py-3">Régimen</th>
                     <th class="px-4 py-3">EPS</th>
+                    <th class="px-4 py-3">Empresa</th>
                     <th class="px-4 py-3">Estado</th>
                     <th class="px-4 py-3 text-right">Acciones</th>
                 </tr>
@@ -86,7 +87,13 @@
                         <td class="px-4 py-3 text-gray-600">{{ $esTitular ? 'Titular' : $afiliacion->parentesco }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $afiliacion->fecha_afiliacion }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $afiliacion->tipoAfiliacion?->nombre_regimen }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $afiliacion->eps?->nombre_eps }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $afiliacion->eps?->nombre_eps ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-600">
+                            {{ $afiliacion->nombre_empresa ?? '—' }}
+                            @if ($afiliacion->nit_empresa)
+                                <span class="block text-xs text-gray-400">NIT {{ $afiliacion->nit_empresa }}</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3">
                             @if ($afiliacion->id_estado == 1)
                                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">

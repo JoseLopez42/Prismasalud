@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Medico;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin\CatalogoProcedimiento;
 use App\Models\Admin\DetalleProcedimiento;
 use App\Models\Admin\Procedimiento;
 use App\Models\Admin\TipoProcedimiento;
@@ -40,13 +41,18 @@ class ProcedimientoController extends Controller
             }
         }
 
-        // Catálogo de tipos de procedimiento (compartido)
+        // Catálogo de tipos y de procedimientos (compartido, desde la BD)
         $tipos = TipoProcedimiento::orderBy('nombre')->get();
+
+        $catalogo = CatalogoProcedimiento::with('tipoProcedimiento')
+            ->where('activo', true)
+            ->orderBy('nombre')
+            ->get();
 
         $seccionActiva = 'procedimientos';
 
         return view('medico.procedimiento.index', compact(
-            'cedulaBuscada', 'paciente', 'procedimientos', 'detalles', 'tipos', 'idCita', 'seccionActiva'
+            'cedulaBuscada', 'paciente', 'procedimientos', 'detalles', 'tipos', 'catalogo', 'idCita', 'seccionActiva'
         ));
     }
 
@@ -58,7 +64,7 @@ class ProcedimientoController extends Controller
             'id_cita'               => 'nullable|exists:cita,id',
             'id_tipo_procedimiento' => 'nullable|exists:tipo_procedimiento,id',
             'fecha'                 => 'required|date',
-            'descripcion'           => 'required|string|max:255',
+            'descripcion'           => 'required|string|max:255|exists:catalogo_procedimiento,nombre',
             'observaciones'         => 'nullable|string',
         ]);
 

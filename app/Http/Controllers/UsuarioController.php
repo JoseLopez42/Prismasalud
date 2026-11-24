@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use App\Models\TipoUsuario;
+use App\Models\SubTipoPaciente;
 use App\Models\Admin\Ciudad;
 use App\Models\Admin\TipoDocumento;
 use App\Models\Admin\Beneficiario;
@@ -18,6 +19,7 @@ use App\Models\Admin\Ocupacion;
 use App\Models\Admin\TipoSangre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
 {
@@ -26,7 +28,7 @@ class UsuarioController extends Controller
     // Lista todos los usuarios
     public function index()
     {
-        $usuarios = Usuario::with('tipoUsuario')->get();
+        $usuarios = Usuario::with(['tipoUsuario', 'subTipoPaciente'])->get();
         $seccionActiva = 'usuarios';
         return view('admin.usuarios.index', compact('usuarios', 'seccionActiva'));
     }
@@ -34,7 +36,8 @@ class UsuarioController extends Controller
     // Formulario para crear un nuevo usuario
     public function create()
     {
-        $tiposUsuario = TipoUsuario::all();
+        // Solo se muestran los roles administrables (Administrador y Paciente)
+        $tiposUsuario = TipoUsuario::asignables()->orderBy('id')->get();
         $ciudades = Ciudad::all();
         $tiposDocumento = TipoDocumento::all();
 
@@ -60,6 +63,9 @@ class UsuarioController extends Controller
     // Guarda el nuevo usuario
     public function store(Request $request)
     {
+        // Roles permitidos en este formulario (Administrador y Paciente)
+        $rolesPermitidos = TipoUsuario::asignables()->pluck('id')->all();
+
         $datos = $request->validate([
             'cedula'            => 'required|integer|unique:usuarios,cedula',
             'nombres'           => 'required|string|max:100',
@@ -68,7 +74,7 @@ class UsuarioController extends Controller
             'telefono'          => 'nullable|string|max:20',
             'correo'            => 'required|email|unique:usuarios,correo',
             'contrasena'        => 'required|string|min:6',
-            'tipo_usuario_id'   => 'required|exists:tipos_usuario,id',
+            'tipo_usuario_id'   => ['required', 'exists:tipos_usuario,id', Rule::in($rolesPermitidos)],
             'id_ciudad'         => 'nullable|exists:ciudades,id_ciudad',
             'id_tipo_documento' => 'nullable|exists:tipo_documento,id_tipo_documento',
             'foto'              => 'nullable|image|max:2048', // máx 2MB
@@ -77,6 +83,13 @@ class UsuarioController extends Controller
         // Si el rol es Paciente (id=2), validamos también los campos adicionales de paciente
         $tipoUsuario = TipoUsuario::find($request->tipo_usuario_id);
         $esPaciente = $tipoUsuario && strtolower($tipoUsuario->nombre) === 'paciente';
+
+        // Los pacientes que se crean desde el módulo de Usuarios son COTIZANTES
+        // (titulares de la afiliación). Los BENEFICIARIOS se crean desde el
+        // módulo de Afiliación.
+        $datos['id_sub_tipo_paciente'] = $esPaciente
+            ? SubTipoPaciente::idPorNombre('Cotizante')
+            : null;
 
         $datosPaciente = null;
         if ($esPaciente) {
@@ -117,10 +130,11 @@ class UsuarioController extends Controller
 
             // Si es Paciente, creamos su beneficiario (como cotizante titular)
             // con los datos adicionales del paciente. NO se crea afiliación.
-            if ($esPaciente && $datosPaciente) {
-                $ocupacionFinal = $datosPaciente['ocupacion'] === 'Otro'
+            if ($esPaciente) {
+                $ocupacion = $datosPaciente['ocupacion'] ?? null;
+                $ocupacionFinal = $ocupacion === 'Otro'
                     ? ($datosPaciente['ocupacion_otra'] ?? null)
-                    : $datosPaciente['ocupacion'];
+                    : $ocupacion;
 
                 Beneficiario::create([
                     'cc_afiliado'      => $datos['cedula'],
@@ -130,30 +144,32 @@ class UsuarioController extends Controller
                     'nit_eps'          => null,
                     'nombres'          => $datos['nombres'],
                     'apellidos'        => $datos['apellidos'],
-                    'edad'             => $datos['edad'],
-                    'telefono'         => $datos['telefono'],
-                    'direccion'        => '',
+                    'edad'             => $datos['edad'] ?? null,
+                    'telefono'         => $datos['telefono'] ?? null,
+                    'direccion'        => $datos['direccion'] ?? '',
                     'correo'           => $datos['correo'],
                     'fecha_nacimiento' => null,
 
-                    // Campos adicionales del paciente (requieren migración en tabla beneficiarios)
-                    'id_tipo_documento'   => $datosPaciente['id_tipo_documento'],
-                    'pais_expedicion'     => $datosPaciente['pais_expedicion'],
-                    'genero'              => $datosPaciente['genero'],
-                    'estado_civil'        => $datosPaciente['estado_civil'],
-                    'grupo_etnico'        => $datosPaciente['grupo_etnico'],
+                    // Campos adicionales del paciente (requieren migración en tabla beneficiarios).
+                    // Se usa "?? null" porque el formulario deshabilita (y por tanto no
+                    // envía) algunos campos, como el tipo de discapacidad.
+                    'id_tipo_documento'   => $datos['id_tipo_documento'] ?? null,
+                    'pais_expedicion'     => $datosPaciente['pais_expedicion'] ?? null,
+                    'genero'              => $datosPaciente['genero'] ?? null,
+                    'estado_civil'        => $datosPaciente['estado_civil'] ?? null,
+                    'grupo_etnico'        => $datosPaciente['grupo_etnico'] ?? null,
                     'tiene_discapacidad'  => $request->boolean('tiene_discapacidad'),
-                    'tipo_discapacidad'   => $datosPaciente['tipo_discapacidad'],
-                    'nacionalidad'        => $datosPaciente['nacionalidad'],
-                    'pais_nacimiento'     => $datosPaciente['pais_nacimiento'],
-                    'zona_residencia'     => $datosPaciente['zona_residencia'],
-                    'telefono_fijo'       => $datosPaciente['telefono_fijo'],
-                    'estrato'             => $datosPaciente['estrato'],
-                    'nivel_educativo'     => $datosPaciente['nivel_educativo'],
+                    'tipo_discapacidad'   => $datosPaciente['tipo_discapacidad'] ?? null,
+                    'nacionalidad'        => $datosPaciente['nacionalidad'] ?? null,
+                    'pais_nacimiento'     => $datosPaciente['pais_nacimiento'] ?? null,
+                    'zona_residencia'     => $datosPaciente['zona_residencia'] ?? null,
+                    'telefono_fijo'       => $datosPaciente['telefono_fijo'] ?? null,
+                    'estrato'             => $datosPaciente['estrato'] ?? null,
+                    'nivel_educativo'     => $datosPaciente['nivel_educativo'] ?? null,
                     'ocupacion'           => $ocupacionFinal,
-                    'tipo_sangre'         => $datosPaciente['tipo_sangre'],
+                    'tipo_sangre'         => $datosPaciente['tipo_sangre'] ?? null,
                     'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
-                    'numero_afiliacion_anterior' => $datosPaciente['numero_afiliacion_anterior'],
+                    'numero_afiliacion_anterior' => $datosPaciente['numero_afiliacion_anterior'] ?? null,
                 ]);
             }
         });
@@ -165,7 +181,8 @@ class UsuarioController extends Controller
     public function edit($cedula)
     {
         $usuario = Usuario::findOrFail($cedula);
-        $tiposUsuario = TipoUsuario::all();
+        // Solo se muestran los roles administrables (Administrador y Paciente)
+        $tiposUsuario = TipoUsuario::asignables()->orderBy('id')->get();
         $ciudades = Ciudad::all();
         $tiposDocumento = TipoDocumento::all();
         $seccionActiva = 'usuarios';
@@ -178,6 +195,9 @@ class UsuarioController extends Controller
     {
         $usuario = Usuario::findOrFail($cedula);
 
+        // Roles permitidos en este formulario (Administrador y Paciente)
+        $rolesPermitidos = TipoUsuario::asignables()->pluck('id')->all();
+
         $datos = $request->validate([
             'nombres'           => 'required|string|max:100',
             'apellidos'         => 'required|string|max:100',
@@ -185,7 +205,7 @@ class UsuarioController extends Controller
             'telefono'          => 'nullable|string|max:20',
             'correo'            => 'required|email|unique:usuarios,correo,' . $cedula . ',cedula',
             'contrasena'        => 'nullable|string|min:6',
-            'tipo_usuario_id'   => 'required|exists:tipos_usuario,id',
+            'tipo_usuario_id'   => ['required', 'exists:tipos_usuario,id', Rule::in($rolesPermitidos)],
             'id_ciudad'         => 'nullable|exists:ciudades,id_ciudad',
             'id_tipo_documento' => 'nullable|exists:tipo_documento,id_tipo_documento',
             'foto'              => 'nullable|image|max:2048',
@@ -199,6 +219,17 @@ class UsuarioController extends Controller
             $datos['contrasena'] = bcrypt($datos['contrasena']);
         } else {
             unset($datos['contrasena']);
+        }
+
+        // El sub tipo de paciente solo aplica a los pacientes. Si el rol
+        // cambia a Paciente y no tenía sub tipo, se asume Cotizante.
+        $tipoUsuario = TipoUsuario::find($datos['tipo_usuario_id']);
+        $esPaciente = $tipoUsuario && strtolower($tipoUsuario->nombre) === 'paciente';
+
+        if (! $esPaciente) {
+            $datos['id_sub_tipo_paciente'] = null;
+        } elseif (! $usuario->id_sub_tipo_paciente) {
+            $datos['id_sub_tipo_paciente'] = SubTipoPaciente::idPorNombre('Cotizante');
         }
 
         $usuario->update($datos);

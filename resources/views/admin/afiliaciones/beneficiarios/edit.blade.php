@@ -1,17 +1,29 @@
 @extends('admin.layout')
 
-@section('titulo', 'Editar beneficiario')
-@section('encabezado', 'Afiliaciones · Editar beneficiario')
+@section('titulo', $beneficiario->esCotizante() ? 'Editar cotizante' : 'Editar beneficiario')
+@section('encabezado', 'Afiliaciones · ' . ($beneficiario->esCotizante() ? 'Editar cotizante' : 'Editar beneficiario'))
 
 @section('contenido')
 
-    <a href="{{ route('beneficiarios.index') }}" class="text-sm text-teal-600 hover:underline">← Volver a beneficiarios</a>
+    @php
+        $esCotizante = $beneficiario->esCotizante();
+        $titulo = $esCotizante ? 'Editar cotizante' : 'Editar beneficiario';
+    @endphp
+
+    <a href="{{ route('beneficiarios.index') }}" class="text-sm text-teal-600 hover:underline">← Volver al listado de afiliados</a>
 
     <div class="max-w-2xl mt-4">
         <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div class="bg-gradient-to-r from-emerald-800 via-teal-700 to-teal-500 px-6 py-6 text-white">
-                <p class="font-bold text-lg leading-tight">Editar beneficiario</p>
-                <p class="text-xs text-white/70">{{ $beneficiario->cc_afiliado }} · {{ $beneficiario->nombres }} {{ $beneficiario->apellidos }}</p>
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="font-bold text-lg leading-tight">{{ $titulo }}</p>
+                        <p class="text-xs text-white/70">{{ $beneficiario->cc_afiliado }} · {{ $beneficiario->nombres }} {{ $beneficiario->apellidos }}</p>
+                    </div>
+                    <span class="shrink-0 inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full border border-white/40 bg-white/15">
+                        {{ $esCotizante ? 'Cotizante (titular)' : 'Beneficiario (familiar)' }}
+                    </span>
+                </div>
             </div>
             <div class="p-6">
                 @if ($errors->any())
@@ -21,6 +33,65 @@
                 <form method="POST" action="{{ route('beneficiarios.update', $beneficiario->cc_afiliado) }}" class="space-y-5" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+
+                    {{-- Datos propios de cada tipo de persona --}}
+                    @if ($esCotizante)
+                        <div class="bg-teal-50 border border-teal-100 rounded-xl p-4 space-y-3">
+                            <p class="text-sm font-semibold text-teal-900">Datos del cotizante</p>
+                            <p class="text-xs text-teal-800">Es el titular de la afiliación: no depende de otro afiliado y no tiene parentesco asignado.</p>
+                            <div>
+                                <label for="nit_eps" class="block text-sm font-medium text-gray-700 mb-1.5">EPS</label>
+                                <select id="nit_eps" name="nit_eps"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <option value="">Sin EPS asignada</option>
+                                    @foreach ($eps as $e)
+                                        <option value="{{ $e->nit_eps }}" {{ old('nit_eps', $beneficiario->nit_eps) == $e->nit_eps ? 'selected' : '' }}>
+                                            {{ $e->nombre_eps }}{{ $e->activo ? '' : ' (inactiva)' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('nit_eps')
+                                    <p class="text-xs text-red-600 mt-1.5">{{ $message }}</p>
+                                @enderror
+                                <p class="text-xs text-gray-500 mt-1.5">Al cambiarla, también se actualizará la EPS de sus beneficiarios.</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3">
+                            <p class="text-sm font-semibold text-indigo-900">Datos del beneficiario</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Familiar de</label>
+                                    <input type="text" disabled
+                                           value="{{ $beneficiario->cotizante?->nombres }} {{ $beneficiario->cotizante?->apellidos }} ({{ $beneficiario->cc_cotizante ?? '—' }})"
+                                           class="w-full border border-gray-200 bg-white/70 text-gray-500 rounded-lg px-3 py-2.5 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">EPS heredada</label>
+                                    <input type="text" disabled
+                                           value="{{ $beneficiario->eps?->nombre_eps ?? 'Sin EPS asignada' }}"
+                                           class="w-full border border-gray-200 bg-white/70 text-gray-500 rounded-lg px-3 py-2.5 text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="parentesco" class="block text-sm font-medium text-gray-700 mb-1.5">Parentesco</label>
+                                <select id="parentesco" name="parentesco"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+                                        required>
+                                    <option value="">Seleccione...</option>
+                                    @foreach ($parentescos as $p)
+                                        <option value="{{ $p->nombre }}" {{ old('parentesco', $beneficiario->parentesco) === $p->nombre ? 'selected' : '' }}>
+                                            {{ $p->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('parentesco')
+                                    <p class="text-xs text-red-600 mt-1.5">{{ $message }}</p>
+                                @enderror
+                                <p class="text-xs text-gray-500 mt-1.5">La EPS se hereda del cotizante; para cambiarla, edita la ficha del cotizante.</p>
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Foto de perfil --}}
                     <div>

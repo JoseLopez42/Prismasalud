@@ -30,7 +30,6 @@ class Usuario extends Model
         'nit_eps',
         'activo',
         'licencia_id',
-        'debe_crear_contrasena',
     ];
 
     protected $hidden = [
@@ -55,7 +54,8 @@ class Usuario extends Model
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 
-    // Licencia (plan comprado) del usuario
+    // Plan/licencia comprada por este administrador (la asigna el superadmin
+    // al activar la licencia; antes de eso se busca por usuario_cedula).
     public function licencia()
     {
         return $this->belongsTo(Licencia::class, 'licencia_id');

@@ -11,6 +11,12 @@
             <div>
                 <h2 class="text-xl font-bold text-gray-900">Cotizante: {{ $principal->usuario?->nombres }} {{ $principal->usuario?->apellidos }}</h2>
                 <p class="text-sm text-gray-500">C.C. {{ $principal->cc_usuario }} · EPS: {{ $principal->eps?->nombre_eps ?? '—' }}</p>
+                <p class="text-sm text-gray-500">
+                    Empresa: {{ $principal->nombre_empresa ?? '—' }}
+                    @if ($principal->nit_empresa)
+                        · NIT {{ $principal->nit_empresa }}
+                    @endif
+                </p>
                 <p class="text-sm text-gray-500">Total de personas afiliadas a este núcleo: {{ $familia->count() }}</p>
             </div>
             <a href="{{ route('afiliaciones.create', ['cc_usuario' => $principal->cc_usuario]) }}"
@@ -31,6 +37,7 @@
                         <th class="px-4 py-3">Régimen</th>
                         <th class="px-4 py-3">EPS</th>
                         <th class="px-4 py-3">Estado</th>
+                        <th class="px-4 py-3 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -51,7 +58,7 @@
                             <td class="px-4 py-3 text-gray-600">{{ $esTitular ? 'Titular' : ($afiliacion->parentesco ?: '—') }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $afiliacion->fecha_afiliacion }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $afiliacion->tipoAfiliacion?->nombre_regimen }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $afiliacion->eps?->nombre_eps }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $afiliacion->eps?->nombre_eps ?? '—' }}</td>
                             <td class="px-4 py-3">
                                 @if ($afiliacion->id_estado == 1)
                                     <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
@@ -63,14 +70,33 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-4 py-3 text-right">
+                                @include('admin.partials.acciones_fila', [
+                                    'rutaEditar' => route('afiliaciones.edit', $afiliacion->id_afiliacion),
+                                    'formId' => 'form-estado-nucleo-' . $afiliacion->id_afiliacion,
+                                    'rutaEstado' => route('afiliaciones.estado', $afiliacion->id_afiliacion),
+                                    'activo' => $afiliacion->id_estado == 1,
+                                    'tituloDesactivar' => '¿Desactivar a esta persona?',
+                                    'textoDesactivar' => 'La persona quedará inactiva en este núcleo familiar.',
+                                    'tituloActivar' => '¿Activar a esta persona?',
+                                    'textoActivar' => 'La persona volverá a estar activa en este núcleo familiar.',
+                                ])
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-12 text-center text-gray-500">No hay personas afiliadas a este núcleo.</td>
+                            <td colspan="9" class="px-4 py-12 text-center text-gray-500">No hay personas afiliadas a este núcleo.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
+    @include('admin.partials.modal_confirmacion')
+
 @endsection
+
+@push('scripts')
+    @include('admin.partials.script_listado')
+@endpush

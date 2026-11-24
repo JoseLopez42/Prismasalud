@@ -139,11 +139,14 @@
                     ['icono' => 'medicos',       'texto' => 'Médicos y Consultorios',  'ruta' => route('medico.index'), 'clave' => 'medicos',        'tablas' => ['medico', 'especialidad', 'consultorio', 'horario_medico']],
                     ['icono' => 'citas',         'texto' => 'Citas Médicas',          'ruta' => route('cita.index'), 'clave' => 'citas',          'tablas' => ['cita', 'tipo_cita', 'estado_cita']],
                     ['icono' => 'historia',      'texto' => 'Historia Clínica',        'ruta' => route('historia.index'), 'clave' => 'historia',       'tablas' => null],
-                    ['icono' => 'procedimientos','texto' => 'Procedimientos',         'ruta' => '#', 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento', 'detalle_procedimiento']],
+                    ['icono' => 'procedimientos','texto' => 'Procedimientos',         'ruta' => route('procedimiento.index'), 'clave' => 'procedimientos', 'tablas' => ['procedimiento', 'tipo_procedimiento']],
                     ['icono' => 'farmacia',      'texto' => 'Farmacia y Medicamentos', 'ruta' => route('medicamento.index'), 'clave' => 'farmacia',       'tablas' => ['medicamentos']],
                     ['icono' => 'reportes',      'texto' => 'Reportes',                'ruta' => '#', 'clave' => 'reportes',       'tablas' => null],
                     ['icono' => 'configuracion', 'texto' => 'Configuración',          'ruta' => '#', 'clave' => 'configuracion',  'tablas' => null],
                     ['icono' => 'api',           'texto' => 'API',                    'ruta' => route('api.medicamentos'), 'clave' => 'api', 'tablas' => null],
+
+                    // Última opción del menú: vista previa de los recordatorios por WhatsApp.
+                    ['icono' => 'mensaje',       'texto' => 'Recordatorios',          'ruta' => route('admin.recordatorios'), 'clave' => 'recordatorios', 'tablas' => null],
                 ];
             @endphp
 
@@ -194,6 +197,8 @@
                                             'especialidad' => route('especialidad.index'),
                                             'consultorio' => route('consultorio.index'),
                                             'horario_medico' => route('horario_medico.index'),
+                                            'procedimiento' => route('procedimiento.index'),
+                                            'tipo_procedimiento' => route('tipo_procedimiento.index'),
                                             'cita' => route('cita.index'),
                                             'tipo_cita' => route('tipo_cita.index'),
                                             'estado_cita' => route('estado_cita.index'),
@@ -234,6 +239,8 @@
                                             'especialidad' => route('especialidad.index'),
                                             'consultorio' => route('consultorio.index'),
                                             'horario_medico' => route('horario_medico.index'),
+                                            'procedimiento' => route('procedimiento.index'),
+                                            'tipo_procedimiento' => route('tipo_procedimiento.index'),
                                             'cita' => route('cita.index'),
                                             'tipo_cita' => route('tipo_cita.index'),
                                             'estado_cita' => route('estado_cita.index'),

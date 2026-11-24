@@ -96,7 +96,7 @@
                         <td class="px-4 py-3 text-gray-600">{{ $usuario->correo }}</td>
                         <td class="px-4 py-3">
                             <span class="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full">
-                                {{ $usuario->tipoUsuario->nombre ?? '—' }}
+                                {{ $usuario->nombre_rol }}
                             </span>
                         </td>
                         <td class="px-4 py-3">

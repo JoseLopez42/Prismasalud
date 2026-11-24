@@ -119,6 +119,10 @@
                                 @endforeach
                             </select>
                         </div>
+                        <p id="info-sub-tipo-paciente" class="text-xs text-gray-400 mt-1 hidden">
+                            Los pacientes creados aquí se registran como <strong>Paciente Cotizante</strong> (titular de la afiliación).
+                            Los <strong>Paciente Beneficiario</strong> se registran desde el módulo de Afiliación.
+                        </p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -210,19 +214,10 @@
                         </div>
 
                         <div class="p-6 space-y-5">
+                        {{-- El "Tipo de documento" ya se pide arriba en el formulario principal,
+                             por eso aquí no se repite (quedaría duplicado). --}}
                         <div class="grid md:grid-cols-2 gap-4 mt-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de documento</label>
-                                    <select name="id_tipo_documento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                                        <option value="">Seleccione...</option>
-                                        @foreach ($tiposDocumento as $td)
-                                            <option value="{{ $td->id_tipo_documento }}" {{ old('id_tipo_documento') == $td->id_tipo_documento ? 'selected' : '' }}>
-                                                {{ $td->tipo_documento }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
+                                <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">País de expedición</label>
                                     <select name="pais_expedicion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
@@ -437,11 +432,18 @@
         const bloquePaciente = document.getElementById('datos-paciente');
 
         if (campoRol && bloquePaciente) {
+            const infoSubTipo = document.getElementById('info-sub-tipo-paciente');
+
             function toggleDatosPaciente() {
                 const rolSeleccionado = campoRol.value;
                 const textoRol = campoRol.options[campoRol.selectedIndex]?.textContent?.trim() || '';
                 const esPaciente = textoRol.toLowerCase() === 'paciente';
                 bloquePaciente.classList.toggle('hidden', !esPaciente);
+
+                // Aviso de que el paciente se guardará como "Paciente Cotizante"
+                if (infoSubTipo) {
+                    infoSubTipo.classList.toggle('hidden', !esPaciente);
+                }
 
                 // Si no es paciente, limpiar y deshabilitar los campos adicionales
                 if (!esPaciente) {

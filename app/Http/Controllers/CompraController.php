@@ -230,6 +230,11 @@ class CompraController extends Controller
                 'fecha_fin' => now()->addDays($duracionDias)->toDateString(), 'estado' => 'inactiva',
                 'notas' => 'Compra realizada desde el panel de administración.',
             ]);
+
+            // Al renovar, la licencia nueva nace inactiva pero ya deja
+            // suspendidas las anteriores: el admin no puede usar el panel
+            // hasta que el superadmin active esta licencia.
+            Licencia::suspenderAnteriores($licencia);
             
             Empresa::create([
                 'usuario_cedula' => $usuario->cedula,

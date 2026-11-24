@@ -8,21 +8,37 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('licencias', function (Blueprint $table) {
-            $table->string('tipo_entidad', 30)->nullable()->after('nit');
-            $table->string('representante_legal', 150)->nullable()->after('tipo_entidad');
-            $table->string('correo_ips', 150)->nullable()->after('representante_legal');
-            $table->string('telefono_ips', 20)->nullable()->after('correo_ips');
-            $table->string('departamento', 80)->nullable()->after('telefono_ips');
-            $table->string('ciudad', 80)->nullable()->after('departamento');
-            $table->string('direccion', 200)->nullable()->after('ciudad');
+        if (! Schema::hasTable('licencias')) {
+            return;
+        }
+
+        // La tabla ya se crea con estas columnas en 2026_09_27_000002.
+        // Solo agregamos las que falten, para no romper una BD existente.
+        $columnas = [
+            'tipo_entidad' => ['string', 30],
+            'representante_legal' => ['string', 150],
+            'correo_ips' => ['string', 150],
+            'telefono_ips' => ['string', 20],
+            'departamento' => ['string', 80],
+            'ciudad' => ['string', 80],
+            'direccion' => ['string', 200],
+        ];
+
+        $faltan = array_filter($columnas, fn ($tipo, $nombre) => ! Schema::hasColumn('licencias', $nombre), ARRAY_FILTER_USE_BOTH);
+
+        if (! $faltan) {
+            return;
+        }
+
+        Schema::table('licencias', function (Blueprint $table) use ($faltan) {
+            foreach ($faltan as $nombre => $tipo) {
+                $table->{$tipo[0]}($nombre, $tipo[1])->nullable();
+            }
         });
     }
 
     public function down(): void
     {
-        Schema::table('licencias', function (Blueprint $table) {
-            $table->dropColumn(['tipo_entidad', 'representante_legal', 'correo_ips', 'telefono_ips', 'departamento', 'ciudad', 'direccion']);
-        });
+        // Las columnas ya forman parte de la creación de la tabla.
     }
 };

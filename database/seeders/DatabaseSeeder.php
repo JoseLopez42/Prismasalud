@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             TipoUsuarioSeeder::class,
             AdminPruebaSeeder::class,
             DepartamentoSeeder::class,
+            PlanSeeder::class,
         ]);
     }
 }

@@ -70,4 +70,45 @@ class Licencia extends Model
         $plan = Plan::porSlug($this->plan);
         return $plan['nombre'] ?? $this->plan;
     }
+
+    /**
+     * Suspende todas las licencias activas anteriores del mismo administrador
+     * o de la misma IPS, y deja sin licencia asignada a los usuarios que
+     * apuntaban a ellas. Se usa al renovar y al activar una licencia nueva.
+     */
+    public static function suspenderAnteriores(self $licencia): void
+    {
+        $condiciones = [];
+
+        if ($licencia->usuario_cedula) {
+            $condiciones[] = ['usuario_cedula', '=', $licencia->usuario_cedula];
+        }
+
+        if ($licencia->nit) {
+            $condiciones[] = ['nit', '=', $licencia->nit];
+        }
+
+        if (! $condiciones) {
+            return;
+        }
+
+        $anteriores = self::where('id', '!=', $licencia->id)
+            ->where('estado', 'activa')
+            ->where(function ($q) use ($condiciones) {
+                foreach ($condiciones as $i => $condicion) {
+                    $i === 0
+                        ? $q->where($condicion[0], $condicion[1], $condicion[2])
+                        : $q->orWhere($condicion[0], $condicion[1], $condicion[2]);
+                }
+            })
+            ->pluck('id');
+
+        if ($anteriores->isEmpty()) {
+            return;
+        }
+
+        self::whereIn('id', $anteriores)->update(['estado' => 'suspendida']);
+
+        Usuario::whereIn('licencia_id', $anteriores)->update(['licencia_id' => null]);
+    }
 }
