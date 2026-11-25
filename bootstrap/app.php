@@ -19,6 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'essuperadmin'     => \App\Http\Middleware\EsSuperAdmin::class,
             'verificarlicencia' => \App\Http\Middleware\VerificarLicencia::class,
         ]);
+
+        // DBA-03: en TODAS las páginas web, antes de cada petición, le dice a
+        // MariaDB qué persona tiene la sesión (@usuario_app) para la auditoría.
+        $middleware->web(append: [
+            \App\Http\Middleware\RegistrarUsuarioAuditoria::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
