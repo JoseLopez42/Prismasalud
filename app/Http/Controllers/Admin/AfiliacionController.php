@@ -24,12 +24,13 @@ use App\Models\Empresa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AfiliacionController extends Controller
 {
     public function index()
     {
-        $afiliaciones = Afiliacion::with(['beneficiario', 'eps', 'usuario', 'estado', 'tipoAfiliacion'])->get();
+        $afiliaciones = Afiliacion::with(['beneficiario', 'eps', 'usuario', 'estado', 'tipoAfiliacion', 'parentesco'])->get();
         $seccionActiva = 'afiliaciones';
         return view('admin.afiliaciones.afiliacion.index', compact('afiliaciones', 'seccionActiva'));
     }
@@ -50,21 +51,22 @@ class AfiliacionController extends Controller
         $seccionActiva = 'afiliaciones';
 
         // Catálogos para los campos adicionales (extraídos de la base de datos)
-        $generos = Genero::activo()->pluck('nombre', 'nombre');
-        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'nombre');
+        $generos = Genero::activo()->pluck('nombre', 'id_genero');
+        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'id_estado_civil');
         $gruposEtnicos = GrupoEtnico::activo()->pluck('nombre', 'nombre');
-        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'nombre');
+        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'id_zona_residencia');
         $estratos = Estrato::activo()->pluck('numero', 'numero');
-        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'nombre');
+        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'id_nivel_educativo');
         $tiposSangre = TipoSangre::activo()->pluck('nombre', 'nombre');
-        $paises = Pais::activo()->pluck('nombre', 'nombre');
-        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'nombre');
+        $paises = Pais::activo()->pluck('nombre', 'id_pais');
+        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'id_ocupacion');
+        $ocupacionOtroId = $this->ocupacionOtroId();
 
         return view('admin.afiliaciones.afiliacion.create', compact(
             'beneficiarios', 'cotizantes', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
             'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones',
-            'empresa', 'seccionActiva'
+            'ocupacionOtroId', 'empresa', 'seccionActiva'
         ));
     }
 
@@ -79,22 +81,27 @@ class AfiliacionController extends Controller
             'cc_usuario'         => 'required|exists:usuarios,cedula',
             'origen_beneficiario'=> 'required|in:sin,nuevo',
 
-            // Campos adicionales de afiliación (datos del afiliado en este registro)
+            // Campos adicionales del afiliado, almacenados en beneficiarios
             'id_tipo_documento'  => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
-            'pais_expedicion'    => ['nullable', 'string', 'max:100'],
-            'genero'             => ['nullable', 'string', 'max:20', 'in:Masculino,Femenino,Otro'],
-            'estado_civil'       => ['nullable', 'string', 'max:50'],
+            'id_pais_expedicion' => ['nullable', 'exists:paises,id_pais'],
+            'id_genero'          => ['nullable', 'exists:generos,id_genero'],
+            'id_estado_civil'    => ['nullable', 'exists:estados_civiles,id_estado_civil'],
             'grupo_etnico'       => ['nullable', 'string', 'max:50'],
             'tiene_discapacidad' => ['nullable', 'boolean'],
             'tipo_discapacidad'  => ['nullable', 'string', 'max:100', 'required_if:tiene_discapacidad,1'],
-            'nacionalidad'       => ['nullable', 'string', 'max:100'],
-            'pais_nacimiento'    => ['nullable', 'string', 'max:100'],
-            'zona_residencia'    => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
+            'id_pais_nacionalidad' => ['nullable', 'exists:paises,id_pais'],
+            'id_pais_nacimiento' => ['nullable', 'exists:paises,id_pais'],
+            'id_zona_residencia' => ['nullable', 'exists:zonas_residencia,id_zona_residencia'],
             'telefono_fijo'      => ['nullable', 'string', 'max:20'],
             'estrato'            => ['nullable', 'integer', 'min:1', 'max:6'],
-            'nivel_educativo'    => ['nullable', 'string', 'max:50'],
-            'ocupacion'          => ['nullable', 'string', 'max:100'],
-            'ocupacion_otra'     => ['nullable', 'string', 'max:100', 'required_if:ocupacion,Otro'],
+            'id_nivel_educativo' => ['nullable', 'exists:niveles_educativos,id_nivel_educativo'],
+            'id_ocupacion'       => ['nullable', 'exists:ocupaciones,id_ocupacion'],
+            'ocupacion_otra'     => [
+                'nullable',
+                'string',
+                'max:100',
+                Rule::requiredIf(fn () => (string) $request->input('id_ocupacion') === (string) $this->ocupacionOtroId()),
+            ],
             'tipo_sangre'        => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
             'victima_conflicto_armado' => ['nullable', 'boolean'],
             'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
@@ -104,8 +111,8 @@ class AfiliacionController extends Controller
             'id_tipo_afiliacion.required' => 'Selecciona el tipo de afiliación.',
             'cc_usuario.required'         => 'Selecciona el cotizante titular.',
             'id_tipo_documento.exists'    => 'El tipo de documento no es válido.',
-            'genero.in'                   => 'El género no es válido.',
-            'zona_residencia.in'          => 'La zona de residencia no es válida.',
+            'id_genero.exists'            => 'El género no es válido.',
+            'id_zona_residencia.exists'   => 'La zona de residencia no es válida.',
             'estrato.integer'             => 'El estrato debe ser un número del 1 al 6.',
             'estrato.min'                 => 'El estrato debe ser entre 1 y 6.',
             'estrato.max'                 => 'El estrato debe ser entre 1 y 6.',
@@ -117,11 +124,13 @@ class AfiliacionController extends Controller
         // Ruta "sin beneficiario": solo se afilia al cotizante (titular).
         if ($request->origen_beneficiario === 'sin') {
             $this->asegurarFichaCotizante((int) $request->cc_usuario);
+            Beneficiario::findOrFail($request->cc_usuario)
+                ->update($this->camposDemograficos($request));
         } else {
             // Ruta "nuevo beneficiario": se crea desde aquí, dentro de la afiliación.
             $request->validate([
                 'nuevo_cc_cotizante'     => ['required', 'integer', 'exists:beneficiarios,cc_afiliado,tipo_persona,cotizante'],
-                'nuevo_parentesco'       => ['required', 'string', 'max:40', 'exists:parentescos,nombre'],
+                'nuevo_id_parentesco'    => ['required', 'exists:parentescos,id_parentesco'],
                 'nuevo_cc_afiliado'      => ['required', 'integer', 'digits_between:4,12', 'unique:beneficiarios,cc_afiliado', 'unique:usuarios,cedula'],
                 'nuevo_nombres'          => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
                 'nuevo_apellidos'        => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
@@ -134,8 +143,8 @@ class AfiliacionController extends Controller
             ], [
                 'nuevo_cc_cotizante.required'     => 'Selecciona de qué cotizante es familiar el nuevo beneficiario.',
                 'nuevo_cc_cotizante.exists'        => 'El cotizante seleccionado no existe.',
-                'nuevo_parentesco.required'       => 'Selecciona el parentesco del nuevo beneficiario.',
-                'nuevo_parentesco.exists'         => 'Selecciona un parentesco de la lista.',
+                'nuevo_id_parentesco.required'    => 'Selecciona el parentesco del nuevo beneficiario.',
+                'nuevo_id_parentesco.exists'      => 'Selecciona un parentesco de la lista.',
                 'nuevo_cc_afiliado.required'      => 'La cédula del nuevo beneficiario es obligatoria.',
                 'nuevo_cc_afiliado.unique'        => 'Esa cédula ya existe (como beneficiario o como usuario del sistema).',
                 'nuevo_nombres.required'          => 'Los nombres del nuevo beneficiario son obligatorios.',
@@ -188,7 +197,7 @@ class AfiliacionController extends Controller
                     'cc_afiliado'      => $request->nuevo_cc_afiliado,
                     'tipo_persona'     => 'beneficiario',
                     'cc_cotizante'     => $request->nuevo_cc_cotizante,
-                    'parentesco'       => $request->nuevo_parentesco,
+                    'id_parentesco'    => $request->nuevo_id_parentesco,
                     'nit_eps'          => $cotizante->nit_eps,
                     'nombres'          => $request->nuevo_nombres,
                     'apellidos'        => $request->nuevo_apellidos,
@@ -197,7 +206,7 @@ class AfiliacionController extends Controller
                     'direccion'        => $request->nuevo_direccion,
                     'correo'           => $request->nuevo_correo,
                     'fecha_nacimiento' => $request->nuevo_fecha_nacimiento,
-                ]);
+                ] + $this->camposDemograficos($request));
 
                 Usuario::create([
                     'cedula'                => $request->nuevo_cc_afiliado,
@@ -236,25 +245,6 @@ class AfiliacionController extends Controller
                 // NIT, así que no se pide: se toma de su licencia.
                 'nit_empresa'        => $empresa['nit'],
                 'nombre_empresa'     => $empresa['nombre'],
-
-                // Campos adicionales de afiliación
-                'id_tipo_documento'  => $request->id_tipo_documento,
-                'pais_expedicion'    => $request->pais_expedicion,
-                'genero'             => $request->genero,
-                'estado_civil'       => $request->estado_civil,
-                'grupo_etnico'       => $request->grupo_etnico,
-                'tiene_discapacidad' => $request->boolean('tiene_discapacidad'),
-                'tipo_discapacidad'  => $request->tipo_discapacidad,
-                'nacionalidad'       => $request->nacionalidad,
-                'pais_nacimiento'    => $request->pais_nacimiento,
-                'zona_residencia'    => $request->zona_residencia,
-                'telefono_fijo'      => $request->telefono_fijo,
-                'estrato'            => $request->estrato,
-                'nivel_educativo'    => $request->nivel_educativo,
-                'ocupacion'          => $request->ocupacion === 'Otro' ? $request->ocupacion_otra : $request->ocupacion,
-                'tipo_sangre'        => $request->tipo_sangre,
-                'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
-                'numero_afiliacion_anterior' => $request->numero_afiliacion_anterior,
             ], $derivados));
 
             DB::commit();
@@ -276,7 +266,7 @@ class AfiliacionController extends Controller
                     'correo'       => $request->nuevo_correo,
                     'tipo_persona' => 'beneficiario',
                     'cotizante'    => $cotizanteNombre,
-                    'parentesco'   => $request->nuevo_parentesco,
+                    'parentesco'   => Parentesco::find($request->nuevo_id_parentesco)?->nombre,
                     'eps'          => optional(Beneficiario::find($request->nuevo_cc_cotizante)?->eps)->nombre_eps,
                 ],
             ]);
@@ -299,21 +289,22 @@ class AfiliacionController extends Controller
         $seccionActiva = 'afiliaciones';
 
         // Catálogos para los campos adicionales (extraídos de la base de datos)
-        $generos = Genero::activo()->pluck('nombre', 'nombre');
-        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'nombre');
+        $generos = Genero::activo()->pluck('nombre', 'id_genero');
+        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'id_estado_civil');
         $gruposEtnicos = GrupoEtnico::activo()->pluck('nombre', 'nombre');
-        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'nombre');
+        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'id_zona_residencia');
         $estratos = Estrato::activo()->pluck('numero', 'numero');
-        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'nombre');
+        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'id_nivel_educativo');
         $tiposSangre = TipoSangre::activo()->pluck('nombre', 'nombre');
-        $paises = Pais::activo()->pluck('nombre', 'nombre');
-        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'nombre');
+        $paises = Pais::activo()->pluck('nombre', 'id_pais');
+        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'id_ocupacion');
+        $ocupacionOtroId = $this->ocupacionOtroId();
 
         return view('admin.afiliaciones.afiliacion.edit', compact(
             'afiliacion', 'beneficiarios', 'estados', 'usuarios', 'tipos', 'tiposDocumento',
             'parentescos', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
             'estratos', 'nivelesEducativos', 'tiposSangre', 'paises', 'ocupaciones',
-            'empresa', 'seccionActiva'
+            'ocupacionOtroId', 'empresa', 'seccionActiva'
         ));
     }
 
@@ -351,8 +342,8 @@ class AfiliacionController extends Controller
 
     public function detalle($id)
     {
-        $principal = Afiliacion::with(['beneficiario', 'eps', 'usuario', 'estado', 'tipoAfiliacion'])->findOrFail($id);
-        $familia = Afiliacion::with(['beneficiario', 'eps', 'usuario', 'estado', 'tipoAfiliacion'])
+        $principal = Afiliacion::with(['beneficiario', 'eps', 'usuario', 'estado', 'tipoAfiliacion', 'parentesco'])->findOrFail($id);
+        $familia = Afiliacion::with(['beneficiario', 'eps', 'usuario', 'estado', 'tipoAfiliacion', 'parentesco'])
             ->where('cc_usuario', $principal->cc_usuario)
             ->orderBy('created_at')
             ->get();
@@ -438,7 +429,7 @@ class AfiliacionController extends Controller
         }
 
         return [
-            'parentesco' => $persona->esCotizante() ? 'Titular' : ($persona->parentesco ?: 'Sin dato'),
+            'id_parentesco' => $persona->esCotizante() ? null : $persona->id_parentesco,
             // La EPS es la de la persona. Si no tiene EPS asignada, la afiliación
             // queda con el NIT de la empresa que la registra.
             'nit_eps'    => $persona->nit_eps,
@@ -516,9 +507,9 @@ class AfiliacionController extends Controller
         Beneficiario::create([
             'cc_afiliado'  => $ccUsuario,
             'tipo_persona' => 'cotizante',
-            'cc_cotizante' => null,
-            'parentesco'   => null,
-            'nit_eps'      => null,
+            'cc_cotizante'  => null,
+            'id_parentesco' => null,
+            'nit_eps'       => null,
             'nombres'      => $usuario->nombres,
             'apellidos'    => $usuario->apellidos,
             'edad'         => $usuario->edad,
@@ -541,5 +532,53 @@ class AfiliacionController extends Controller
             ->when($incluir, fn ($q) => $q->orWhere('cedula', $incluir))
             ->orderBy('nombres')
             ->get();
+    }
+
+    private function camposDemograficos(Request $request): array
+    {
+        $campos = [
+            'id_tipo_documento' => 'id_tipo_documento',
+            'id_pais_expedicion' => 'id_pais_expedicion',
+            'id_genero' => 'id_genero',
+            'id_estado_civil' => 'id_estado_civil',
+            'grupo_etnico' => 'grupo_etnico',
+            'tiene_discapacidad' => 'tiene_discapacidad',
+            'tipo_discapacidad' => 'tipo_discapacidad',
+            'id_pais_nacionalidad' => 'id_pais_nacionalidad',
+            'id_pais_nacimiento' => 'id_pais_nacimiento',
+            'id_zona_residencia' => 'id_zona_residencia',
+            'telefono_fijo' => 'telefono_fijo',
+            'estrato' => 'estrato',
+            'id_nivel_educativo' => 'id_nivel_educativo',
+            'id_ocupacion' => 'id_ocupacion',
+            'tipo_sangre' => 'tipo_sangre',
+            'victima_conflicto_armado' => 'victima_conflicto_armado',
+            'numero_afiliacion_anterior' => 'numero_afiliacion_anterior',
+        ];
+
+        $datos = [];
+
+        foreach ($campos as $input => $columna) {
+            if (!$request->exists($input)) {
+                continue;
+            }
+
+            $valor = $request->input($input);
+            $datos[$columna] = $valor === '' ? null : $valor;
+        }
+
+        if ($request->exists('id_ocupacion')) {
+            $esOtro = (string) $request->input('id_ocupacion') === (string) $this->ocupacionOtroId();
+            $datos['ocupacion_otra'] = $esOtro && $request->filled('ocupacion_otra')
+                ? $request->input('ocupacion_otra')
+                : null;
+        }
+
+        return $datos;
+    }
+
+    private function ocupacionOtroId()
+    {
+        return Ocupacion::where('nombre', 'Otro')->value('id_ocupacion');
     }
 }

@@ -55,7 +55,7 @@
                                     <span class="inline-flex text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">Beneficiario</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-gray-600">{{ $esTitular ? 'Titular' : ($afiliacion->parentesco ?: '—') }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $esTitular ? 'Titular' : ($afiliacion->parentesco?->nombre ?? '—') }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $afiliacion->fecha_afiliacion }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $afiliacion->tipoAfiliacion?->nombre_regimen }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $afiliacion->eps?->nombre_eps ?? '—' }}</td>

@@ -219,10 +219,10 @@
                         <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">País de expedición</label>
-                                    <select name="pais_expedicion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_pais_expedicion" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($paises as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('pais_expedicion') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_pais_expedicion') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -231,19 +231,19 @@
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Género</label>
-                                    <select name="genero" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_genero" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($generos as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('genero') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_genero') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Estado civil</label>
-                                    <select name="estado_civil" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_estado_civil" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($estadosCiviles as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('estado_civil') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_estado_civil') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -279,10 +279,10 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nacionalidad</label>
-                                    <select name="nacionalidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_pais_nacionalidad" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($paises as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('nacionalidad') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_pais_nacionalidad') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -291,19 +291,19 @@
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">País de nacimiento</label>
-                                    <select name="pais_nacimiento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_pais_nacimiento" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($paises as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('pais_nacimiento') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_pais_nacimiento') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Zona de residencia</label>
-                                    <select name="zona_residencia" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_zona_residencia" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($zonasResidencia as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('zona_residencia') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_zona_residencia') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -329,26 +329,26 @@
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nivel educativo</label>
-                                    <select name="nivel_educativo" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_nivel_educativo" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($nivelesEducativos as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('nivel_educativo') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_nivel_educativo') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Ocupación / Profesión</label>
-                                    <select name="ocupacion" id="ocupacion-select-usuario" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                    <select name="id_ocupacion" id="ocupacion-select-usuario" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                                         <option value="">Seleccione...</option>
                                         @foreach ($ocupaciones as $valor => $etiqueta)
-                                            <option value="{{ $valor }}" {{ old('ocupacion') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                            <option value="{{ $valor }}" {{ (string) old('id_ocupacion') === (string) $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                                         @endforeach
                                     </select>
                                     <input type="text" name="ocupacion_otra" id="ocupacion-otra-usuario"
                                            placeholder="Escribe tu ocupación"
                                            value="{{ old('ocupacion_otra') }}"
                                            class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition hidden"
-                                           {{ old('ocupacion') === 'Otro' ? '' : 'disabled' }}>
+                                           {{ (string) old('id_ocupacion') === (string) $ocupacionOtroId ? '' : 'disabled' }}>
                                 </div>
                             </div>
 
@@ -479,7 +479,7 @@
             const campoOcupacionOtra = document.getElementById('ocupacion-otra-usuario');
             if (selOcupacion && campoOcupacionOtra) {
                 function toggleOcupacionOtra() {
-                    const esOtro = selOcupacion.value === 'Otro';
+                    const esOtro = String(selOcupacion.value) === '{{ $ocupacionOtroId }}';
                     campoOcupacionOtra.classList.toggle('hidden', !esOtro);
                     campoOcupacionOtra.disabled = !esOtro;
                     if (!esOtro) campoOcupacionOtra.value = '';

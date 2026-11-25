@@ -14,17 +14,16 @@ class Beneficiario extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'cc_afiliado', 'tipo_persona', 'cc_cotizante', 'parentesco', 'nit_eps',
+        'cc_afiliado', 'tipo_persona', 'cc_cotizante', 'id_parentesco', 'nit_eps',
         'nombres', 'apellidos', 'edad',
         'telefono', 'direccion', 'correo', 'fecha_nacimiento',
 
-        // Campos adicionales del paciente
-        'id_tipo_documento', 'pais_expedicion',
-        'genero', 'estado_civil', 'grupo_etnico',
+        'id_tipo_documento', 'id_pais_expedicion',
+        'id_genero', 'id_estado_civil', 'grupo_etnico',
         'tiene_discapacidad', 'tipo_discapacidad',
-        'nacionalidad', 'pais_nacimiento',
-        'zona_residencia', 'telefono_fijo',
-        'estrato', 'nivel_educativo', 'ocupacion',
+        'id_pais_nacionalidad', 'id_pais_nacimiento',
+        'id_zona_residencia', 'telefono_fijo',
+        'estrato', 'id_nivel_educativo', 'id_ocupacion', 'ocupacion_otra',
         'tipo_sangre', 'victima_conflicto_armado',
         'numero_afiliacion_anterior',
     ];
@@ -49,5 +48,50 @@ class Beneficiario extends Model
     public function usuario()
     {
         return $this->belongsTo(\App\Models\Usuario::class, 'cc_afiliado', 'cedula');
+    }
+
+    public function parentesco()
+    {
+        return $this->belongsTo(Parentesco::class, 'id_parentesco', 'id_parentesco');
+    }
+
+    public function genero()
+    {
+        return $this->belongsTo(Genero::class, 'id_genero', 'id_genero');
+    }
+
+    public function estadoCivil()
+    {
+        return $this->belongsTo(EstadoCivil::class, 'id_estado_civil', 'id_estado_civil');
+    }
+
+    public function nivelEducativo()
+    {
+        return $this->belongsTo(NivelEducativo::class, 'id_nivel_educativo', 'id_nivel_educativo');
+    }
+
+    public function ocupacion()
+    {
+        return $this->belongsTo(Ocupacion::class, 'id_ocupacion', 'id_ocupacion');
+    }
+
+    public function paisNacionalidad()
+    {
+        return $this->belongsTo(Pais::class, 'id_pais_nacionalidad', 'id_pais');
+    }
+
+    public function paisNacimiento()
+    {
+        return $this->belongsTo(Pais::class, 'id_pais_nacimiento', 'id_pais');
+    }
+
+    public function paisExpedicion()
+    {
+        return $this->belongsTo(Pais::class, 'id_pais_expedicion', 'id_pais');
+    }
+
+    public function zonaResidencia()
+    {
+        return $this->belongsTo(ZonaResidencia::class, 'id_zona_residencia', 'id_zona_residencia');
     }
 }
