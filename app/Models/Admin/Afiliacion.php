@@ -10,29 +10,9 @@ class Afiliacion extends Model
     protected $primaryKey = 'id_afiliacion';
 
     protected $fillable = [
-        'fecha_afiliacion', 'parentesco', 'id_tipo_afiliacion',
+        'fecha_afiliacion', 'id_parentesco', 'id_tipo_afiliacion',
         'nit_eps', 'nit_empresa', 'nombre_empresa',
         'cc_usuario', 'id_estado', 'cc_afiliado',
-
-        // Identificación
-        'id_tipo_documento', 'pais_expedicion',
-
-        // Demográficos
-        'genero', 'estado_civil', 'grupo_etnico',
-        'tiene_discapacidad', 'tipo_discapacidad',
-        'nacionalidad', 'pais_nacimiento',
-
-        // Residencia
-        'zona_residencia', 'telefono_fijo',
-
-        // Socioeconómico (sin ingresos ni NIT empleador)
-        'estrato', 'nivel_educativo', 'ocupacion',
-
-        // Salud (sin RH, sin alergias, sin embarazo)
-        'tipo_sangre', 'victima_conflicto_armado',
-
-        // Afiliación
-        'numero_afiliacion_anterior',
     ];
 
     public function beneficiario()
@@ -60,8 +40,8 @@ class Afiliacion extends Model
         return $this->belongsTo(TipoAfiliacion::class, 'id_tipo_afiliacion', 'id_regimen');
     }
 
-    public function tipoDocumento()
+    public function parentesco()
     {
-        return $this->belongsTo(\App\Models\Admin\TipoDocumento::class, 'id_tipo_documento', 'id_tipo_documento');
+        return $this->belongsTo(Parentesco::class, 'id_parentesco', 'id_parentesco');
     }
 }

@@ -23,7 +23,7 @@ class BeneficiarioController extends Controller
 
     public function index()
     {
-        $beneficiarios = Beneficiario::with(['cotizante', 'eps'])->get();
+        $beneficiarios = Beneficiario::with(['cotizante', 'eps', 'parentesco'])->get();
         $seccionActiva = 'afiliaciones';
         return view('admin.afiliaciones.beneficiarios.index', compact('beneficiarios', 'seccionActiva'));
     }
@@ -51,7 +51,6 @@ class BeneficiarioController extends Controller
         $request->merge([
             'tipo_persona'  => 'cotizante',
             'cc_cotizante'  => null,
-            'parentesco'    => null,
         ]);
 
         $datos = $request->validate([
@@ -73,8 +72,6 @@ class BeneficiarioController extends Controller
             'nit_eps.exists'            => 'La EPS seleccionada no existe o está inactiva.',
             'cc_cotizante.required_if'  => 'Selecciona de qué cotizante es familiar el beneficiario.',
             'cc_cotizante.exists'       => 'El cotizante seleccionado no existe.',
-            'parentesco.required_if'    => 'Selecciona el parentesco con el cotizante.',
-            'parentesco.exists'         => 'Selecciona un parentesco de la lista.',
             'cc_afiliado.required'      => 'La cédula es obligatoria.',
             'cc_afiliado.integer'       => 'La cédula debe ser un número.',
             'cc_afiliado.digits_between'=> 'La cédula debe tener entre 4 y 12 dígitos.',
@@ -112,7 +109,6 @@ class BeneficiarioController extends Controller
         if ($datos['tipo_persona'] === 'cotizante') {
             // Un cotizante no depende de nadie: se limpian esos campos.
             $datos['cc_cotizante'] = null;
-            $datos['parentesco']   = null;
         } else {
             // El beneficiario NO elige EPS: hereda la de su cotizante.
             $datos['nit_eps'] = Beneficiario::find($datos['cc_cotizante'])?->nit_eps;
@@ -166,7 +162,6 @@ class BeneficiarioController extends Controller
                 'correo'       => $datos['correo'],
                 'tipo_persona' => $datos['tipo_persona'],
                 'cotizante'    => $cotizante,
-                'parentesco'   => $datos['parentesco'],
                 'eps'          => $epsNombre,
             ],
         ]);
@@ -246,7 +241,7 @@ class BeneficiarioController extends Controller
         } else {
             // El beneficiario hereda la EPS de su cotizante; lo único propio
             // que se puede editar aquí es el parentesco.
-            $reglas['parentesco'] = ['required', 'string', 'max:40', 'exists:parentescos,nombre'];
+            $reglas['id_parentesco'] = ['required', 'exists:parentescos,id_parentesco'];
         }
 
         $mensajes = [
@@ -274,8 +269,8 @@ class BeneficiarioController extends Controller
         if ($esCotizante) {
             $mensajes['nit_eps.exists'] = 'La EPS seleccionada no existe o está inactiva.';
         } else {
-            $mensajes['parentesco.required'] = 'Selecciona el parentesco con el cotizante.';
-            $mensajes['parentesco.exists']   = 'Selecciona un parentesco de la lista.';
+            $mensajes['id_parentesco.required'] = 'Selecciona el parentesco con el cotizante.';
+            $mensajes['id_parentesco.exists']   = 'Selecciona un parentesco de la lista.';
         }
 
         $datos = $request->validate($reglas, $mensajes);
@@ -290,18 +285,17 @@ class BeneficiarioController extends Controller
         if ($esCotizante) {
             // Un cotizante es titular: no depende de nadie ni tiene parentesco.
             $datos['cc_cotizante'] = null;
-            $datos['parentesco']   = null;
         } else {
             // El beneficiario NO elige EPS: toma la de su cotizante.
             $datos['nit_eps']      = $beneficiario->cotizante?->nit_eps;
             $datos['cc_cotizante'] = $beneficiario->cc_cotizante;
         }
 
-        $epsAnterior        = $beneficiario->nit_eps;
-        $parentescoAnterior = $beneficiario->parentesco;
+        $epsAnterior         = $beneficiario->nit_eps;
+        $parentescoAnteriorId = $beneficiario->id_parentesco;
 
         // Actualiza la persona y, si ya tiene cuenta, la sincroniza (incluyendo foto).
-        DB::transaction(function () use ($beneficiario, $datos, $request, $esCotizante, $epsAnterior, $parentescoAnterior) {
+        DB::transaction(function () use ($beneficiario, $datos, $request, $esCotizante, $epsAnterior, $parentescoAnteriorId) {
             $beneficiario->update($datos);
 
             // Si el cotizante cambia de EPS, sus familiares y sus afiliaciones
@@ -316,10 +310,10 @@ class BeneficiarioController extends Controller
             }
 
             // El parentesco también se copia a la afiliación de ese familiar.
-            if (!$esCotizante && $parentescoAnterior !== $beneficiario->parentesco) {
+            if (!$esCotizante && $parentescoAnteriorId !== $beneficiario->id_parentesco) {
                 Afiliacion::where('cc_afiliado', $beneficiario->cc_afiliado)
-                    ->where('parentesco', $parentescoAnterior)
-                    ->update(['parentesco' => $beneficiario->parentesco]);
+                    ->where('id_parentesco', $parentescoAnteriorId)
+                    ->update(['id_parentesco' => $beneficiario->id_parentesco]);
             }
 
             $usuario = Usuario::where('cedula', $beneficiario->cc_afiliado)->first();

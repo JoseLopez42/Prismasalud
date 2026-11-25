@@ -134,7 +134,7 @@
                                 {{ $b->cotizante?->nombres }} {{ $b->cotizante?->apellidos }}
                             </td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->eps?->nombre_eps ?? '—' }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $b->parentesco ?? '—' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $b->parentesco?->nombre ?? '—' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->edad }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->telefono }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->correo }}</td>

@@ -42,21 +42,23 @@ class UsuarioController extends Controller
         $tiposDocumento = TipoDocumento::all();
 
         // Catálogos para los campos adicionales del paciente (extraídos de la base de datos)
-        $paises = Pais::activo()->pluck('nombre', 'nombre');
-        $generos = Genero::activo()->pluck('nombre', 'nombre');
-        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'nombre');
+        $paises = Pais::activo()->pluck('nombre', 'id_pais');
+        $generos = Genero::activo()->pluck('nombre', 'id_genero');
+        $estadosCiviles = EstadoCivil::activo()->pluck('nombre', 'id_estado_civil');
         $gruposEtnicos = GrupoEtnico::activo()->pluck('nombre', 'nombre');
-        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'nombre');
+        $zonasResidencia = ZonaResidencia::activo()->pluck('nombre', 'id_zona_residencia');
         $estratos = Estrato::activo()->pluck('numero', 'numero');
-        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'nombre');
+        $nivelesEducativos = NivelEducativo::activo()->pluck('nombre', 'id_nivel_educativo');
         $tiposSangre = TipoSangre::activo()->pluck('nombre', 'nombre');
-        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'nombre');
+        $ocupaciones = Ocupacion::activo()->pluck('nombre', 'id_ocupacion');
+        $ocupacionOtroId = Ocupacion::where('nombre', 'Otro')->value('id_ocupacion');
 
         $seccionActiva = 'usuarios';
         return view('admin.usuarios.create', compact(
             'tiposUsuario', 'ciudades', 'tiposDocumento',
             'paises', 'generos', 'estadosCiviles', 'gruposEtnicos', 'zonasResidencia',
-            'estratos', 'nivelesEducativos', 'tiposSangre', 'ocupaciones', 'seccionActiva'
+            'estratos', 'nivelesEducativos', 'tiposSangre', 'ocupaciones',
+            'ocupacionOtroId', 'seccionActiva'
         ));
     }
 
@@ -92,24 +94,32 @@ class UsuarioController extends Controller
             : null;
 
         $datosPaciente = null;
+        $ocupacionOtroId = null;
         if ($esPaciente) {
+            $ocupacionOtroId = Ocupacion::where('nombre', 'Otro')->value('id_ocupacion');
+
             $datosPaciente = $request->validate([
-                'id_tipo_documento'   => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
-                'pais_expedicion'     => ['nullable', 'string', 'max:100'],
-                'genero'              => ['nullable', 'string', 'max:20', 'in:Masculino,Femenino,Otro'],
-                'estado_civil'        => ['nullable', 'string', 'max:50'],
-                'grupo_etnico'        => ['nullable', 'string', 'max:50'],
-                'tiene_discapacidad'  => ['nullable', 'boolean'],
-                'tipo_discapacidad'   => ['nullable', 'string', 'max:100', 'required_if:tiene_discapacidad,1'],
-                'nacionalidad'        => ['nullable', 'string', 'max:100'],
-                'pais_nacimiento'     => ['nullable', 'string', 'max:100'],
-                'zona_residencia'     => ['nullable', 'string', 'max:20', 'in:Urbana,Rural'],
-                'telefono_fijo'       => ['nullable', 'string', 'max:20'],
-                'estrato'             => ['nullable', 'integer', 'min:1', 'max:6'],
-                'nivel_educativo'     => ['nullable', 'string', 'max:50'],
-                'ocupacion'           => ['nullable', 'string', 'max:100'],
-                'ocupacion_otra'      => ['nullable', 'string', 'max:100', 'required_if:ocupacion,Otro'],
-                'tipo_sangre'         => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
+                'id_tipo_documento'    => ['nullable', 'exists:tipo_documento,id_tipo_documento'],
+                'id_pais_expedicion'   => ['nullable', 'exists:paises,id_pais'],
+                'id_genero'            => ['nullable', 'exists:generos,id_genero'],
+                'id_estado_civil'      => ['nullable', 'exists:estados_civiles,id_estado_civil'],
+                'grupo_etnico'         => ['nullable', 'string', 'max:50'],
+                'tiene_discapacidad'   => ['nullable', 'boolean'],
+                'tipo_discapacidad'    => ['nullable', 'string', 'max:100', 'required_if:tiene_discapacidad,1'],
+                'id_pais_nacionalidad' => ['nullable', 'exists:paises,id_pais'],
+                'id_pais_nacimiento'   => ['nullable', 'exists:paises,id_pais'],
+                'id_zona_residencia'   => ['nullable', 'exists:zonas_residencia,id_zona_residencia'],
+                'telefono_fijo'        => ['nullable', 'string', 'max:20'],
+                'estrato'              => ['nullable', 'integer', 'min:1', 'max:6'],
+                'id_nivel_educativo'   => ['nullable', 'exists:niveles_educativos,id_nivel_educativo'],
+                'id_ocupacion'         => ['nullable', 'exists:ocupaciones,id_ocupacion'],
+                'ocupacion_otra'       => [
+                    'nullable',
+                    'string',
+                    'max:100',
+                    Rule::requiredIf(fn () => (string) $request->input('id_ocupacion') === (string) $ocupacionOtroId),
+                ],
+                'tipo_sangre'          => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
                 'victima_conflicto_armado' => ['nullable', 'boolean'],
                 'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
             ], [
@@ -125,22 +135,22 @@ class UsuarioController extends Controller
 
         $datos['contrasena'] = bcrypt($datos['contrasena']);
 
-        DB::transaction(function () use ($datos, $request, $esPaciente, &$datosPaciente) {
+        DB::transaction(function () use ($datos, $request, $esPaciente, &$datosPaciente, $ocupacionOtroId) {
             $usuario = Usuario::create($datos);
 
             // Si es Paciente, creamos su beneficiario (como cotizante titular)
             // con los datos adicionales del paciente. NO se crea afiliación.
             if ($esPaciente) {
-                $ocupacion = $datosPaciente['ocupacion'] ?? null;
-                $ocupacionFinal = $ocupacion === 'Otro'
+                $idOcupacion = $datosPaciente['id_ocupacion'] ?? null;
+                $ocupacionOtra = (string) $idOcupacion === (string) $ocupacionOtroId
                     ? ($datosPaciente['ocupacion_otra'] ?? null)
-                    : $ocupacion;
+                    : null;
 
                 Beneficiario::create([
                     'cc_afiliado'      => $datos['cedula'],
                     'tipo_persona'     => 'cotizante',
                     'cc_cotizante'     => null,
-                    'parentesco'       => null,
+                    'id_parentesco'    => null,
                     'nit_eps'          => null,
                     'nombres'          => $datos['nombres'],
                     'apellidos'        => $datos['apellidos'],
@@ -154,19 +164,20 @@ class UsuarioController extends Controller
                     // Se usa "?? null" porque el formulario deshabilita (y por tanto no
                     // envía) algunos campos, como el tipo de discapacidad.
                     'id_tipo_documento'   => $datos['id_tipo_documento'] ?? null,
-                    'pais_expedicion'     => $datosPaciente['pais_expedicion'] ?? null,
-                    'genero'              => $datosPaciente['genero'] ?? null,
-                    'estado_civil'        => $datosPaciente['estado_civil'] ?? null,
+                    'id_pais_expedicion'  => $datosPaciente['id_pais_expedicion'] ?? null,
+                    'id_genero'           => $datosPaciente['id_genero'] ?? null,
+                    'id_estado_civil'     => $datosPaciente['id_estado_civil'] ?? null,
                     'grupo_etnico'        => $datosPaciente['grupo_etnico'] ?? null,
                     'tiene_discapacidad'  => $request->boolean('tiene_discapacidad'),
                     'tipo_discapacidad'   => $datosPaciente['tipo_discapacidad'] ?? null,
-                    'nacionalidad'        => $datosPaciente['nacionalidad'] ?? null,
-                    'pais_nacimiento'     => $datosPaciente['pais_nacimiento'] ?? null,
-                    'zona_residencia'     => $datosPaciente['zona_residencia'] ?? null,
+                    'id_pais_nacionalidad' => $datosPaciente['id_pais_nacionalidad'] ?? null,
+                    'id_pais_nacimiento'  => $datosPaciente['id_pais_nacimiento'] ?? null,
+                    'id_zona_residencia'  => $datosPaciente['id_zona_residencia'] ?? null,
                     'telefono_fijo'       => $datosPaciente['telefono_fijo'] ?? null,
                     'estrato'             => $datosPaciente['estrato'] ?? null,
-                    'nivel_educativo'     => $datosPaciente['nivel_educativo'] ?? null,
-                    'ocupacion'           => $ocupacionFinal,
+                    'id_nivel_educativo'  => $datosPaciente['id_nivel_educativo'] ?? null,
+                    'id_ocupacion'        => $idOcupacion,
+                    'ocupacion_otra'      => $ocupacionOtra,
                     'tipo_sangre'         => $datosPaciente['tipo_sangre'] ?? null,
                     'victima_conflicto_armado' => $request->boolean('victima_conflicto_armado'),
                     'numero_afiliacion_anterior' => $datosPaciente['numero_afiliacion_anterior'] ?? null,
