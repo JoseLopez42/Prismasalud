@@ -13,6 +13,7 @@ class Licencia extends Model
         'departamento', 'ciudad', 'direccion',
         'plan', 'plan_id', 'fecha_inicio', 'fecha_fin', 'estado', 'notas',
         'usuario_cedula',
+        'empresa_id', // DBA-11: empresa (IPS/EPS) dueña de la licencia
     ];
 
     protected $casts = [
@@ -32,11 +33,18 @@ class Licencia extends Model
         return $this->belongsTo(Usuario::class, 'usuario_cedula', 'cedula');
     }
 
+    // DBA-11: la empresa (IPS/EPS) dueña de esta licencia
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
+
     // El plan (de la tabla planes) contratado por esta licencia
     public function planModelo()
     {
         return $this->belongsTo(Plan::class, 'plan_id');
     }
+
     // Historial de pagos/transacciones de esta licencia
     public function transacciones()
     {

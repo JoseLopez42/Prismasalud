@@ -206,6 +206,11 @@ class CompraController extends Controller
      * (ya sea porque tenia sesion activa, o porque acaba de validar su
      * contrasena dentro del mismo formulario de compra) y lo deja
      * logueado con el plan activo.
+     *
+     * DBA-11: antes se creaba una empresa NUEVA en cada compra o renovación,
+     * y por eso un mismo NIT tenía muchas filas. Ahora hay una sola empresa
+     * por NIT (empresas.nit es UNIQUE): si ya existe se actualizan sus datos,
+     * si no se crea. La licencia nueva queda ligada con licencias.empresa_id.
      */
     private function crearLicenciaParaUsuario(Usuario $usuario, array $planSeleccionado, array $datos, string $tipo = 'compra')
     {
@@ -213,7 +218,30 @@ class CompraController extends Controller
 
         $licencia = null;
         DB::transaction(function () use ($usuario, $planSeleccionado, $datos, $duracionDias, $tipo, &$licencia) {
+            // 1. La empresa: se busca por NIT. Si no existe se prepara una nueva.
+            $empresa = Empresa::firstOrNew(['nit' => $datos['nit']]);
+
+            // El dueño (administrador) solo se asigna cuando la empresa es nueva:
+            // así nadie se "apropia" de una empresa existente comprando con su NIT.
+            if (! $empresa->exists) {
+                $empresa->usuario_cedula = $usuario->cedula;
+            }
+
+            $empresa->fill([
+                'nombre' => $datos['nombre_ips'],
+                'tipo_entidad' => $datos['tipo_entidad'],
+                'representante_legal' => $datos['representante_legal'],
+                'correo' => $datos['correo_ips'],
+                'telefono' => $datos['telefono_ips'],
+                'departamento' => $datos['departamento'],
+                'ciudad' => $datos['ciudad'],
+                'direccion' => $datos['direccion'],
+            ]);
+            $empresa->save();
+
+            // 2. La licencia nueva, ligada a la empresa (empresa_id es obligatorio).
             $licencia = Licencia::create([
+                'empresa_id' => $empresa->id,
                 'usuario_cedula' => $usuario->cedula,
                 'nombre_ips' => $datos['nombre_ips'], 'nit' => $datos['nit'],
                 'tipo_entidad' => $datos['tipo_entidad'],
@@ -235,19 +263,10 @@ class CompraController extends Controller
             // suspendidas las anteriores: el admin no puede usar el panel
             // hasta que el superadmin active esta licencia.
             Licencia::suspenderAnteriores($licencia);
-            
-            Empresa::create([
-                'usuario_cedula' => $usuario->cedula,
+
+            // 3. La empresa apunta a su licencia más reciente (plan y fechas vigentes).
+            $empresa->update([
                 'licencia_id' => $licencia->id,
-                'nit' => $datos['nit'],
-                'nombre' => $datos['nombre_ips'],
-                'tipo_entidad' => $datos['tipo_entidad'],
-                'representante_legal' => $datos['representante_legal'],
-                'correo' => $datos['correo_ips'],
-                'telefono' => $datos['telefono_ips'],
-                'departamento' => $datos['departamento'],
-                'ciudad' => $datos['ciudad'],
-                'direccion' => $datos['direccion'],
                 'plan' => $planSeleccionado['id'],
                 'fecha_compra' => now()->toDateString(),
                 'fecha_expiracion' => $licencia->fecha_fin?->toDateString() ?? now()->addDays($duracionDias)->toDateString(),

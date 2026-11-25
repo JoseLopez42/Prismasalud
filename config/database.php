@@ -62,6 +62,35 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+        ],  
+
+                /*
+        | DBA-03: conexión SOLO para migraciones.
+        | La app usa 'mysql' con el usuario prisma_app (solo datos:
+        | SELECT, INSERT, UPDATE, DELETE). Crear o modificar tablas necesita
+        | más permisos, así que las migraciones usan esta conexión:
+        |     php artisan migrate --database=migraciones
+        | Si DB_MIGRATE_USERNAME / DB_MIGRATE_PASSWORD no están en el .env,
+        | usa DB_USERNAME / DB_PASSWORD (así nadie queda sin poder migrar).
+        */
+        'migraciones' => [
+            'driver' => 'mysql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_MIGRATE_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_MIGRATE_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'mariadb' => [
