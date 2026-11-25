@@ -194,6 +194,10 @@ class CompraController extends Controller
         $_SESSION['usuario_nombres'] = $usuario->nombres;
         $_SESSION['tipo_usuario_id'] = $usuario->tipo_usuario_id;
 
+        // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_usuarios
+        DB::table('usuarios')->where('cedula', $usuario->cedula)
+            ->update(['ultimo_ingreso' => now()]);
+
         return $this->crearLicenciaParaUsuario($usuario, $planSeleccionado, $datos);
     }
 

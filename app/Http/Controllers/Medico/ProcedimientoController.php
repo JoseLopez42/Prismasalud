@@ -68,6 +68,8 @@ class ProcedimientoController extends Controller
             'observaciones'         => 'nullable|string',
         ]);
 
+        $this->abortarSiCitaAtendida($datos['id_cita'] ?? null);
+
         $datos['cedula_medico'] = $this->cedulaMedico();
         $datos['activo'] = true;
 
@@ -117,6 +119,7 @@ class ProcedimientoController extends Controller
 
         // El detalle solo lo puede agregar el médico dueño del procedimiento
         abort_unless($procedimiento->cedula_medico === $this->cedulaMedico(), 403);
+        $this->abortarSiRegistroEnCitaAtendida($procedimiento);
 
         DetalleProcedimiento::create([
             'id_procedimiento' => $datos['id_procedimiento'],
@@ -141,6 +144,7 @@ class ProcedimientoController extends Controller
         $procedimiento = Procedimiento::findOrFail($id);
 
         abort_unless((int) $procedimiento->cedula_medico === $this->cedulaMedico(), 403);
+        $this->abortarSiRegistroEnCitaAtendida($procedimiento);
 
         $datos = $request->validate([
             'id_tipo_procedimiento' => 'nullable|exists:tipo_procedimiento,id',
@@ -160,6 +164,7 @@ class ProcedimientoController extends Controller
         $detalle = DetalleProcedimiento::with('procedimiento')->findOrFail($id);
 
         abort_unless((int) $detalle->procedimiento->cedula_medico === $this->cedulaMedico(), 403);
+        $this->abortarSiRegistroEnCitaAtendida($detalle);
 
         $datos = $request->validate([
             'descripcion' => 'required|string|max:255',

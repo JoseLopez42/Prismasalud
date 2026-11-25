@@ -27,6 +27,7 @@
         'flecha'        => ['M9 5l7 7-7 7'],
         'inventario'    => ['M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
         'entrega'       => ['M9 12l2 2 4-4m2.5 2a9.5 9.5 0 11-19 0 9.5 9.5 0 0119 0z'],
+        'api'           => ['M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'],
     ];
     $trazos = $iconos[$icono ?? 'dashboard'] ?? $iconos['dashboard'];
 @endphp

@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Medicamento;
+use App\Services\InvimaMedicamentoService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 
 class MedicamentoController extends Controller
 {
+    private const POR_PAGINA_API = 20;
+
     // Lista todos los medicamentos del catálogo
     public function index()
     {
@@ -18,10 +22,55 @@ class MedicamentoController extends Controller
     }
 
     // Formulario para crear un medicamento
-    public function create()
+    public function create(Request $request, InvimaMedicamentoService $servicio)
     {
         $seccionActiva = 'farmacia';
-        return view('admin.farmacia.medicamento.create', compact('seccionActiva'));
+        $modoApi = $request->query('origen') === 'api';
+        $buscarApi = trim((string) $request->query('buscar', ''));
+        $paginadorApi = null;
+        $errorApi = null;
+
+        if ($modoApi) {
+            $resultado = $servicio->buscar($buscarApi);
+            $errorApi = $resultado['error'];
+
+            $medicamentos = [];
+            $nombresVistos = [];
+
+            foreach ($resultado['medicamentos'] as $medicamento) {
+                $claveNombre = mb_strtolower($medicamento['nombre']);
+
+                if ($medicamento['codigo'] === '' || isset($nombresVistos[$claveNombre])) {
+                    continue;
+                }
+
+                $nombresVistos[$claveNombre] = true;
+                $medicamentos[] = $medicamento;
+            }
+
+            $pagina = max(1, (int) $request->query('page', 1));
+            $coleccion = collect($medicamentos);
+            $paginadorApi = new LengthAwarePaginator(
+                $coleccion->forPage($pagina, self::POR_PAGINA_API)->values(),
+                $coleccion->count(),
+                self::POR_PAGINA_API,
+                $pagina,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
+        $catalogo = Medicamento::pluck('nombre', 'codigo');
+        $existentesPorCodigo = $catalogo
+            ->mapWithKeys(fn ($nombre, $codigo) => [mb_strtolower((string) $codigo) => $nombre])
+            ->all();
+        $existentesPorNombre = $catalogo
+            ->mapWithKeys(fn ($nombre, $codigo) => [mb_strtolower((string) $nombre) => $codigo])
+            ->all();
+
+        return view('admin.farmacia.medicamento.create', compact(
+            'seccionActiva', 'modoApi', 'buscarApi', 'paginadorApi', 'errorApi',
+            'existentesPorCodigo', 'existentesPorNombre'
+        ));
     }
 
     // Guarda el nuevo medicamento
