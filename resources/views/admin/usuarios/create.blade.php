@@ -147,17 +147,7 @@
                         </div>
                     </div>
 
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Edad</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-teal-50 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>
-                                <input type="text" name="edad" id="campo-edad" value="{{ old('edad') }}"
-                                       inputmode="numeric" maxlength="3"
-                                       class="campo-form w-full border border-gray-300 rounded-lg pl-11 pr-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                            </div>
-                        </div>
-
+                    <div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
                             <div class="relative">
@@ -216,6 +206,14 @@
                         <div class="p-6 space-y-5">
                         {{-- El "Tipo de documento" ya se pide arriba en el formulario principal,
                              por eso aquí no se repite (quedaría duplicado). --}}
+                        {{-- La edad ya no se escribe: se calcula desde esta fecha. --}}
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento <span class="text-red-500">*</span></label>
+                            <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}"
+                                   min="1900-01-01" max="{{ now()->toDateString() }}" required
+                                   class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        </div>
+
                         <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">País de expedición</label>
@@ -397,8 +395,8 @@
     </div>
 
     <script>
-        // Cédula, edad y teléfono: solo dígitos
-        ['campo-cedula', 'campo-edad', 'campo-telefono'].forEach(function (idCampo) {
+        // Cédula y teléfono: solo dígitos. La fecha se elige en un calendario.
+        ['campo-cedula', 'campo-telefono'].forEach(function (idCampo) {
             document.getElementById(idCampo).addEventListener('input', function () {
                 this.value = this.value.replace(/\D/g, '');
             });

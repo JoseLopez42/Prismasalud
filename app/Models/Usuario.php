@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Admin\Beneficiario;
 use App\Models\Admin\Ciudad;
 use App\Models\Admin\TipoDocumento;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Usuario extends Model
@@ -19,7 +21,6 @@ class Usuario extends Model
         'cedula',
         'nombres',
         'apellidos',
-        'edad',
         'telefono',
         'correo',
         'contrasena',
@@ -67,6 +68,37 @@ class Usuario extends Model
         }
 
         return $rol;
+    }
+
+    /**
+     * Relación con el beneficiario que tiene la misma cédula.
+     * En esta base los pacientes están en beneficiarios.cc_afiliado.
+     */
+    public function beneficiario()
+    {
+        return $this->hasOne(Beneficiario::class, 'cc_afiliado', 'cedula');
+    }
+
+    /**
+     * Edad calculada, nunca guardada.
+     *
+     * usuarios no tiene fecha_nacimiento: se toma la del beneficiario
+     * con la misma cédula. Si no hay fecha, devuelve null y la vista
+     * muestra una raya (—) en vez de un número inventado.
+     */
+    public function getEdadAttribute(): ?int
+    {
+        if (! $this->cedula) {
+            return null;
+        }
+
+        $beneficiario = $this->beneficiario;
+
+        if (! $beneficiario || ! $beneficiario->fecha_nacimiento) {
+            return null;
+        }
+
+        return Carbon::parse($beneficiario->fecha_nacimiento)->age;
     }
 
     // Un usuario pertenece a una ciudad

@@ -3,6 +3,7 @@
 namespace App\Models\Admin;
 
 use App\Casts\BooleanoCifrado;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Beneficiario extends Model
@@ -16,7 +17,7 @@ class Beneficiario extends Model
 
     protected $fillable = [
         'cc_afiliado', 'tipo_persona', 'cc_cotizante', 'id_parentesco', 'nit_eps',
-        'nombres', 'apellidos', 'edad',
+        'nombres', 'apellidos',
         'telefono', 'direccion', 'correo', 'fecha_nacimiento',
 
         'id_tipo_documento', 'id_pais_expedicion',
@@ -47,6 +48,19 @@ class Beneficiario extends Model
         'tiene_discapacidad'       => BooleanoCifrado::class,
         'victima_conflicto_armado' => BooleanoCifrado::class,
     ];
+
+    /**
+     * Edad calculada desde la fecha de nacimiento, que sí es dato fuente.
+     * Sin fecha devuelve null para que la vista muestre —.
+     */
+    public function getEdadAttribute(): ?int
+    {
+        if (! $this->fecha_nacimiento) {
+            return null;
+        }
+
+        return Carbon::parse($this->fecha_nacimiento)->age;
+    }
 
     // Si es beneficiario (familiar): el cotizante del que depende
     public function cotizante()

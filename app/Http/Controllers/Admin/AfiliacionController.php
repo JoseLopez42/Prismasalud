@@ -21,7 +21,6 @@ use App\Models\Admin\Ocupacion;
 use App\Models\Admin\TipoSangre;
 use App\Models\SubTipoPaciente;
 use App\Models\Empresa;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -134,11 +133,10 @@ class AfiliacionController extends Controller
                 'nuevo_cc_afiliado'      => ['required', 'integer', 'digits_between:4,12', 'unique:beneficiarios,cc_afiliado', 'unique:usuarios,cedula'],
                 'nuevo_nombres'          => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
                 'nuevo_apellidos'        => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
-                'nuevo_edad'             => ['required', 'integer', 'min:0', 'max:120'],
                 'nuevo_telefono'         => ['required', 'string', 'max:20', 'regex:/^[+()\d\s\-]{7,20}$/'],
                 'nuevo_direccion'        => ['required', 'string', 'max:255'],
                 'nuevo_correo'           => ['required', 'email', 'max:100', 'unique:beneficiarios,correo', 'unique:usuarios,correo'],
-                'nuevo_fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
+                'nuevo_fecha_nacimiento' => ['required', 'date', 'before_or_equal:today', 'after:1900-01-01'],
                 'nuevo_foto'             => ['nullable', 'image', 'max:2048'],
             ], [
                 'nuevo_cc_cotizante.required'     => 'Selecciona de qué cotizante es familiar el nuevo beneficiario.',
@@ -149,22 +147,17 @@ class AfiliacionController extends Controller
                 'nuevo_cc_afiliado.unique'        => 'Esa cédula ya existe (como beneficiario o como usuario del sistema).',
                 'nuevo_nombres.required'          => 'Los nombres del nuevo beneficiario son obligatorios.',
                 'nuevo_apellidos.required'        => 'Los apellidos del nuevo beneficiario son obligatorios.',
-                'nuevo_edad.required'             => 'La edad del nuevo beneficiario es obligatoria.',
                 'nuevo_telefono.required'         => 'El teléfono del nuevo beneficiario es obligatorio.',
                 'nuevo_direccion.required'        => 'La dirección del nuevo beneficiario es obligatoria.',
                 'nuevo_correo.required'           => 'El correo del nuevo beneficiario es obligatorio.',
                 'nuevo_correo.unique'             => 'Ese correo ya está registrado.',
                 'nuevo_fecha_nacimiento.required' => 'La fecha de nacimiento del nuevo beneficiario es obligatoria.',
+                'nuevo_fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+                'nuevo_fecha_nacimiento.after'    => 'La fecha de nacimiento debe ser posterior a 1900-01-01.',
                 'nuevo_foto.image'                => 'La foto debe ser una imagen.',
                 'nuevo_foto.max'                  => 'La foto no puede pesar más de 2 MB.',
             ]);
 
-            $edadReal = Carbon::parse($request->nuevo_fecha_nacimiento)->age;
-            if (abs((int) $request->nuevo_edad - $edadReal) > 1) {
-                return back()->withErrors([
-                    'nuevo_edad' => 'La edad no coincide con la fecha de nacimiento del nuevo beneficiario (según la fecha, tiene ' . $edadReal . ' años).',
-                ])->withInput();
-            }
         }
 
         if ($request->origen_beneficiario === 'nuevo') {
@@ -201,7 +194,6 @@ class AfiliacionController extends Controller
                     'nit_eps'          => $cotizante->nit_eps,
                     'nombres'          => $request->nuevo_nombres,
                     'apellidos'        => $request->nuevo_apellidos,
-                    'edad'             => $request->nuevo_edad,
                     'telefono'         => $request->nuevo_telefono,
                     'direccion'        => $request->nuevo_direccion,
                     'correo'           => $request->nuevo_correo,
@@ -212,7 +204,6 @@ class AfiliacionController extends Controller
                     'cedula'                => $request->nuevo_cc_afiliado,
                     'nombres'               => $request->nuevo_nombres,
                     'apellidos'             => $request->nuevo_apellidos,
-                    'edad'                  => $request->nuevo_edad,
                     'telefono'              => $request->nuevo_telefono,
                     'correo'                => $request->nuevo_correo,
                     'foto'                  => $rutaFoto,
@@ -512,7 +503,6 @@ class AfiliacionController extends Controller
             'nit_eps'       => null,
             'nombres'      => $usuario->nombres,
             'apellidos'    => $usuario->apellidos,
-            'edad'         => $usuario->edad,
             'telefono'     => $usuario->telefono,
             'direccion'    => '',
             'correo'       => $usuario->correo,

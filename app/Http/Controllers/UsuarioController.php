@@ -72,7 +72,6 @@ class UsuarioController extends Controller
             'cedula'            => 'required|integer|unique:usuarios,cedula',
             'nombres'           => 'required|string|max:100',
             'apellidos'         => 'required|string|max:100',
-            'edad'              => 'nullable|integer|min:0|max:120',
             'telefono'          => 'nullable|string|max:20',
             'correo'            => 'required|email|unique:usuarios,correo',
             'contrasena'        => 'required|string|min:6',
@@ -122,9 +121,16 @@ class UsuarioController extends Controller
                 'tipo_sangre'          => ['nullable', 'string', 'max:5', 'in:O+,O-,A+,A-,B+,B-,AB+,AB-'],
                 'victima_conflicto_armado' => ['nullable', 'boolean'],
                 'numero_afiliacion_anterior' => ['nullable', 'string', 'max:50'],
+
+                // La edad ya no se guarda: se calcula desde esta fecha.
+                // Es obligatoria para pacientes (cotizantes creados aquí).
+                'fecha_nacimiento'     => ['required', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             ], [
                 'tipo_discapacidad.required_if' => 'Si tiene discapacidad, indica el tipo.',
                 'ocupacion_otra.required_if' => 'Si seleccionó "Otro" en ocupación, escriba la ocupación.',
+                'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
+                'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+                'fecha_nacimiento.after' => 'La fecha de nacimiento debe ser posterior a 1900-01-01.',
             ]);
         }
 
@@ -154,11 +160,10 @@ class UsuarioController extends Controller
                     'nit_eps'          => null,
                     'nombres'          => $datos['nombres'],
                     'apellidos'        => $datos['apellidos'],
-                    'edad'             => $datos['edad'] ?? null,
                     'telefono'         => $datos['telefono'] ?? null,
                     'direccion'        => $datos['direccion'] ?? '',
                     'correo'           => $datos['correo'],
-                    'fecha_nacimiento' => null,
+                    'fecha_nacimiento' => $datosPaciente['fecha_nacimiento'],
 
                     // Campos adicionales del paciente (requieren migración en tabla beneficiarios).
                     // Se usa "?? null" porque el formulario deshabilita (y por tanto no
@@ -209,10 +214,13 @@ class UsuarioController extends Controller
         // Roles permitidos en este formulario (Administrador y Paciente)
         $rolesPermitidos = TipoUsuario::asignables()->pluck('id')->all();
 
+        // Solo a los pacientes se les pide la fecha de nacimiento.
+        $tipoUsuario = TipoUsuario::find($request->input('tipo_usuario_id'));
+        $esPaciente = $tipoUsuario && strtolower($tipoUsuario->nombre) === 'paciente';
+
         $datos = $request->validate([
             'nombres'           => 'required|string|max:100',
             'apellidos'         => 'required|string|max:100',
-            'edad'              => 'nullable|integer|min:0|max:120',
             'telefono'          => 'nullable|string|max:20',
             'correo'            => 'required|email|unique:usuarios,correo,' . $cedula . ',cedula',
             'contrasena'        => 'nullable|string|min:6',
@@ -220,6 +228,16 @@ class UsuarioController extends Controller
             'id_ciudad'         => 'nullable|exists:ciudades,id_ciudad',
             'id_tipo_documento' => 'nullable|exists:tipo_documento,id_tipo_documento',
             'foto'              => 'nullable|image|max:2048',
+            'fecha_nacimiento'  => [
+                Rule::requiredIf($esPaciente),
+                'date',
+                'before_or_equal:today',
+                'after:1900-01-01',
+            ],
+        ], [
+            'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria para pacientes.',
+            'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+            'fecha_nacimiento.after' => 'La fecha de nacimiento debe ser posterior a 1900-01-01.',
         ]);
 
         if ($request->hasFile('foto')) {
@@ -234,16 +252,26 @@ class UsuarioController extends Controller
 
         // El sub tipo de paciente solo aplica a los pacientes. Si el rol
         // cambia a Paciente y no tenía sub tipo, se asume Cotizante.
-        $tipoUsuario = TipoUsuario::find($datos['tipo_usuario_id']);
-        $esPaciente = $tipoUsuario && strtolower($tipoUsuario->nombre) === 'paciente';
-
         if (! $esPaciente) {
             $datos['id_sub_tipo_paciente'] = null;
         } elseif (! $usuario->id_sub_tipo_paciente) {
             $datos['id_sub_tipo_paciente'] = SubTipoPaciente::idPorNombre('Cotizante');
         }
 
+        // La fecha vive en beneficiarios, no en usuarios: no se pasa al update.
+        $fechaNacimiento = $datos['fecha_nacimiento'] ?? null;
+        unset($datos['fecha_nacimiento']);
+
         $usuario->update($datos);
+
+        if ($esPaciente && $fechaNacimiento) {
+            $beneficiario = Beneficiario::where('cc_afiliado', $usuario->cedula)->first();
+
+            if ($beneficiario) {
+                $beneficiario->fecha_nacimiento = $fechaNacimiento;
+                $beneficiario->save();
+            }
+        }
 
         return redirect()->route('usuarios.index')->with('exito', 'Usuario actualizado correctamente.');
     }

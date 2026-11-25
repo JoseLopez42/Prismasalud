@@ -116,11 +116,7 @@
                             <input type="text" name="apellidos" value="{{ old('apellidos', $beneficiario->apellidos) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Edad</label>
-                            <input type="number" name="edad" value="{{ old('edad', $beneficiario->edad) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
-                        </div>
+                    <div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
                             <input type="text" name="telefono" value="{{ old('telefono', $beneficiario->telefono) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
@@ -136,8 +132,8 @@
                             <input type="email" name="correo" value="{{ old('correo', $beneficiario->correo) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
-                            <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento', $beneficiario->fecha_nacimiento) }}" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento <span class="text-red-500">*</span></label>
+                            <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento', $beneficiario->fecha_nacimiento) }}" min="1900-01-01" max="{{ now()->toDateString() }}" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
                         </div>
                     </div>
 

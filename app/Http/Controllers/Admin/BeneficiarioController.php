@@ -9,7 +9,6 @@ use App\Models\Admin\Eps;
 use App\Models\Admin\Parentesco;
 use App\Models\Usuario;
 use App\Models\SubTipoPaciente;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -59,11 +58,10 @@ class BeneficiarioController extends Controller
             'cc_afiliado'      => ['required', 'integer', 'digits_between:4,12', 'unique:beneficiarios,cc_afiliado', 'unique:usuarios,cedula'],
             'nombres'          => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
             'apellidos'        => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
-            'edad'             => ['required', 'integer', 'min:0', 'max:120'],
             'telefono'         => ['required', 'string', 'max:20', 'regex:/^[+()\d\s\-]{7,20}$/'],
             'direccion'        => ['required', 'string', 'max:255'],
             'correo'           => ['required', 'email', 'max:100', 'unique:beneficiarios,correo', 'unique:usuarios,correo'],
-            'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
+            'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'foto'             => ['nullable', 'image', 'max:2048'], // opcional, máx 2 MB
         ], [
             'tipo_persona.required'     => 'Indica si la persona es cotizante o beneficiario.',
@@ -80,10 +78,6 @@ class BeneficiarioController extends Controller
             'nombres.regex'             => 'Los nombres solo pueden contener letras, espacios, puntos, guiones y apóstrofos.',
             'apellidos.required'        => 'Los apellidos son obligatorios.',
             'apellidos.regex'           => 'Los apellidos solo pueden contener letras, espacios, puntos, guiones y apóstrofos.',
-            'edad.required'             => 'La edad es obligatoria.',
-            'edad.integer'              => 'La edad debe ser un número entera.',
-            'edad.min'                  => 'La edad no puede ser negativa.',
-            'edad.max'                  => 'La edad no puede superar los 120 años.',
             'telefono.required'         => 'El teléfono es obligatorio.',
             'telefono.regex'            => 'El teléfono debe tener entre 7 y 20 caracteres (números, +, espacios, paréntesis o guiones).',
             'direccion.required'        => 'La dirección es obligatoria.',
@@ -93,18 +87,10 @@ class BeneficiarioController extends Controller
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.date'     => 'La fecha de nacimiento no es una fecha válida.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+            'fecha_nacimiento.after' => 'La fecha de nacimiento debe ser posterior a 1900-01-01.',
             'foto.image'                => 'La foto debe ser una imagen (jpg, png, etc.).',
             'foto.max'                  => 'La foto no puede pesar más de 2 MB.',
         ]);
-
-        // La edad digitada debe coincidir con la fecha de nacimiento
-        // (se permite diferencia de 1 año según si ya cumplió años o no).
-        $edadReal = Carbon::parse($datos['fecha_nacimiento'])->age;
-        if (abs((int) $datos['edad'] - $edadReal) > 1) {
-            return back()->withErrors([
-                'edad' => 'La edad no coincide con la fecha de nacimiento (según la fecha, tiene ' . $edadReal . ' años).',
-            ])->withInput();
-        }
 
         if ($datos['tipo_persona'] === 'cotizante') {
             // Un cotizante no depende de nadie: se limpian esos campos.
@@ -131,7 +117,6 @@ class BeneficiarioController extends Controller
                 'cedula'                => $datos['cc_afiliado'],
                 'nombres'               => $datos['nombres'],
                 'apellidos'             => $datos['apellidos'],
-                'edad'                  => $datos['edad'],
                 'telefono'              => $datos['telefono'],
                 'correo'                => $datos['correo'],
                 'foto'                  => $rutaFoto,
@@ -216,11 +201,10 @@ class BeneficiarioController extends Controller
         $reglas = [
             'nombres'          => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
             'apellidos'        => ['required', 'string', 'max:100', 'regex:/^[\pL\s.\'-]+$/u'],
-            'edad'             => ['required', 'integer', 'min:0', 'max:120'],
             'telefono'         => ['required', 'string', 'max:20', 'regex:/^[+()\d\s\-]{7,20}$/'],
             'direccion'        => ['required', 'string', 'max:255'],
             'correo'           => ['required', 'email', 'max:100', 'unique:beneficiarios,correo,' . $cc . ',cc_afiliado', 'unique:usuarios,correo,' . $cc . ',cedula'],
-            'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today'],
+            'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'foto'             => ['nullable', 'image', 'max:2048'],
         ];
 
@@ -249,10 +233,6 @@ class BeneficiarioController extends Controller
             'nombres.regex'             => 'Los nombres solo pueden contener letras, espacios, puntos, guiones y apóstrofos.',
             'apellidos.required'        => 'Los apellidos son obligatorios.',
             'apellidos.regex'           => 'Los apellidos solo pueden contener letras, espacios, puntos, guiones y apóstrofos.',
-            'edad.required'             => 'La edad es obligatoria.',
-            'edad.integer'              => 'La edad debe ser un número entera.',
-            'edad.min'                  => 'La edad no puede ser negativa.',
-            'edad.max'                  => 'La edad no puede superar los 120 años.',
             'telefono.required'         => 'El teléfono es obligatorio.',
             'telefono.regex'            => 'El teléfono debe tener entre 7 y 20 caracteres (números, +, espacios, paréntesis o guiones).',
             'direccion.required'        => 'La dirección es obligatoria.',
@@ -262,6 +242,7 @@ class BeneficiarioController extends Controller
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.date'     => 'La fecha de nacimiento no es una fecha válida.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+            'fecha_nacimiento.after' => 'La fecha de nacimiento debe ser posterior a 1900-01-01.',
             'foto.image'                => 'La foto debe ser una imagen (jpg, png, etc.).',
             'foto.max'                  => 'La foto no puede pesar más de 2 MB.',
         ];
@@ -274,13 +255,6 @@ class BeneficiarioController extends Controller
         }
 
         $datos = $request->validate($reglas, $mensajes);
-
-        $edadReal = Carbon::parse($datos['fecha_nacimiento'])->age;
-        if (abs((int) $datos['edad'] - $edadReal) > 1) {
-            return back()->withErrors([
-                'edad' => 'La edad no coincide con la fecha de nacimiento (según la fecha, tiene ' . $edadReal . ' años).',
-            ])->withInput();
-        }
 
         if ($esCotizante) {
             // Un cotizante es titular: no depende de nadie ni tiene parentesco.
@@ -321,7 +295,6 @@ class BeneficiarioController extends Controller
                 $usuario->update([
                     'nombres'   => $datos['nombres'],
                     'apellidos' => $datos['apellidos'],
-                    'edad'      => $datos['edad'],
                     'telefono'  => $datos['telefono'],
                     'correo'    => $datos['correo'],
                 ]);
