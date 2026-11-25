@@ -2,6 +2,7 @@
 
 namespace App\Models\Admin;
 
+use App\Casts\BooleanoCifrado;
 use Illuminate\Database\Eloquent\Model;
 
 class Beneficiario extends Model
@@ -26,6 +27,25 @@ class Beneficiario extends Model
         'estrato', 'id_nivel_educativo', 'id_ocupacion', 'ocupacion_otra',
         'tipo_sangre', 'victima_conflicto_armado',
         'numero_afiliacion_anterior',
+    ];
+
+    /*
+    | DBA-03 (parte 3): datos sensibles cifrados (Ley 1581 de 2012).
+    | Laravel los cifra al guardar y los descifra al leer, con la llave APP_KEY.
+    | En la base se ven ilegibles; en la app se ven normales.
+    |
+    | IMPORTANTE: si se pierde o cambia APP_KEY, estos datos NO se pueden recuperar.
+    | Y como están cifrados, no se puede buscar ni ordenar por ellos en SQL.
+    */
+    protected $casts = [
+        'grupo_etnico'             => 'encrypted',
+        'tipo_sangre'              => 'encrypted',
+        'tipo_discapacidad'        => 'encrypted',
+        'telefono'                 => 'encrypted',
+        'telefono_fijo'            => 'encrypted',
+        'direccion'                => 'encrypted',
+        'tiene_discapacidad'       => BooleanoCifrado::class,
+        'victima_conflicto_armado' => BooleanoCifrado::class,
     ];
 
     // Si es beneficiario (familiar): el cotizante del que depende
