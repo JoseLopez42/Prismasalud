@@ -48,7 +48,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `valores_antes`: `json_valid(`valores_antes`)`.
+- `valores_antes`: `` `json_valid(`valores_antes`)` ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -82,9 +82,9 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_beneficiarios_cotizante_cc`: ``tipo_persona` = 'cotizante' and `cc_cotizante` is null or `tipo_persona` = 'beneficiario' and `cc_cotizante` is not null`.
-- `chk_beneficiarios_estrato`: ``estrato` is null or `estrato` between 1 and 6`.
-- `chk_beneficiarios_tipo_persona`: ``tipo_persona` in ('cotizante','beneficiario')`.
+- `chk_beneficiarios_cotizante_cc`: `` `tipo_persona` = 'cotizante' and `cc_cotizante` is null or `tipo_persona` = 'beneficiario' and `cc_cotizante` is not null ``.
+- `chk_beneficiarios_estrato`: `` `estrato` is null or `estrato` between 1 and 6 ``.
+- `chk_beneficiarios_tipo_persona`: `` `tipo_persona` in ('cotizante','beneficiario') ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -156,7 +156,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_cita_hora`: ``hora_fin` > `hora_inicio``.
+- `chk_cita_hora`: `` `hora_fin` > `hora_inicio` ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -272,7 +272,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_detalle_procedimiento_cantidad`: ``cantidad` > 0`.
+- `chk_detalle_procedimiento_cantidad`: `` `cantidad` > 0 ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -325,7 +325,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_empresas_estado`: ``estado` in ('activa','prueba','suspendida','inactiva','vencida')`.
+- `chk_empresas_estado`: `` `estado` in ('activa','prueba','suspendida','inactiva','vencida') ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -358,7 +358,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_empresas_estado`: ``estado` in ('activa','prueba','suspendida','inactiva','vencida')`.
+- `chk_empresas_estado`: `` `estado` in ('activa','prueba','suspendida','inactiva','vencida') ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -616,7 +616,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_horario_medico_hora`: ``hora_fin` > `hora_inicio``.
+- `chk_horario_medico_hora`: `` `hora_fin` > `hora_inicio` ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -642,7 +642,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_licencias_estado`: ``estado` in ('activa','prueba','suspendida','inactiva','vencida')`.
+- `chk_licencias_estado`: `` `estado` in ('activa','prueba','suspendida','inactiva','vencida') ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -785,7 +785,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_medico_estado`: ``estado` in ('activo','inactivo')`.
+- `chk_medico_estado`: `` `estado` in ('activo','inactivo') ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -892,8 +892,8 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `beneficios`: `json_valid(`beneficios`)`.
-- `no_incluye`: `json_valid(`no_incluye`)`.
+- `beneficios`: `` `json_valid(`beneficios`)` ``.
+- `no_incluye`: `` `json_valid(`no_incluye`)` ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -932,8 +932,8 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_prescripcion_estado`: ``estado` in ('pendiente','entregada')`.
-- `chk_prescripcion_fecha_limite`: ``fecha_limite` is null or `fecha_limite` >= `fecha``.
+- `chk_prescripcion_estado`: `` `estado` in ('pendiente','entregada') ``.
+- `chk_prescripcion_fecha_limite`: `` `fecha_limite` is null or `fecha_limite` >= `fecha` ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
@@ -1171,7 +1171,7 @@ Los campos sensibles de `beneficiarios` se guardan cifrados y se exponen descifr
 
 **Restricciones CHECK.**
 
-- `chk_transacciones_tipo`: ``tipo` in ('compra','renovacion')`.
+- `chk_transacciones_tipo`: `` `tipo` in ('compra','renovacion') ``.
 
 | Columna | Tipo | Nulo | Llave | Default | Descripción |
 |---|---|---|---|---|---|
