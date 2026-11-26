@@ -1,0 +1,688 @@
+// Diagrama ER de unoa_pruebas, generado desde information_schema el 26/11/2026.
+// Se excluyen cache, cache_locks, jobs, job_batches, failed_jobs, sessions, password_reset_tokens y migrations.
+// Las acciones ON DELETE y ON UPDATE están documentadas en docs/diccionario_datos.md.
+
+Table afiliacion [note: 'Registra la afiliación de un usuario o beneficiario a una EPS, régimen, empresa y estado, con su fecha.'] {
+  id_afiliacion bigint unsigned [pk, not null, increment]
+  fecha_afiliacion date [not null]
+  id_tipo_afiliacion bigint unsigned [not null]
+  nit_eps varchar(20)
+  nit_empresa varchar(30)
+  nombre_empresa varchar(150)
+  cc_usuario bigint unsigned [not null]
+  id_estado bigint unsigned [not null]
+  cc_afiliado bigint unsigned [not null]
+  created_at datetime
+  updated_at datetime
+  id_parentesco bigint unsigned
+}
+
+Table auditoria_clinica [note: 'Registro inmutable de cambios y bajas de historia clínica para trazabilidad sanitaria (Ley 2015 de 2020).'] {
+  id bigint unsigned [pk, not null, increment]
+  tabla varchar(64) [not null]
+  id_registro bigint unsigned [not null]
+  accion enum('UPDATE','DELETE') [not null]
+  valores_antes longtext [not null]
+  usuario_bd varchar(100) [not null]
+  usuario_app bigint unsigned
+  fecha datetime [not null]
+}
+
+Table beneficiarios [note: 'Ficha demográfica y de seguridad social de cotizantes y beneficiarios, con datos sensibles cifrados.'] {
+  cc_afiliado bigint unsigned [pk, not null]
+  tipo_persona varchar(15) [not null]
+  cc_cotizante bigint unsigned
+  nit_eps varchar(20)
+  id_tipo_documento bigint unsigned
+  grupo_etnico text
+  tiene_discapacidad text
+  tipo_discapacidad text
+  telefono_fijo text
+  estrato tinyint(3) unsigned
+  tipo_sangre text
+  victima_conflicto_armado text
+  numero_afiliacion_anterior varchar(50)
+  nombres varchar(100) [not null]
+  apellidos varchar(100) [not null]
+  telefono text
+  direccion text [not null]
+  correo varchar(100) [not null]
+  fecha_nacimiento date
+  created_at datetime
+  updated_at datetime
+  id_genero bigint unsigned
+  id_estado_civil bigint unsigned
+  id_nivel_educativo bigint unsigned
+  id_ocupacion bigint unsigned
+  id_pais_nacionalidad bigint unsigned
+  id_pais_nacimiento bigint unsigned
+  id_pais_expedicion bigint unsigned
+  id_zona_residencia bigint unsigned
+  id_parentesco bigint unsigned
+  ocupacion_otra varchar(100)
+}
+
+Table catalogo_procedimiento [note: 'Catálogo de procedimientos agrupados por tipo, usado al registrar procedimientos clínicos.'] {
+  id bigint unsigned [pk, not null, increment]
+  id_tipo_procedimiento bigint unsigned [not null]
+  nombre varchar(150) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table cita [note: 'Agenda de citas médicas por empresa, paciente, médico, consultorio, tipo y estado, con su franja horaria.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned
+  cedula_usuario bigint unsigned [not null]
+  cedula_medico bigint unsigned [not null]
+  id_consultorio bigint unsigned [not null]
+  id_tipo_cita bigint unsigned [not null]
+  id_estado_cita bigint unsigned [not null]
+  fecha date [not null]
+  hora_inicio time [not null]
+  hora_fin time [not null]
+  motivo varchar(255)
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table ciudades [note: 'Catálogo de ciudades asociadas a un departamento.'] {
+  id_ciudad bigint unsigned [pk, not null, increment]
+  ciudad varchar(255) [not null]
+  id_departamento bigint unsigned
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table consultorio [note: 'Consultorios físicos de una sede donde se atienden citas y se programan horarios médicos.'] {
+  id bigint unsigned [pk, not null, increment]
+  nombre varchar(100) [not null, unique]
+  descripcion varchar(255)
+  ubicacion varchar(150)
+  id_sede bigint unsigned
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table departamentos [note: 'Catálogo de departamentos del país.'] {
+  id_departamento bigint unsigned [pk, not null, increment]
+  nombre_departamento varchar(255) [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table detalle_afiliado_afiliacion [note: 'Relación entre afiliaciones y afiliados, con el estado de cada vínculo.'] {
+  id_detalle bigint unsigned [pk, not null, increment]
+  id_afiliacion bigint unsigned [not null]
+  cc_afiliado bigint unsigned [not null]
+  id_estado bigint unsigned [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table detalle_procedimiento [note: 'Ítems de ejecución de un procedimiento, con descripción, cantidad y resultado.'] {
+  id bigint unsigned [pk, not null, increment]
+  id_procedimiento bigint unsigned [not null]
+  descripcion varchar(255) [not null]
+  cantidad int(10) unsigned [not null]
+  resultado text
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table diagnostico [note: 'Diagnósticos clínicos emitidos por un médico a un paciente, vinculados a historia clínica y empresa.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned
+  cedula_paciente bigint unsigned [not null]
+  cedula_medico bigint unsigned [not null]
+  id_historia_clinica bigint unsigned
+  descripcion varchar(255) [not null]
+  tipo varchar(50)
+  fecha date [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table empresas [note: 'Empresas o IPS clientes con licencia, plan, NIT único y estado contractual.'] {
+  id bigint unsigned [pk, not null, increment]
+  usuario_cedula bigint unsigned
+  licencia_id bigint unsigned
+  nit varchar(30) [not null, unique]
+  nombre varchar(150) [not null]
+  tipo_entidad varchar(20)
+  representante_legal varchar(150)
+  correo varchar(150)
+  telefono varchar(20)
+  departamento varchar(80)
+  ciudad varchar(80)
+  direccion varchar(200)
+  plan varchar(50)
+  fecha_compra date
+  fecha_expiracion date
+  estado varchar(20) [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table empresas_respaldo_dba11 [note: 'Respaldo de empresas antes de la unificación por NIT realizada en DBA-11.'] {
+  id bigint unsigned [pk, not null, increment]
+  usuario_cedula bigint unsigned
+  licencia_id bigint unsigned
+  nit varchar(30) [not null]
+  nombre varchar(150) [not null]
+  tipo_entidad varchar(20)
+  representante_legal varchar(150)
+  correo varchar(150)
+  telefono varchar(20)
+  departamento varchar(80)
+  ciudad varchar(80)
+  direccion varchar(200)
+  plan varchar(50)
+  fecha_compra date
+  fecha_expiracion date
+  estado varchar(20) [not null]
+  created_at datetime
+  updated_at datetime
+  accion_dba11 varchar(20) [not null]
+}
+
+Table enfermedad [note: 'Antecedentes o enfermedades registradas en la historia clínica del paciente por empresa.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned
+  cedula_paciente bigint unsigned [not null]
+  cedula_medico bigint unsigned [not null]
+  id_historia_clinica bigint unsigned
+  nombre varchar(150) [not null]
+  descripcion text
+  fecha date [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table eps [note: 'Entidades promotoras de salud con NIT, sede y teléfono de contacto.'] {
+  nit_eps varchar(20) [pk, not null]
+  nombre_eps varchar(255) [not null]
+  telefono_contacto varchar(20) [not null]
+  id_sede bigint unsigned
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table especialidad [note: 'Catálogo de especialidades médicas.'] {
+  id bigint unsigned [pk, not null, increment]
+  nombre varchar(100) [not null, unique]
+  descripcion varchar(255)
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table estado [note: 'Catálogo genérico de estados usado por afiliación y detalle de afiliación.'] {
+  id_estado bigint unsigned [pk, not null, increment]
+  estado varchar(50) [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table estados_civiles [note: 'Catálogo de estados civiles de los beneficiarios.'] {
+  id_estado_civil bigint unsigned [pk, not null, increment]
+  nombre varchar(50) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table estado_cita [note: 'Catálogo de estados de la cita médica.'] {
+  id bigint unsigned [pk, not null, increment]
+  nombre varchar(50) [not null, unique]
+  descripcion varchar(255)
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table estratos [note: 'Catálogo de estratos socioeconómicos permitidos, del 1 al 6.'] {
+  id_estrato bigint unsigned [pk, not null, increment]
+  numero int [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table generos [note: 'Catálogo de géneros de los beneficiarios.'] {
+  id_genero bigint unsigned [pk, not null, increment]
+  nombre varchar(20) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table grupos_etnicos [note: 'Catálogo de grupos étnicos de los beneficiarios; dato sensible cifrado en la ficha.'] {
+  id_grupo_etnico bigint unsigned [pk, not null, increment]
+  nombre varchar(50) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table historia_clinica [note: 'Historia clínica por empresa, paciente, médico y cita; sus cambios son auditados por triggers.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned
+  cedula_paciente bigint unsigned [not null]
+  cedula_medico bigint unsigned [not null]
+  id_cita bigint unsigned
+  fecha date [not null]
+  motivo_consulta text
+  antecedentes text
+  examen_fisico text
+  observaciones text
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table horario_medico [note: 'Disponibilidad de un médico en un consultorio para una fecha y franja horaria.'] {
+  id bigint unsigned [pk, not null, increment]
+  cedula_medico bigint unsigned [not null]
+  id_consultorio bigint unsigned [not null]
+  fecha date [not null]
+  hora_inicio time [not null]
+  hora_fin time [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table licencias [note: 'Licencias contratadas por una empresa o IPS, con plan, vigencia y estado.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned [not null]
+  usuario_cedula bigint unsigned
+  nombre_ips varchar(255) [not null]
+  nit varchar(30) [not null]
+  tipo_entidad varchar(30)
+  representante_legal varchar(150)
+  correo_ips varchar(150)
+  telefono_ips varchar(20)
+  departamento varchar(80)
+  ciudad varchar(80)
+  direccion varchar(200)
+  contacto_nombre varchar(255)
+  contacto_email varchar(255)
+  contacto_telefono varchar(20)
+  plan varchar(255) [not null]
+  plan_id bigint unsigned
+  fecha_inicio date [not null]
+  fecha_fin date [not null]
+  estado varchar(255) [not null]
+  notas text
+  created_at datetime
+  updated_at datetime
+}
+
+Table log_ingresos [note: 'Registro de ingresos de usuarios, médicos y cuentas Laravel, alimentado por triggers.'] {
+  id bigint unsigned [pk, not null, increment]
+  cedula bigint unsigned [not null]
+  tipo_usuario varchar(50) [not null]
+  fecha date [not null]
+  hora time [not null]
+}
+
+Table log_ingresos_historico [note: 'Histórico frío de log_ingresos después de la purga configurable.'] {
+  id bigint unsigned [pk, not null, increment]
+  cedula bigint unsigned [not null]
+  tipo_usuario varchar(50) [not null]
+  fecha date [not null]
+  hora time [not null]
+}
+
+Table log_licencias [note: 'Registro de cambios de plan en licencias, alimentado por trg_log_cambio_plan.'] {
+  id int(10) unsigned [pk, not null, increment]
+  licencia_id bigint unsigned [not null]
+  nombre_ips varchar(255)
+  plan_anterior varchar(100)
+  plan_nuevo varchar(100)
+  fecha_cambio datetime [not null]
+}
+
+Table log_licencias_historico [note: 'Histórico frío de log_licencias después de la purga configurable.'] {
+  id int(10) unsigned [pk, not null, increment]
+  licencia_id bigint unsigned [not null]
+  nombre_ips varchar(255)
+  plan_anterior varchar(100)
+  plan_nuevo varchar(100)
+  fecha_cambio datetime [not null]
+}
+
+Table medicamento [note: 'Catálogo de medicamentos con código, presentación y stock disponible.'] {
+  codigo varchar(50) [pk, not null]
+  nombre varchar(150) [not null, unique]
+  presentacion varchar(100)
+  descripcion text
+  stock int(10) unsigned [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table medico [note: 'Profesional médico con credenciales, especialidad, contacto y último ingreso.'] {
+  cedula bigint unsigned [pk, not null]
+  nombres varchar(100) [not null]
+  apellidos varchar(100) [not null]
+  foto varchar(255)
+  correo varchar(150) [not null, unique]
+  telefono varchar(20)
+  direccion varchar(200)
+  contrasena varchar(255) [not null]
+  estado varchar(20) [not null]
+  id_especialidad bigint unsigned [not null]
+  created_at datetime
+  updated_at datetime
+  ultimo_ingreso datetime
+}
+
+Table niveles_educativos [note: 'Catálogo de niveles educativos de los beneficiarios.'] {
+  id_nivel_educativo bigint unsigned [pk, not null, increment]
+  nombre varchar(50) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table ocupaciones [note: 'Catálogo de ocupaciones de los beneficiarios.'] {
+  id_ocupacion bigint unsigned [pk, not null, increment]
+  nombre varchar(100) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table paises [note: 'Catálogo de países usado en nacionalidad, nacimiento y expedición de documentos.'] {
+  id_pais bigint unsigned [pk, not null, increment]
+  nombre varchar(100) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table parentescos [note: 'Catálogo de parentescos entre cotizante y beneficiario.'] {
+  id_parentesco bigint unsigned [pk, not null, increment]
+  nombre varchar(40) [not null, unique]
+  created_at datetime
+  updated_at datetime
+}
+
+Table planes [note: 'Planes comerciales con precios, beneficios, exclusiones y presentación en la web.'] {
+  id bigint unsigned [pk, not null, increment]
+  slug varchar(255) [not null, unique]
+  nombre varchar(255) [not null]
+  etiqueta varchar(255)
+  descripcion text
+  precio_total bigint unsigned
+  periodo varchar(255)
+  ideal text
+  beneficios longtext
+  no_incluye longtext
+  cta varchar(255)
+  cta_url varchar(255)
+  icono varchar(255)
+  clase_icono varchar(255)
+  destacada boolean [not null]
+  activo boolean [not null]
+  orden int(10) unsigned [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table prescripcion [note: 'Prescripciones médicas por empresa y cita, con medicamento, dosis, vigencia y entrega en farmacia.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned
+  id_cita bigint unsigned
+  cedula_paciente bigint unsigned [not null]
+  cedula_medico bigint unsigned [not null]
+  id_medicamento varchar(50)
+  medicamento varchar(150) [not null]
+  dosis varchar(100)
+  frecuencia varchar(100)
+  duracion varchar(100)
+  indicaciones text
+  fecha date [not null]
+  fecha_limite date
+  activo boolean [not null]
+  estado varchar(20) [not null]
+  fecha_entrega datetime
+  cedula_farmaceuta bigint unsigned
+  cantidad_entregada int(10) unsigned
+  observacion_entrega varchar(255)
+  created_at datetime
+  updated_at datetime
+}
+
+Table procedimiento [note: 'Procedimientos clínicos ejecutados por empresa, cita, médico y paciente.'] {
+  id bigint unsigned [pk, not null, increment]
+  empresa_id bigint unsigned
+  cedula_paciente bigint unsigned [not null]
+  cedula_medico bigint unsigned [not null]
+  id_cita bigint unsigned
+  id_tipo_procedimiento bigint unsigned
+  fecha date [not null]
+  descripcion varchar(255) [not null]
+  observaciones text
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table regimen [note: 'Catálogo de regímenes de afiliación, usado como tipo de afiliación.'] {
+  id_regimen bigint unsigned [pk, not null, increment]
+  nombre_regimen varchar(255) [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table sedes [note: 'Sedes físicas de la IPS, ubicadas por ciudad.'] {
+  id_sede bigint unsigned [pk, not null, increment]
+  nombre_sede varchar(255) [not null]
+  direccion varchar(255) [not null]
+  telefono varchar(20) [not null]
+  id_ciudad bigint unsigned
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table sub_tipo_paciente [note: 'Subtipos de paciente usados para clasificar a los usuarios.'] {
+  id_sub_tipo_paciente bigint unsigned [pk, not null, increment]
+  nombre varchar(30) [not null, unique]
+  descripcion varchar(150)
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table tipos_sangre [note: 'Catálogo de tipos de sangre; dato sensible cifrado en la ficha del beneficiario.'] {
+  id_tipo_sangre bigint unsigned [pk, not null, increment]
+  nombre varchar(10) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table tipos_usuario [note: 'Catálogo de tipos de usuario del sistema, como paciente, médico o administrador.'] {
+  id bigint unsigned [pk, not null, increment]
+  nombre varchar(50) [not null]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table tipo_cita [note: 'Tipos de cita médica con código CUPS, duración y especialidad opcional.'] {
+  id bigint unsigned [pk, not null, increment]
+  nombre varchar(191) [not null, unique]
+  codigo_cups varchar(10) [unique]
+  descripcion varchar(255)
+  categoria varchar(80)
+  fuente varchar(60)
+  duracion_minutos smallint(5) unsigned [not null]
+  id_especialidad bigint unsigned
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table tipo_documento [note: 'Catálogo de tipos de documento usado por usuarios y beneficiarios.'] {
+  id_tipo_documento bigint unsigned [pk, not null, increment]
+  tipo_documento varchar(100) [not null]
+  activo boolean [not null]
+}
+
+Table tipo_procedimiento [note: 'Catálogo de tipos de procedimiento clínico.'] {
+  id bigint unsigned [pk, not null, increment]
+  nombre varchar(150) [not null, unique]
+  descripcion text
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table transacciones [note: 'Compras y renovaciones de licencias, con plan, monto, método y referencia de pago.'] {
+  id bigint unsigned [pk, not null, increment]
+  licencia_id bigint unsigned [not null]
+  usuario_cedula bigint unsigned
+  plan_id bigint unsigned
+  monto bigint unsigned [not null]
+  tipo varchar(255) [not null]
+  metodo_pago varchar(255) [not null]
+  referencia_pago varchar(255)
+  estado varchar(255) [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Table users [note: 'Usuarios de autenticación Laravel con rol y último ingreso.'] {
+  id bigint unsigned [pk, not null]
+  name varchar(255) [not null]
+  email varchar(255) [not null, unique]
+  email_verified_at datetime
+  password varchar(255) [not null]
+  rol varchar(30) [not null]
+  remember_token varchar(100)
+  created_at datetime
+  updated_at datetime
+  ultimo_ingreso datetime
+}
+
+Table usuarios [note: 'Pacientes y usuarios del negocio identificados por cédula, con EPS, ciudad y tipo de usuario.'] {
+  cedula bigint unsigned [pk, not null]
+  nombres varchar(100) [not null]
+  apellidos varchar(100) [not null]
+  telefono varchar(20)
+  id_ciudad bigint unsigned
+  id_tipo_documento bigint unsigned
+  nit_eps varchar(20)
+  activo boolean [not null]
+  correo varchar(150) [not null, unique]
+  contrasena varchar(255) [not null]
+  foto varchar(255)
+  codigo varchar(6)
+  codigo_expira_en datetime
+  tipo_usuario_id bigint unsigned [not null]
+  id_sub_tipo_paciente bigint unsigned
+  licencia_id bigint unsigned
+  created_at datetime
+  updated_at datetime
+  debe_crear_contrasena boolean [not null]
+  ultimo_ingreso datetime
+}
+
+Table zonas_residencia [note: 'Catálogo de zonas de residencia de los beneficiarios.'] {
+  id_zona_residencia bigint unsigned [pk, not null, increment]
+  nombre varchar(20) [not null, unique]
+  activo boolean [not null]
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: afiliacion.cc_afiliado > beneficiarios.cc_afiliado
+Ref: afiliacion.cc_usuario > usuarios.cedula
+Ref: afiliacion.id_estado > estado.id_estado
+Ref: afiliacion.id_parentesco > parentescos.id_parentesco
+Ref: afiliacion.id_tipo_afiliacion > regimen.id_regimen
+Ref: afiliacion.nit_eps > eps.nit_eps
+Ref: beneficiarios.cc_cotizante > beneficiarios.cc_afiliado
+Ref: beneficiarios.id_estado_civil > estados_civiles.id_estado_civil
+Ref: beneficiarios.id_genero > generos.id_genero
+Ref: beneficiarios.id_nivel_educativo > niveles_educativos.id_nivel_educativo
+Ref: beneficiarios.id_ocupacion > ocupaciones.id_ocupacion
+Ref: beneficiarios.id_pais_expedicion > paises.id_pais
+Ref: beneficiarios.id_pais_nacimiento > paises.id_pais
+Ref: beneficiarios.id_pais_nacionalidad > paises.id_pais
+Ref: beneficiarios.id_parentesco > parentescos.id_parentesco
+Ref: beneficiarios.id_tipo_documento > tipo_documento.id_tipo_documento
+Ref: beneficiarios.id_zona_residencia > zonas_residencia.id_zona_residencia
+Ref: beneficiarios.nit_eps > eps.nit_eps
+Ref: catalogo_procedimiento.id_tipo_procedimiento > tipo_procedimiento.id
+Ref: cita.cedula_medico > medico.cedula
+Ref: cita.cedula_usuario > usuarios.cedula
+Ref: cita.empresa_id > empresas.id
+Ref: cita.id_consultorio > consultorio.id
+Ref: cita.id_estado_cita > estado_cita.id
+Ref: cita.id_tipo_cita > tipo_cita.id
+Ref: ciudades.id_departamento > departamentos.id_departamento
+Ref: consultorio.id_sede > sedes.id_sede
+Ref: detalle_afiliado_afiliacion.cc_afiliado > beneficiarios.cc_afiliado
+Ref: detalle_afiliado_afiliacion.id_afiliacion > afiliacion.id_afiliacion
+Ref: detalle_afiliado_afiliacion.id_estado > estado.id_estado
+Ref: detalle_procedimiento.id_procedimiento > procedimiento.id
+Ref: diagnostico.cedula_medico > medico.cedula
+Ref: diagnostico.cedula_paciente > usuarios.cedula
+Ref: diagnostico.empresa_id > empresas.id
+Ref: diagnostico.id_historia_clinica > historia_clinica.id
+Ref: empresas.licencia_id > licencias.id
+Ref: empresas.usuario_cedula > usuarios.cedula
+Ref: enfermedad.cedula_medico > medico.cedula
+Ref: enfermedad.cedula_paciente > usuarios.cedula
+Ref: enfermedad.empresa_id > empresas.id
+Ref: enfermedad.id_historia_clinica > historia_clinica.id
+Ref: eps.id_sede > sedes.id_sede
+Ref: historia_clinica.cedula_medico > medico.cedula
+Ref: historia_clinica.cedula_paciente > usuarios.cedula
+Ref: historia_clinica.empresa_id > empresas.id
+Ref: historia_clinica.id_cita > cita.id
+Ref: horario_medico.cedula_medico > medico.cedula
+Ref: horario_medico.id_consultorio > consultorio.id
+Ref: licencias.empresa_id > empresas.id
+Ref: licencias.plan_id > planes.id
+Ref: licencias.usuario_cedula > usuarios.cedula
+Ref: medico.id_especialidad > especialidad.id
+Ref: prescripcion.cedula_farmaceuta > usuarios.cedula
+Ref: prescripcion.cedula_medico > medico.cedula
+Ref: prescripcion.cedula_paciente > usuarios.cedula
+Ref: prescripcion.empresa_id > empresas.id
+Ref: prescripcion.id_cita > cita.id
+Ref: prescripcion.id_medicamento > medicamento.codigo
+Ref: procedimiento.cedula_medico > medico.cedula
+Ref: procedimiento.cedula_paciente > usuarios.cedula
+Ref: procedimiento.empresa_id > empresas.id
+Ref: procedimiento.id_cita > cita.id
+Ref: procedimiento.id_tipo_procedimiento > tipo_procedimiento.id
+Ref: sedes.id_ciudad > ciudades.id_ciudad
+Ref: tipo_cita.id_especialidad > especialidad.id
+Ref: transacciones.licencia_id > licencias.id
+Ref: transacciones.plan_id > planes.id
+Ref: transacciones.usuario_cedula > usuarios.cedula
+Ref: usuarios.id_ciudad > ciudades.id_ciudad
+Ref: usuarios.id_sub_tipo_paciente > sub_tipo_paciente.id_sub_tipo_paciente
+Ref: usuarios.id_tipo_documento > tipo_documento.id_tipo_documento
+Ref: usuarios.licencia_id > licencias.id
+Ref: usuarios.nit_eps > eps.nit_eps
+Ref: usuarios.tipo_usuario_id > tipos_usuario.id
