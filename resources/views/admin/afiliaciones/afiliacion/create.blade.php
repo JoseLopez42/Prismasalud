@@ -184,15 +184,9 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Edad</label>
-                                <input type="number" name="nuevo_edad" value="{{ old('nuevo_edad') }}" min="0" max="120" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
-                                <input type="text" name="nuevo_telefono" value="{{ old('nuevo_telefono') }}" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
+                            <input type="text" name="nuevo_telefono" value="{{ old('nuevo_telefono') }}" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                         </div>
 
                         <div>
@@ -206,8 +200,8 @@
                                 <input type="email" name="nuevo_correo" value="{{ old('nuevo_correo') }}" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
-                                <input type="date" name="nuevo_fecha_nacimiento" value="{{ old('nuevo_fecha_nacimiento') }}" class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento <span class="text-red-500">*</span></label>
+                                <input type="date" name="nuevo_fecha_nacimiento" value="{{ old('nuevo_fecha_nacimiento') }}" min="1900-01-01" max="{{ now()->toDateString() }}" required class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
                             </div>
                         </div>
 

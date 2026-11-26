@@ -64,7 +64,7 @@
                             <td class="px-4 py-3 text-gray-500">{{ $b->cc_afiliado }}</td>
                             <td class="px-4 py-3 font-semibold text-gray-900">{{ $b->nombres }} {{ $b->apellidos }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->eps?->nombre_eps ?? '—' }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $b->edad }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $b->edad ? $b->edad . ' años' : '—' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->telefono }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->correo }}</td>
                             <td class="px-4 py-3">
@@ -135,7 +135,7 @@
                             </td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->eps?->nombre_eps ?? '—' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->parentesco?->nombre ?? '—' }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $b->edad }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $b->edad ? $b->edad . ' años' : '—' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->telefono }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $b->correo }}</td>
                             <td class="px-4 py-3">

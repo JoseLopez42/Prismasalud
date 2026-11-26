@@ -139,14 +139,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Edad</label>
-                            <input type="number" id="campo-edad" name="edad" value="{{ old('edad') }}"
-                                   min="0" max="120" placeholder="Ej: 34"
-                                   class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
-                            <p id="error-edad" class="text-xs text-red-600 mt-1.5"></p>
-                        </div>
+                    <div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
                             <input type="tel" id="campo-telefono" name="telefono" value="{{ old('telefono') }}"
@@ -173,8 +166,9 @@
                             <p id="error-correo" class="text-xs text-red-600 mt-1.5"></p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Fecha de nacimiento <span class="text-red-500">*</span></label>
                             <input type="date" id="campo-fecha" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}"
+                                   min="1900-01-01" max="{{ now()->toDateString() }}"
                                    class="campo-form w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" required>
                             <p id="error-fecha" class="text-xs text-red-600 mt-1.5"></p>
                         </div>
@@ -221,7 +215,6 @@
                 cc:         document.getElementById('campo-cc'),
                 nombres:    document.getElementById('campo-nombres'),
                 apellidos:  document.getElementById('campo-apellidos'),
-                edad:       document.getElementById('campo-edad'),
                 telefono:   document.getElementById('campo-telefono'),
                 direccion:  document.getElementById('campo-direccion'),
                 correo:     document.getElementById('campo-correo'),
@@ -235,7 +228,6 @@
                 cc:         document.getElementById('error-cc'),
                 nombres:    document.getElementById('error-nombres'),
                 apellidos:  document.getElementById('error-apellidos'),
-                edad:       document.getElementById('error-edad'),
                 telefono:   document.getElementById('error-telefono'),
                 direccion:  document.getElementById('error-direccion'),
                 correo:     document.getElementById('error-correo'),
@@ -297,17 +289,6 @@
                 campos[clave].classList.remove('campo-invalido');
             }
 
-            function edadDesdeFecha(fecha) {
-                const hoy = new Date();
-                const nac = new Date(fecha);
-                let edad = hoy.getFullYear() - nac.getFullYear();
-                const mes = hoy.getMonth() - nac.getMonth();
-                if (mes < 0 || (mes === 0 && hoy.getDate() < nac.getDate())) {
-                    edad--;
-                }
-                return edad;
-            }
-
             // Valida UN campo y devuelve true si está bien
             function validarCampo(clave) {
                 const valor = campos[clave].value.trim();
@@ -345,19 +326,6 @@
                         if (!soloLetras.test(valor)) return mostrarError('apellidos', 'Solo se permiten letras, espacios, puntos, guiones y apóstrofos.'), false;
                         break;
 
-                    case 'edad':
-                        if (!valor) return mostrarError('edad', 'La edad es obligatoria.'), false;
-                        if (!/^\d+$/.test(valor)) return mostrarError('edad', 'La edad debe ser un número entero.'), false;
-                        const edadNum = parseInt(valor, 10);
-                        if (edadNum < 0 || edadNum > 120) return mostrarError('edad', 'La edad debe estar entre 0 y 120 años.'), false;
-                        if (campos.fecha.value) {
-                            const edadReal = edadDesdeFecha(campos.fecha.value);
-                            if (Math.abs(edadNum - edadReal) > 1) {
-                                return mostrarError('edad', 'La edad no coincide con la fecha de nacimiento (según la fecha tiene ' + edadReal + ' años).'), false;
-                            }
-                        }
-                        break;
-
                     case 'telefono':
                         if (!valor) return mostrarError('telefono', 'El teléfono es obligatorio.'), false;
                         if (!telefonoValido.test(valor)) return mostrarError('telefono', 'Teléfono inválido: 7 a 20 caracteres (números, +, espacios, paréntesis o guiones).'), false;
@@ -379,6 +347,7 @@
                         const fechaSel = new Date(valor);
                         if (isNaN(fechaSel.getTime())) return mostrarError('fecha', 'La fecha de nacimiento no es válida.'), false;
                         if (fechaSel > new Date()) return mostrarError('fecha', 'La fecha de nacimiento no puede ser futura.'), false;
+                        if (fechaSel.getFullYear() < 1900) return mostrarError('fecha', 'La fecha de nacimiento debe ser posterior a 1900-01-01.'), false;
                         break;
                 }
 
@@ -402,7 +371,7 @@
 
             // Validación completa al enviar
             form.addEventListener('submit', function (evento) {
-                const orden = ['cotizante', 'parentesco', 'eps', 'cc', 'nombres', 'apellidos', 'edad', 'telefono', 'direccion', 'correo', 'fecha'];
+                const orden = ['cotizante', 'parentesco', 'eps', 'cc', 'nombres', 'apellidos', 'telefono', 'direccion', 'correo', 'fecha'];
                 const resultados = orden.map(clave => validarCampo(clave));
 
                 if (resultados.includes(false)) {
