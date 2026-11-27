@@ -1,0 +1,99 @@
+name: REC-07 - Integración continua
+
+on:
+  push:
+    branches:
+      - master
+      - jose
+      - paula
+  pull_request:
+    branches:
+      - master
+
+# El CI solo necesita leer el código; no puede modificar el repositorio
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Pruebas y compilación
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # MariaDB 10.4, misma versión de XAMPP. La contraseña es solo del contenedor temporal.
+    services:
+      mariadb:
+        image: mariadb:10.4
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: prisma_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    # Estas DB_* del CI ganan a phpunit.xml, que no usa force="true".
+    # No fijamos APP_ENV aquí: key:generate debe escribir en .env y PHPUnit ya pone APP_ENV=testing.
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: prisma_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+
+      - name: Configurar PHP 8.2 y extensiones
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mbstring, bcmath, intl, zip, dom, curl, fileinfo
+          coverage: none
+          tools: composer:v2
+
+      - name: Restaurar caché de Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Instalar dependencias de PHP
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Auditoría de dependencias PHP
+        # TODO REC-12: hay 18 avisos de seguridad (laravel/framework, symfony/*, league/commonmark). Quitar continue-on-error al actualizar.
+        continue-on-error: true
+        run: composer audit
+
+      - name: Crear entorno temporal del CI
+        # EXCEPCIÓN AUTORIZADA: este .env se crea dentro del CI y no es el .env de ningún desarrollador.
+        # Además, .env está en .gitignore, así que nunca se sube al repositorio.
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Ejecutar migraciones contra prisma_test
+        run: php artisan migrate --database=migraciones --force
+
+      - name: Ejecutar pruebas
+        run: php artisan test
+
+      - name: Configurar Node 22
+        # Vite 7 necesita Node 20.19 o superior; fijamos la versión para que el build no cambie solo
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar dependencias de Node
+        run: npm install
+
+      - name: Compilar recursos front-end
+        run: npm run build
