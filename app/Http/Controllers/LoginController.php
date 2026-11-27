@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
+    private const MENSAJE_CREDENCIALES = 'Cédula o contraseña incorrectas.';
+
     /**
      * Muestra el formulario de inicio de sesión.
      */
@@ -19,15 +21,12 @@ class LoginController extends Controller
 
     /**
      * Procesa el inicio de sesión: valida las credenciales contra
-     * la tabla "usuarios" y, si son correctas, guarda los datos
-     * del usuario en la sesión nativa de PHP (session_start).
+     * la tabla "usuarios" o, si no está allí, contra "medico", y guarda
+     * los datos del rol en la sesión nativa de PHP (session_start).
      */
     public function iniciarSesion(Request $request)
     {
-        // Arrancamos la sesión nativa si aún no existe.
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $this->iniciarSesionPhp();
 
         // Validamos que llegaron los campos del formulario y que se
         // aceptaron los términos y condiciones antes de iniciar sesión.
@@ -39,42 +38,66 @@ class LoginController extends Controller
             'terminos.accepted' => 'Debes aceptar los términos y condiciones para iniciar sesión.',
         ]);
 
+        $contrasena = $credenciales['contrasena'] ?? '';
+
         // Buscamos el usuario por cédula (la PK de la tabla).
         $usuario = Usuario::find($credenciales['cedula']);
-
-        // Cuenta nueva (cotizante o beneficiario recién registrado) que
-        // todavía no ha creado su contraseña: la llevamos a crearla.
-        if ($usuario && $usuario->debe_crear_contrasena) {
-            return redirect()->route('primer_ingreso.form', ['cedula' => $usuario->cedula]);
-        }
 
         // Si no existe como usuario de la plataforma, puede tratarse
         // de un MÉDICO: su cuenta vive en la tabla "medico" (tiene su
         // propia contraseña) y accede a su propio panel.
+        $medico = null;
+        $contrasenaMedicoValida = false;
+
         if (!$usuario) {
             $medico = Medico::find($credenciales['cedula']);
 
-            if ($medico && $medico->estado === 'activo'
-                && password_verify($credenciales['contrasena'], $medico->contrasena)) {
-                $_SESSION['medico_cedula']    = $medico->cedula;
-                $_SESSION['medico_nombres']   = $medico->nombres;
-                $_SESSION['medico_apellidos'] = $medico->apellidos;
-                $_SESSION['medico_foto']      = $medico->foto;
-                $_SESSION['tipo_usuario_id']  = 3;
-
-                // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_medico
-                DB::table('medico')->where('cedula', $medico->cedula)
-                    ->update(['ultimo_ingreso' => now()]);
-
-                return redirect()->route('medico.inicio');
+            if ($medico) {
+                $contrasenaMedicoValida = $contrasena !== ''
+                    && password_verify($contrasena, $medico->contrasena);
             }
         }
 
-        // Si no existe el usuario, o la contraseña no coincide con
-        // el hash guardado (bcrypt), la sesión no se abre.
-        if (!$usuario || empty($credenciales['contrasena']) || !password_verify($credenciales['contrasena'], $usuario->contrasena)) {
-            return back()->withErrors(['login' => 'Cédula o contraseña incorrectas.']);
+        // REC-02: "medico.estado" se sigue exigiendo, y el error es el mismo
+        // que para unas credenciales malas, tanto si el médico está inactivo
+        // como si la contraseña era incorrecta.
+        if (!$usuario && $medico && $medico->estado === 'activo' && $contrasenaMedicoValida) {
+            $this->regenerarSesionNativa();
+
+            $_SESSION['medico_cedula']    = $medico->cedula;
+            $_SESSION['medico_nombres']   = $medico->nombres;
+            $_SESSION['medico_apellidos'] = $medico->apellidos;
+            $_SESSION['medico_foto']      = $medico->foto;
+            $_SESSION['tipo_usuario_id']  = 3;
+
+            // LOG DE INGRESOS: dispara el trigger trg_log_ingreso_medico
+            DB::table('medico')->where('cedula', $medico->cedula)
+                ->update(['ultimo_ingreso' => now()]);
+
+            return redirect()->route('medico.inicio');
         }
+
+        // REC-02: se calcula la validez de la contraseña también para las
+        // cuentas inactivas, pero "usuarios.activo" se revisa antes de crear
+        // la sesión. El mensaje es idéntico en todos los casos para no
+        // revelar si la contraseña era correcta.
+        $contrasenaUsuarioValida = $usuario
+            && $contrasena !== ''
+            && password_verify($contrasena, $usuario->contrasena);
+
+        if (!$usuario
+            || !$usuario->activo
+            || (!$usuario->debe_crear_contrasena && !$contrasenaUsuarioValida)) {
+            return back()->withErrors(['login' => self::MENSAJE_CREDENCIALES]);
+        }
+
+        // Cuenta nueva (cotizante o beneficiario recién registrado) que
+        // todavía no ha creado su contraseña: la llevamos a crearla.
+        if ($usuario->debe_crear_contrasena) {
+            return redirect()->route('primer_ingreso.form', ['cedula' => $usuario->cedula]);
+        }
+
+        $this->regenerarSesionNativa();
 
         // Credenciales correctas: guardamos los datos clave del
         // usuario logueado en $_SESSION, para usarlos en cualquier
@@ -107,13 +130,35 @@ class LoginController extends Controller
      */
     public function cerrarSesion()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $this->iniciarSesionPhp();
 
         session_unset();   // Borra todas las variables de $_SESSION
         session_destroy(); // Destruye la sesión por completo
 
         return redirect('/login');
+    }
+
+    /**
+     * Asegura que la sesión nativa esté abierta (la usa también el
+     * middleware de auditoría).
+     */
+    private function iniciarSesionPhp(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    /**
+     * REC-02: justo después de validar las credenciales se descarta
+     * cualquier sesión anterior y se cambia el id. Después se escriben
+     * las claves del rol que acaba de entrar.
+     */
+    private function regenerarSesionNativa(): void
+    {
+        $this->iniciarSesionPhp();
+
+        $_SESSION = [];
+        session_regenerate_id(true);
     }
 }

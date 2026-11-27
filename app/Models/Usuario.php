@@ -39,7 +39,22 @@ class Usuario extends Model
 
     protected $hidden = [
         'contrasena',
+        // REC-02: el código de recuperación es un hash; nunca serializarlo.
+        'codigo',
+        'codigo_expira_en',
+        'codigo_intentos',
     ];
+
+    /**
+     * REC-02: la fecha de expiración del código se compara como fecha,
+     * no como texto.
+     */
+    protected function casts(): array
+    {
+        return [
+            'codigo_expira_en' => 'datetime',
+        ];
+    }
 
     // Un usuario pertenece a un tipo de usuario (rol)
     public function tipoUsuario()

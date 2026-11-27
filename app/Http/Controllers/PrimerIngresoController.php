@@ -233,10 +233,9 @@ class PrimerIngresoController extends Controller
         // Borra el código del cache
         Cache::forget('primer_ingreso:' . $cedula);
 
-        // Inicia sesión automática (igual que el flujo actual)
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        // Inicia sesión automática: REC-02 exige cambiar el id de la
+        // sesión nativa antes de escribir las claves del usuario.
+        $this->regenerarSesionNativa();
         $_SESSION['usuario_cedula']  = $usuario->cedula;
         $_SESSION['usuario_nombres'] = $usuario->nombres;
         $_SESSION['tipo_usuario_id'] = $usuario->tipo_usuario_id;
@@ -250,6 +249,21 @@ class PrimerIngresoController extends Controller
 
         return redirect()->route('usuario.inicio')
             ->with('exito', '¡Bienvenido a PrismaSalud! Tu contraseña fue creada y ya puedes acceder a tu panel.');
+    }
+
+    /**
+     * REC-02: al completar el primer ingreso también hay un login real,
+     * así que se descarta la sesión previa y se regenera su id antes
+     * de escribir las claves del usuario.
+     */
+    private function regenerarSesionNativa(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
+        session_regenerate_id(true);
     }
 
     /**

@@ -315,7 +315,7 @@ Route::prefix('admin')->middleware(['esadministrador', 'verificarlicencia'])->gr
 
 // Rutas de login (públicas, cualquiera puede acceder al formulario)
 Route::get('/login', [LoginController::class, 'mostrarFormulario'])->name('login');
-Route::post('/login', [LoginController::class, 'iniciarSesion'])->name('login.post');
+Route::post('/login', [LoginController::class, 'iniciarSesion'])->middleware('throttle:rec02-login')->name('login.post');
 
 // Primer ingreso: cotizante nuevo crea su propia contraseña (pública)
 // Flujo en 4 pasos (wizard en una sola vista):
@@ -352,9 +352,9 @@ Route::prefix('usuario')->middleware(['esusuario', 'verificarlicencia'])->group(
 // Rutas de recuperación de contraseña (públicas).
 // Son tres pasos separados: 1) correo -> 2) código -> 3) nueva contraseña.
 Route::get('/recuperar', [RecuperarPasswordController::class, 'mostrarFormularioSolicitud'])->name('recuperar.solicitar.form');
-Route::post('/recuperar', [RecuperarPasswordController::class, 'enviarCodigo'])->name('recuperar.solicitar');
+Route::post('/recuperar', [RecuperarPasswordController::class, 'enviarCodigo'])->middleware('throttle:rec02-recuperar')->name('recuperar.solicitar');
 Route::get('/verificar-codigo', [RecuperarPasswordController::class, 'mostrarFormularioVerificar'])->name('recuperar.verificar.form');
-Route::post('/verificar-codigo', [RecuperarPasswordController::class, 'verificarCodigo'])->name('recuperar.verificar');
+Route::post('/verificar-codigo', [RecuperarPasswordController::class, 'verificarCodigo'])->middleware('throttle:rec02-verificar')->name('recuperar.verificar');
 Route::get('/nueva-contrasena', [RecuperarPasswordController::class, 'mostrarFormularioNuevaContrasena'])->name('recuperar.nueva.form');
 Route::post('/nueva-contrasena', [RecuperarPasswordController::class, 'guardarNuevaContrasena'])->name('recuperar.nueva');
 

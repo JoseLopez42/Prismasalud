@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use App\Mail\CodigoRecuperacionMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 
@@ -17,11 +18,16 @@ use Illuminate\Validation\Rules\Password;
  *   3. /nueva-contrasena  -> solo se muestra si el paso 2 fue exitoso; aquí
  *                            se escribe y guarda la nueva contraseña.
  *
- * La sesión es la que ata los pasos entre sí, así que el usuario nunca
- * tiene que volver a escribir su correo ni el código en el paso 3.
+ * REC-02: el código viaja en claro SOLO dentro del correo. En la base se
+ * guarda un hash (Hash::make) y se valida con Hash::check, con un máximo
+ * de 5 intentos y expiración de 15 minutos.
  */
 class RecuperarPasswordController extends Controller
 {
+    private const MAX_INTENTOS = 5;
+
+    private const MENSAJE_CODIGO_INVALIDO = 'El código es inválido o ya expiró.';
+
     /**
      * Paso 1: formulario donde el usuario escribe su correo.
      */
@@ -35,9 +41,9 @@ class RecuperarPasswordController extends Controller
     }
 
     /**
-     * Paso 1 (envío): genera un código de 6 dígitos, lo guarda en el
-     * usuario junto con su fecha de expiración (15 minutos) y se lo
-     * envía por correo usando el Gmail configurado en el .env.
+     * Paso 1 (envío): genera un código de 6 dígitos, guarda su hash en el
+     * usuario junto con la fecha de expiración (15 minutos) y se lo envía
+     * por correo usando el Gmail configurado en el .env.
      */
     public function enviarCodigo(Request $request)
     {
@@ -51,11 +57,13 @@ class RecuperarPasswordController extends Controller
         // o no en la base de datos (evita que alguien "adivine" correos
         // registrados). Siempre mostramos el mismo mensaje.
         if ($usuario) {
-            // Código de 6 dígitos, ej: "482913"
+            // Código de 6 dígitos, ej: "482913". El texto plano solo se
+            // usa para el correo; en la BD queda el hash.
             $codigo = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-            $usuario->codigo = $codigo;
+            $usuario->codigo = Hash::make($codigo);
             $usuario->codigo_expira_en = now()->addMinutes(15);
+            $usuario->codigo_intentos = 0;
             $usuario->save();
 
             // Envía el correo con el código (ver app/Mail/CodigoRecuperacionMail.php)
@@ -87,9 +95,10 @@ class RecuperarPasswordController extends Controller
     }
 
     /**
-     * Paso 2 (validación): comprueba que el código exista, sea del correo
-     * indicado y no haya expirado. Si todo está bien, marca al usuario
-     * en la sesión y lo envía a la vista de nueva contraseña.
+     * Paso 2 (validación): busca al usuario por el correo de la sesión y
+     * compara el código con Hash::check. El código NO se busca en SQL
+     * porque cada hash es distinto. Máximo 5 intentos; al llegar al
+     * límite se invalida y hay que pedir uno nuevo.
      */
     public function verificarCodigo(Request $request)
     {
@@ -98,18 +107,39 @@ class RecuperarPasswordController extends Controller
         }
 
         $request->validate([
-            'codigo' => 'required|string|size:6',
+            'codigo' => ['required', 'regex:/^[0-9]{6}$/'],
+        ], [
+            'codigo.required' => 'Ingresa el código que te llegó al correo.',
+            'codigo.regex' => 'El código tiene 6 números.',
         ]);
 
-        $usuario = Usuario::where('correo', session('recuperar_correo'))
-                          ->where('codigo', $request->codigo)
-                          ->where('codigo_expira_en', '>=', now())
-                          ->first();
+        $usuario = Usuario::where('correo', session('recuperar_correo'))->first();
 
-        // Código equivocado, de otro usuario o vencido: se permanece
-        // en este paso y no se revela cuál de los tres casos fue.
-        if (!$usuario) {
-            return back()->withErrors(['codigo' => 'El código es inválido o ya expiró.'])->withInput();
+        // Código ausente, vencido o ya agotado: se limpia y se devuelve
+        // siempre el mismo mensaje, sin contar el caso concreto.
+        if (!$usuario
+            || !$usuario->codigo
+            || !$usuario->codigo_expira_en
+            || $usuario->codigo_expira_en->lt(now())
+            || $usuario->codigo_intentos >= self::MAX_INTENTOS) {
+            if ($usuario) {
+                $this->invalidarCodigo($usuario);
+            }
+
+            return back()->withErrors(['codigo' => self::MENSAJE_CODIGO_INVALIDO]);
+        }
+
+        if (!Hash::check($request->codigo, $usuario->codigo)) {
+            // En el quinto fallo se invalida de una vez; no se muestra
+            // un mensaje distinto para no revelar el estado de la cuenta.
+            if ($usuario->codigo_intentos + 1 >= self::MAX_INTENTOS) {
+                $this->invalidarCodigo($usuario);
+            } else {
+                $usuario->codigo_intentos++;
+                $usuario->save();
+            }
+
+            return back()->withErrors(['codigo' => self::MENSAJE_CODIGO_INVALIDO]);
         }
 
         // Código validado: desde aquí en adelante solo falta la contraseña.
@@ -169,9 +199,7 @@ class RecuperarPasswordController extends Controller
         ]);
 
         $usuario->contrasena = bcrypt($request->contrasena);
-        $usuario->codigo = null;
-        $usuario->codigo_expira_en = null;
-        $usuario->save();
+        $this->invalidarCodigo($usuario);
 
         $request->session()->forget(['recuperar_correo', 'recuperar_cedula']);
 
@@ -191,7 +219,20 @@ class RecuperarPasswordController extends Controller
         }
 
         return Usuario::where('cedula', $cedula)
+                      ->whereNotNull('codigo')
                       ->where('codigo_expira_en', '>=', now())
                       ->first();
+    }
+
+    /**
+     * REC-02: borra el código hasheado y reinicia su contador para que
+     * no pueda reutilizarse.
+     */
+    private function invalidarCodigo(Usuario $usuario): void
+    {
+        $usuario->codigo = null;
+        $usuario->codigo_expira_en = null;
+        $usuario->codigo_intentos = 0;
+        $usuario->save();
     }
 }

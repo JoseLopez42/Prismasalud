@@ -41,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'vencimiento_tarjeta',
             'nombre_tarjeta',
             'cvv',
+            'codigo',
             'contrasena',
             'contrasena_confirmation',
             'password',
