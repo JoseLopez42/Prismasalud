@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Especialidad;
 use App\Models\Admin\Medico;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -40,6 +41,19 @@ class MedicoController extends Controller
             'id_especialidad'  => 'required|exists:especialidad,id',
             'foto'             => 'nullable|image|max:2048', // máx 2MB
         ]);
+
+        // REC-03: el médico hereda la IPS del administrador en sesión.
+        // El formulario NO puede enviar empresa_id: se toma de la licencia
+        // del administrador (licencias.empresa_id), nunca de los datos POST.
+        $empresaId = isset($_SESSION['usuario_cedula'])
+            ? Usuario::find($_SESSION['usuario_cedula'])?->licencia?->empresa_id
+            : null;
+
+        if ($empresaId === null) {
+            return back()->withInput()->with('error', 'No se pudo identificar la IPS del administrador en sesión.');
+        }
+
+        $datos['empresa_id'] = $empresaId;
 
         // Si subieron una foto, la guardamos en storage/app/public/medicos
         // (necesita "php artisan storage:link" para verse desde el navegador)

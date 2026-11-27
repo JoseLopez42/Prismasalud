@@ -95,6 +95,18 @@ class UsuarioController extends Controller
         $datosPaciente = null;
         $ocupacionOtroId = null;
         if ($esPaciente) {
+            // REC-03: solo los pacientes (tipo 2) heredan la IPS del
+            // administrador en sesión. empresa_id nunca viene del formulario.
+            $empresaId = isset($_SESSION['usuario_cedula'])
+                ? Usuario::find($_SESSION['usuario_cedula'])?->licencia?->empresa_id
+                : null;
+
+            if ($empresaId === null) {
+                return back()->withInput()->with('error', 'No se pudo identificar la IPS del administrador en sesión.');
+            }
+
+            $datos['empresa_id'] = $empresaId;
+
             $ocupacionOtroId = Ocupacion::where('nombre', 'Otro')->value('id_ocupacion');
 
             $datosPaciente = $request->validate([
