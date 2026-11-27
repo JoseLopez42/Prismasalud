@@ -35,7 +35,9 @@ jobs:
           --health-timeout=5s
           --health-retries=10
 
-    # Estas DB_* del CI ganan a phpunit.xml, que no usa force="true".
+    # DB_HOST, DB_PORT, DB_USERNAME y DB_PASSWORD del CI ganan a phpunit.xml (no llevan force).
+    # DB_CONNECTION y DB_DATABASE van con force="true": las pruebas usan siempre migraciones/prisma_test.
+    # La conexión migraciones cae a DB_USERNAME/DB_PASSWORD si no hay DB_MIGRATE_*: aquí root/root.
     # No fijamos APP_ENV aquí: key:generate debe escribir en .env y PHPUnit ya pone APP_ENV=testing.
     env:
       DB_CONNECTION: mysql

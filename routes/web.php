@@ -66,6 +66,9 @@ Route::view('/contacto', 'contacto')->name('contacto.index');
 // Planes del software (publico)
 Route::view('/planes', 'planes')->name('planes.index');
 
+// Aviso público cuando la licencia de la IPS no permite el acceso
+Route::view('/licencia-sin-acceso', 'licencia.sin-acceso')->name('licencia.bloqueada');
+
 // Detalle de un plan (publico; es el "Ver más")
 Route::get('/planes/{plan}', function (string $plan) {
     $selectedPlan = Plan::porSlug($plan);
@@ -328,7 +331,7 @@ Route::post('/primer-ingreso/contrasena', [PrimerIngresoController::class, 'guar
 Route::post('/logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 
 // Panel del Usuario (roles distintos a Administrador)
-Route::prefix('usuario')->middleware('esusuario')->group(function () {
+Route::prefix('usuario')->middleware(['esusuario', 'verificarlicencia'])->group(function () {
     Route::get('/', [PanelUsuarioController::class, 'index'])->name('usuario.inicio');
 
     // Citas del paciente: agendar y consultar sus propias citas
@@ -357,7 +360,7 @@ Route::post('/nueva-contrasena', [RecuperarPasswordController::class, 'guardarNu
 
 // Panel del Médico. Su cuenta vive en la tabla "medico" (cédula +
 // contraseña propia), por eso tiene su propio espacio /medico.
-Route::prefix('medico')->middleware('esmedico')->group(function () {
+Route::prefix('medico')->middleware(['esmedico', 'verificarlicencia'])->group(function () {
     // Inicio: citas programadas del médico
     Route::get('/', [PanelMedicoController::class, 'inicio'])->name('medico.inicio');
 
@@ -405,7 +408,7 @@ Route::prefix('medico')->middleware('esmedico')->group(function () {
 // Panel del Farmacéutico: /farmacia/...
 // Ve las prescripciones de los pacientes, registra la entrega de los
 // medicamentos y administra el stock del inventario.
-Route::prefix('farmacia')->middleware('esfarmaceuta')->group(function () {
+Route::prefix('farmacia')->middleware(['esfarmaceuta', 'verificarlicencia'])->group(function () {
     // Dashboard: http://127.0.0.1:8000/farmacia
     Route::get('/', [FarmaciaController::class, 'inicio'])->name('farmacia.inicio');
 

@@ -24,10 +24,12 @@
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <!-- REGLA CRÍTICA: las pruebas SOLO usan prisma_test. Nunca unoa ni unoa_pruebas: RefreshDatabase borra todas las tablas. -->
-        <env name="DB_CONNECTION" value="mysql"/>
+        <!-- Solo DB_CONNECTION y DB_DATABASE llevan force="true": son los que fijan la conexión segura de pruebas. -->
+        <!-- DB_HOST, DB_PORT, DB_USERNAME y DB_PASSWORD no llevan force para que el CI pueda usar su propio MariaDB. -->
+        <env name="DB_CONNECTION" value="migraciones" force="true"/>
         <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="3306"/>
-        <env name="DB_DATABASE" value="prisma_test"/>
+        <env name="DB_DATABASE" value="prisma_test" force="true"/>
         <env name="DB_USERNAME" value="root"/>
         <env name="DB_PASSWORD" value=""/>
         <env name="DB_URL" value=""/>

@@ -32,6 +32,8 @@ class Usuario extends Model
         'nit_eps',
         'activo',
         'licencia_id',
+        // REC-03: IPS del paciente/farmacéutico (no cambia al renovar licencia).
+        'empresa_id',
         'debe_crear_contrasena',
     ];
 

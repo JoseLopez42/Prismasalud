@@ -14,7 +14,8 @@ class Medico extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'cedula', 'nombres', 'apellidos', 'foto', 'correo', 'telefono',
+        // REC-03: empresa_id es la IPS del médico; la asigna el Administrador.
+        'cedula', 'empresa_id', 'nombres', 'apellidos', 'foto', 'correo', 'telefono',
         'direccion', 'contrasena', 'estado', 'id_especialidad',
     ];
 
