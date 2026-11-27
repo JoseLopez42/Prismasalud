@@ -91,7 +91,7 @@ jobs:
 
       - name: Configurar Node 22
         # Vite 7 necesita Node 20.19 o superior; fijamos la versión para que el build no cambie solo
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
