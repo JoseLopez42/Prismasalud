@@ -9,8 +9,24 @@ use RuntimeException;
 abstract class TestCase extends BaseTestCase
 {
     /**
-     * Candado de seguridad: los tests NUNCA pueden escribir en la base real
-     * "unoa", donde están los datos cifrados de los beneficiarios.
+     * Primer candado (José): revisa la base declarada antes de parent::setUp().
+     * Así se detiene RefreshDatabase antes de que pueda tocar una base real.
+     */
+    protected function setUp(): void
+    {
+        $baseConfigurada = (string) env('DB_DATABASE', '');
+
+        if (! str_ends_with($baseConfigurada, '_test')) {
+            throw new RuntimeException("PRUEBAS BLOQUEADAS: la base configurada es '{$baseConfigurada}'. Las pruebas solo pueden usar bases terminadas en _test (prisma_test).");
+        }
+
+        parent::setUp();
+    }
+
+    /**
+     * Segundo candado (Paula): revisa la conexión real que Laravel ya resolvió.
+     * Sirve para detectar config:cache: env() puede decir prisma_test mientras
+     * la configuración cacheada apunta a otra base.
      *
      * Va en setUpTraits() y no en beforeRefreshingDatabase() porque el trait
      * RefreshDatabase define su propio beforeRefreshingDatabase() vacío y,
@@ -20,12 +36,10 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUpTraits()
     {
-        $baseDatos = DB::connection()->getDatabaseName();
+        $baseReal = (string) DB::connection()->getDatabaseName();
 
-        if ($baseDatos !== 'unoa_test') {
-            throw new RuntimeException(
-                'Los tests solo pueden ejecutarse contra la base unoa_test. Conexión actual: ' . $baseDatos . '.'
-            );
+        if (! str_ends_with($baseReal, '_test')) {
+            throw new RuntimeException("PRUEBAS BLOQUEADAS: la conexión real apunta a '{$baseReal}'. Corre php artisan config:clear antes de las pruebas: la configuración en caché puede apuntar a la base real.");
         }
 
         return parent::setUpTraits();

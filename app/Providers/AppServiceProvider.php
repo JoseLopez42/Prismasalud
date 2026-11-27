@@ -14,10 +14,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $pasarela = config('services.pagos.pasarela', 'simulada');
-
         // REC-05: sin fallback: una pasarela no integrada no debe aprobar compras sin cobrar.
-        $this->app->bind(PasarelaPago::class, function () use ($pasarela) {
+        // La configuración se lee al resolver el servicio, no al registrar el provider,
+        // para que un cambio de pasarela en la prueba se refleje sin re-registrar el provider.
+        $this->app->bind(PasarelaPago::class, function () {
+            $pasarela = config('services.pagos.pasarela', 'simulada');
+
             return match ($pasarela) {
                 'simulada' => new PagoSimulado,
                 default => throw new RuntimeException("Pasarela de pago no soportada: {$pasarela}"),

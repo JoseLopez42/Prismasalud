@@ -22,7 +22,7 @@ class VerificarLicenciaTest extends TestCase
     {
         parent::setUp();
 
-        // unoa_test arranca sin catálogos: los roles se insertan con sus ids
+        // prisma_test arranca sin catálogos: los roles se insertan con sus ids
         // fijos para que las FK de usuarios.apuntan a tipos_usuario.id.
         DB::table('tipos_usuario')->insertOrIgnore([
             ['id' => 1, 'nombre' => 'Administrador', 'created_at' => now(), 'updated_at' => now()],
