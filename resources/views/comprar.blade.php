@@ -315,7 +315,12 @@
 
                     <div class="aviso-simulado">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <span>Este pago es simulado. No procesamos tu tarjeta ni la guardamos completa: solo dejamos los últimos 4 dígitos como referencia interna.</span>
+                        <span>Este pago es simulado. No se realiza ningún cobro real.</span>
+                    </div>
+
+                    <div id="aviso-tarjeta" class="aviso-simulado hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Pago simulado: en producción se pagará con una pasarela segura (Wompi, PayU o ePayco); aquí no se piden datos de tarjeta</span>
                     </div>
 
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -336,30 +341,6 @@
                                 @endforeach
                             </select>
                             <p data-error-for="metodo_pago" class="msg-error {{ $errors->has('metodo_pago') ? '' : 'hidden' }}" role="alert">{{ $errors->first('metodo_pago') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Bloque tarjeta (solo para métodos de tarjeta) -->
-                    <div id="bloque-tarjeta" class="grid sm:grid-cols-2 gap-4 mt-4">
-                        <div class="campo sm:col-span-2">
-                            <label for="nombre_tarjeta">Nombre en la tarjeta</label>
-                            <input type="text" id="nombre_tarjeta" name="nombre_tarjeta" value="{{ old('nombre_tarjeta') }}" maxlength="100" autocomplete="cc-name" data-v data-requerido="Escribe el nombre que aparece en la tarjeta." data-min="3" data-max="100" data-patron="^[\p{L}][\p{L}\s'.\-]*$" data-patron-flags="u" data-patron-msg="Solo puede tener letras.">
-                            <p data-error-for="nombre_tarjeta" class="msg-error {{ $errors->has('nombre_tarjeta') ? '' : 'hidden' }}" role="alert">{{ $errors->first('nombre_tarjeta') }}</p>
-                        </div>
-                        <div class="campo sm:col-span-2">
-                            <label for="numero_tarjeta">Número de tarjeta</label>
-                            <input type="text" id="numero_tarjeta" name="numero_tarjeta" value="{{ old('numero_tarjeta') }}" placeholder="4111 1111 1111 1111" maxlength="19" inputmode="numeric" autocomplete="cc-number" data-v data-requerido="Escribe el número de la tarjeta." data-tarjeta>
-                            <p data-error-for="numero_tarjeta" class="msg-error {{ $errors->has('numero_tarjeta') ? '' : 'hidden' }}" role="alert">{{ $errors->first('numero_tarjeta') }}</p>
-                        </div>
-                        <div class="campo">
-                            <label for="vencimiento_tarjeta">Vencimiento (MM/AA)</label>
-                            <input type="text" id="vencimiento_tarjeta" name="vencimiento_tarjeta" value="{{ old('vencimiento_tarjeta') }}" placeholder="12/28" maxlength="5" inputmode="numeric" autocomplete="cc-exp" data-v data-requerido="Escribe el vencimiento." data-vence>
-                            <p data-error-for="vencimiento_tarjeta" class="msg-error {{ $errors->has('vencimiento_tarjeta') ? '' : 'hidden' }}" role="alert">{{ $errors->first('vencimiento_tarjeta') }}</p>
-                        </div>
-                        <div class="campo">
-                            <label for="cvv">CVV</label>
-                            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" data-v data-requerido="Escribe el CVV." data-patron="^\d{3,4}$" data-patron-msg="El CVV tiene 3 o 4 dígitos." data-solo="0-9">
-                            <p data-error-for="cvv" class="msg-error {{ $errors->has('cvv') ? '' : 'hidden' }}" role="alert">{{ $errors->first('cvv') }}</p>
                         </div>
                     </div>
 
@@ -460,17 +441,16 @@
         }
         llenarCiudades(true);
 
-        // Muestra/oculta los campos de tarjeta vs. referencia según el método de pago elegido.
+        // Muestra el aviso de tarjeta o el campo de referencia según el método elegido.
         var metodoPago = form.querySelector('[name="metodo_pago"]');
         function alternarMetodoPago() {
             if (!metodoPago) return;
             var v = metodoPago.value;
             var esTarjeta = (v === 'tarjeta_credito' || v === 'tarjeta_debito');
-            var bloqueTarjeta = document.getElementById('bloque-tarjeta');
+            var avisoTarjeta = document.getElementById('aviso-tarjeta');
             var bloqueRef = document.getElementById('bloque-referencia');
-            if (bloqueTarjeta) {
-                bloqueTarjeta.classList.toggle('hidden', !esTarjeta);
-                bloqueTarjeta.querySelectorAll('input').forEach(function (i) { i.disabled = !esTarjeta; });
+            if (avisoTarjeta) {
+                avisoTarjeta.classList.toggle('hidden', !esTarjeta);
             }
             if (bloqueRef) {
                 bloqueRef.classList.toggle('hidden', esTarjeta);
@@ -483,7 +463,6 @@
         }
 
         function buscar(selector) { return form.querySelector(selector); }
-        function soloDigitos(t) { return t.replace(/\D/g, ''); }
 
         // Devuelve el mensaje de error del campo, o '' si está bien.
         function errorDe(c) {
@@ -504,27 +483,6 @@
 
             if (c.hasAttribute('data-email') && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(t)) {
                 return 'Escribe un correo válido, por ejemplo nombre@dominio.com.';
-            }
-
-            // Número de tarjeta: de 13 a 16 dígitos (los espacios no cuentan)
-            if (c.hasAttribute('data-tarjeta')) {
-                var n = soloDigitos(t).length;
-                if (n < 13 || n > 16) return 'El número debe tener entre 13 y 16 dígitos.';
-                return '';
-            }
-
-            // Vencimiento MM/AA: mes válido y que no esté vencida
-            if (c.hasAttribute('data-vence')) {
-                var m = /^(\d{2})\/(\d{2})$/.exec(t);
-                if (!m) return 'Escribe el vencimiento como MM/AA, por ejemplo 12/28.';
-                var mes = parseInt(m[1], 10), anio = 2000 + parseInt(m[2], 10);
-                if (mes < 1 || mes > 12) return 'El mes debe estar entre 01 y 12.';
-                var hoy = new Date();
-                if (anio < hoy.getFullYear() || (anio === hoy.getFullYear() && mes < hoy.getMonth() + 1)) {
-                    return 'La tarjeta está vencida.';
-                }
-                if (anio > hoy.getFullYear() + 20) return 'El año del vencimiento no es válido.';
-                return '';
             }
 
             var patron = c.getAttribute('data-patron');
@@ -557,17 +515,12 @@
             return m === '';
         }
 
-        // Formato mientras escribe: tarjeta con espacios cada 4, vencimiento con "/"
+        // Formato mientras escribe: solo se permiten los caracteres válidos de cada campo.
         function formatear(c) {
-            if (c.hasAttribute('data-tarjeta')) {
-                var d = soloDigitos(c.value).slice(0, 16);
-                c.value = d.replace(/(\d{4})(?=\d)/g, '$1 ');
-            } else if (c.hasAttribute('data-vence')) {
-                var v = soloDigitos(c.value).slice(0, 4);
-                c.value = v.length > 2 ? v.slice(0, 2) + '/' + v.slice(2) : v;
-            } else if (c.getAttribute('data-solo')) {
-                var permitido = new RegExp('[^' + c.getAttribute('data-solo') + ']', 'g');
-                c.value = c.value.replace(permitido, '');
+            var permitido = c.getAttribute('data-solo');
+            if (permitido) {
+                var patronSolo = new RegExp('[^' + permitido + ']', 'g');
+                c.value = c.value.replace(patronSolo, '');
             }
         }
 
