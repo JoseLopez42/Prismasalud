@@ -1,0 +1,53 @@
+version: 2
+
+updates:
+  # Composer: un PR mensual agrupa los cambios menores y de parche.
+  - package-ecosystem: "composer"
+    directory: "/"
+    target-branch: "master"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencias"
+    groups:
+      composer-menores:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # npm: el lockfile se revisa cada mes y sus cambios llegan en un solo PR.
+  - package-ecosystem: "npm"
+    directory: "/"
+    target-branch: "master"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencias"
+    groups:
+      npm-menores:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions: también se revisan cada mes; los PR se etiquetan como dependencias.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "master"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencias"
+    groups:
+      github-actions-menores:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

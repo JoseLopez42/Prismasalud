@@ -74,8 +74,6 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Auditoría de dependencias PHP
-        # TODO REC-12: hay 18 avisos de seguridad (laravel/framework, symfony/*, league/commonmark). Quitar continue-on-error al actualizar.
-        continue-on-error: true
         run: composer audit
 
       - name: Crear entorno temporal del CI
@@ -96,9 +94,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
       - name: Instalar dependencias de Node
-        run: npm install
+        run: npm ci
+
+      - name: Auditoría de dependencias JavaScript
+        run: npm audit --audit-level=high
 
       - name: Compilar recursos front-end
         run: npm run build
