@@ -287,7 +287,9 @@ class CompraController extends Controller
                 'metodo_pago' => $datos['metodo_pago'] ?? 'tarjeta_credito',
                 'pasarela' => $this->pasarela->nombre(),
                 'referencia_pago' => $resultadoPago['referencia'],
-                'estado' => 'aprobado',
+                // REC-05: el estado lo decide la pasarela; la simulada aprueba,
+                // pero una pasarela real podría devolver 'pendiente'.
+                'estado' => $resultadoPago['estado'],
             ]);
         });
 
