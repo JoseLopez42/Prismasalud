@@ -37,7 +37,8 @@ jobs:
 
     # DB_HOST, DB_PORT, DB_USERNAME y DB_PASSWORD del CI ganan a phpunit.xml (no llevan force).
     # DB_CONNECTION y DB_DATABASE van con force="true": las pruebas usan siempre migraciones/prisma_test.
-    # La conexión migraciones cae a DB_USERNAME/DB_PASSWORD si no hay DB_MIGRATE_*: aquí root/root.
+    # La conexión migraciones necesita DB_MIGRATE_* explícitos: .env.example trae DB_MIGRATE_PASSWORD vacío
+    # y una variable vacía NO cae al fallback DB_USERNAME/DB_PASSWORD.
     # No fijamos APP_ENV aquí: key:generate debe escribir en .env y PHPUnit ya pone APP_ENV=testing.
     env:
       DB_CONNECTION: mysql
@@ -46,6 +47,8 @@ jobs:
       DB_DATABASE: prisma_test
       DB_USERNAME: root
       DB_PASSWORD: root
+      DB_MIGRATE_USERNAME: root
+      DB_MIGRATE_PASSWORD: root
 
     steps:
       - name: Obtener código
