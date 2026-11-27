@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'pagos' => [
+        'pasarela' => env('PAGOS_PASARELA', 'simulada'),
+    ],
+
 ];

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Usuario;
+use App\Models\Admin\Ciudad;
+use App\Models\Admin\Departamento;
 use App\Models\Empresa;
 use App\Models\Licencia;
 use App\Models\Plan;
 use App\Models\Transaccion;
+use App\Models\Usuario;
+use App\Services\Pagos\PasarelaPago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,20 +19,24 @@ class CompraController extends Controller
 {
     const TIPO_ADMINISTRADOR = 1;
 
+    public function __construct(private PasarelaPago $pasarela) {}
+
     public function mostrarFormulario(string $plan)
     {
         $planSeleccionado = Plan::porSlug($plan);
         abort_unless($planSeleccionado, 404);
 
-        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $usuarioLogueado = isset($_SESSION['usuario_cedula']) ? Usuario::find($_SESSION['usuario_cedula']) : null;
 
         $licenciaExistente = $usuarioLogueado?->licencia;
         $esRenovacion = (bool) $licenciaExistente;
 
         // Departamentos y ciudades desde la base de datos para los selectores dinámicos.
-        $departamentos = \App\Models\Admin\Departamento::orderBy('nombre_departamento')->get();
-        $ciudades = \App\Models\Admin\Ciudad::with('departamento')->orderBy('ciudad')->get();
+        $departamentos = Departamento::orderBy('nombre_departamento')->get();
+        $ciudades = Ciudad::with('departamento')->orderBy('ciudad')->get();
 
         $ciudadesPorDepartamento = [];
         foreach ($ciudades as $ciudad) {
@@ -54,7 +61,9 @@ class CompraController extends Controller
         $planSeleccionado = Plan::porSlug($plan);
         abort_unless($planSeleccionado, 404);
 
-        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $usuarioLogueado = isset($_SESSION['usuario_cedula']) ? Usuario::find($_SESSION['usuario_cedula']) : null;
 
         // Caso 1: ya tiene cuenta (sesion activa) -> solo IPS + pago
@@ -66,11 +75,7 @@ class CompraController extends Controller
             if ($licenciaExistente) {
                 $datosPago = $request->validate([
                     'metodo_pago' => 'required|in:tarjeta_credito,tarjeta_debito,pse,nequi,daviplata,transferencia,efecty',
-                    'nombre_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
-                    'numero_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'min:13', 'max:19'], ['nullable', 'string', 'min:13', 'max:19'])],
-                    'vencimiento_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:5'], ['nullable', 'string', 'max:5'])],
-                    'cvv' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'min:3', 'max:4'], ['nullable', 'string', 'min:3', 'max:4'])],
-                    'referencia' => [Rule::when(!in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
+                    'referencia' => [Rule::when(! in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
                 ], [
                     'metodo_pago.required' => 'Selecciona un método de pago.',
                 ]);
@@ -101,11 +106,7 @@ class CompraController extends Controller
                 'ciudad' => 'required|string|max:80',
                 'direccion' => 'required|string|max:200',
                 'metodo_pago' => 'required|in:tarjeta_credito,tarjeta_debito,pse,nequi,daviplata,transferencia,efecty',
-                'nombre_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
-                'numero_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'min:13', 'max:19'], ['nullable', 'string', 'min:13', 'max:19'])],
-                'vencimiento_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:5'], ['nullable', 'string', 'max:5'])],
-                'cvv' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'min:3', 'max:4'], ['nullable', 'string', 'min:3', 'max:4'])],
-                'referencia' => [Rule::when(!in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
+                'referencia' => [Rule::when(! in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
             ], [
                 'nit.regex' => 'El NIT debe tener solo números (puede terminar en -dígito de verificación).',
                 'telefono_ips.regex' => 'El teléfono de la IPS solo puede tener números, espacios, + ( ) y guion.',
@@ -134,11 +135,7 @@ class CompraController extends Controller
             'contrasena' => ['required', 'string', 'min:6', 'max:100', 'confirmed', 'regex:/^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{6,}$/'],
             'contrasena_confirmation' => ['required', 'string', 'max:100'],
             'metodo_pago' => 'required|in:tarjeta_credito,tarjeta_debito,pse,nequi,daviplata,transferencia,efecty',
-            'nombre_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
-            'numero_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'min:13', 'max:19'], ['nullable', 'string', 'min:13', 'max:19'])],
-            'vencimiento_tarjeta' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:5'], ['nullable', 'string', 'max:5'])],
-            'cvv' => [Rule::when(in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'min:3', 'max:4'], ['nullable', 'string', 'min:3', 'max:4'])],
-            'referencia' => [Rule::when(!in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
+            'referencia' => [Rule::when(! in_array($request->input('metodo_pago'), ['tarjeta_credito', 'tarjeta_debito']), ['required', 'string', 'max:100'], ['nullable', 'string', 'max:100'])],
         ], [
             'nit.regex' => 'El NIT debe tener solo números (puede terminar en -dígito de verificación).',
             'telefono_ips.regex' => 'El teléfono de la IPS solo puede tener números, espacios, + ( ) y guion.',
@@ -153,7 +150,6 @@ class CompraController extends Controller
             'apellidos.required' => 'Escribe tus apellidos.',
         ]);
 
-
         $usuario = Usuario::find($datos['cedula']);
         if (! $usuario && ! empty($datos['correo'])) {
             $usuario = Usuario::where('correo', $datos['correo'])->first();
@@ -164,18 +160,18 @@ class CompraController extends Controller
             if (! Hash::check($datos['contrasena'], $usuario->contrasena)) {
                 return back()
                     ->withErrors(['contrasena' => 'La contraseña no coincide con esa cuenta.'])
-                    ->withInput($request->except(['contrasena', 'contrasena_confirmation', 'numero_tarjeta', 'cvv']));
+                    ->withInput($this->camposSeguros($request));
             }
         } else {
             if (Usuario::where('cedula', $datos['cedula'])->exists()) {
                 return back()
                     ->withErrors(['cedula' => 'Esa cédula ya está registrada.'])
-                    ->withInput($request->except(['contrasena', 'contrasena_confirmation', 'numero_tarjeta', 'cvv']));
+                    ->withInput($this->camposSeguros($request));
             }
             if (Usuario::where('correo', $datos['correo'])->exists()) {
                 return back()
                     ->withErrors(['correo' => 'Ese correo ya está registrado.'])
-                    ->withInput($request->except(['contrasena', 'contrasena_confirmation', 'numero_tarjeta', 'cvv']));
+                    ->withInput($this->camposSeguros($request));
             }
 
             $usuario = Usuario::create([
@@ -189,7 +185,9 @@ class CompraController extends Controller
             ]);
         }
 
-        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $_SESSION['usuario_cedula'] = $usuario->cedula;
         $_SESSION['usuario_nombres'] = $usuario->nombres;
         $_SESSION['tipo_usuario_id'] = $usuario->tipo_usuario_id;
@@ -216,8 +214,15 @@ class CompraController extends Controller
     {
         $duracionDias = $this->duracionEnDias($planSeleccionado['id']);
 
+        // REC-05: la pasarela simulada genera la referencia sin recibir datos de tarjeta.
+        $resultadoPago = $this->pasarela->iniciarPago([
+            'metodo_pago' => $datos['metodo_pago'] ?? 'tarjeta_credito',
+            'referencia' => $datos['referencia'] ?? null,
+            'monto' => $planSeleccionado['precio_total'] ?? 0,
+        ]);
+
         $licencia = null;
-        DB::transaction(function () use ($usuario, $planSeleccionado, $datos, $duracionDias, $tipo, &$licencia) {
+        DB::transaction(function () use ($usuario, $planSeleccionado, $datos, $duracionDias, $tipo, $resultadoPago, &$licencia) {
             // 1. La empresa: se busca por NIT. Si no existe se prepara una nueva.
             $empresa = Empresa::firstOrNew(['nit' => $datos['nit']]);
 
@@ -251,7 +256,7 @@ class CompraController extends Controller
                 'departamento' => $datos['departamento'],
                 'ciudad' => $datos['ciudad'],
                 'direccion' => $datos['direccion'],
-                'contacto_nombre' => trim($usuario->nombres . ' ' . $usuario->apellidos),
+                'contacto_nombre' => trim($usuario->nombres.' '.$usuario->apellidos),
                 'contacto_email' => $usuario->correo, 'contacto_telefono' => $usuario->telefono,
                 'plan' => $planSeleccionado['id'], 'plan_id' => $planSeleccionado['plan_id'],
                 'fecha_inicio' => now()->toDateString(),
@@ -280,7 +285,8 @@ class CompraController extends Controller
                 'monto' => $planSeleccionado['precio_total'] ?? 0,
                 'tipo' => $tipo,
                 'metodo_pago' => $datos['metodo_pago'] ?? 'tarjeta_credito',
-                'referencia_pago' => $this->referenciaPago($datos),
+                'pasarela' => $this->pasarela->nombre(),
+                'referencia_pago' => $resultadoPago['referencia'],
                 'estado' => 'aprobado',
             ]);
         });
@@ -303,29 +309,15 @@ class CompraController extends Controller
     }
 
     /**
-     * Genera una referencia enmascarada según el método de pago elegido.
+     * Campos no sensibles que se repoblan con old() si falla la validación.
      */
-    private function referenciaPago(array $datos): string
+    private function camposSeguros(Request $request): array
     {
-        $metodo = $datos['metodo_pago'] ?? 'tarjeta_credito';
-
-        if (in_array($metodo, ['tarjeta_credito', 'tarjeta_debito'], true)) {
-            return $this->referenciaTarjeta($datos['numero_tarjeta'] ?? '');
-        }
-
-        return trim((string) ($datos['referencia'] ?? ''));
-    }
-
-    /**
-     * Nunca guardamos el numero de tarjeta completo: solo dejamos una
-     * referencia enmascarada con los ultimos 4 digitos, como haria
-     * cualquier pasarela de pago real.
-     */
-    private function referenciaTarjeta(string $numero): string
-    {
-        $limpio = preg_replace('/\D/', '', $numero);
-        $ultimos4 = substr($limpio, -4) ?: '0000';
-
-        return '**** **** **** ' . $ultimos4;
+        return $request->only([
+            'nombre_ips', 'nit', 'tipo_entidad', 'representante_legal',
+            'correo_ips', 'telefono_ips', 'departamento', 'ciudad', 'direccion',
+            'cedula', 'telefono', 'nombres', 'apellidos', 'correo',
+            'metodo_pago', 'referencia',
+        ]);
     }
 }

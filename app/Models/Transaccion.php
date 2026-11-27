@@ -10,7 +10,7 @@ class Transaccion extends Model
 
     protected $fillable = [
         'licencia_id', 'usuario_cedula', 'plan_id', 'monto',
-        'tipo', 'metodo_pago', 'referencia_pago', 'estado',
+        'tipo', 'metodo_pago', 'pasarela', 'referencia_pago', 'estado',
     ];
 
     public function licencia()
